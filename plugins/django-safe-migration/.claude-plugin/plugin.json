@@ -1,0 +1,16 @@
+{
+  "name": "django-safe-migration",
+  "version": "1.0.0",
+  "description": "Write, review, and rewrite Django migrations for PostgreSQL with zero-downtime guarantees: two-file splits, AddIndexConcurrently, FK NOT VALID + VALIDATE, db_default, and RunPython safety.",
+  "author": {
+    "name": "Vinta Software",
+    "url": "https://www.vinta.com.br/"
+  },
+  "homepage": "https://github.com/vintasoftware/django-ai-plugins",
+  "repository": "https://github.com/vintasoftware/django-ai-plugins",
+  "license": "MIT",
+  "keywords": [
+    "django",
+    "python"
+  ]
+}
