@@ -1,7 +1,7 @@
 {
   "name": "django-reviewer",
-  "version": "1.0.0",
-  "description": "Reviews and refines Django/Python code for clarity, consistency, and maintainability while preserving all functionality. Runs as a dedicated review subagent (Opus).",
+  "version": "1.1.0",
+  "description": "Read-only Django/Python code review subagent (Opus) that preloads the django-expert skill and reports findings on clarity, conventions, ORM/DRF anti-patterns, N+1 queries, and authorization/validation gaps. Never edits files.",
   "author": {
     "name": "Vinta Software",
     "url": "https://www.vinta.com.br/"
@@ -9,6 +9,12 @@
   "homepage": "https://github.com/vintasoftware/django-ai-plugins",
   "repository": "https://github.com/vintasoftware/django-ai-plugins",
   "license": "MIT",
+  "dependencies": [
+    {
+      "name": "django-expert",
+      "version": "^1.0.0"
+    }
+  ],
   "keywords": [
     "django",
     "python",

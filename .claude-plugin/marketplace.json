@@ -35,7 +35,7 @@
     {
       "name": "django-reviewer",
       "source": "./plugins/django-reviewer",
-      "description": "Reviews and refines Django/Python code for clarity, consistency, and maintainability while preserving all functionality. Runs as a dedicated review subagent (Opus).",
+      "description": "Read-only Django/Python code review subagent (Opus) that preloads the django-expert skill and reports findings on clarity, conventions, ORM/DRF anti-patterns, N+1 queries, and authorization/validation gaps. Never edits files.",
       "category": "backend"
     }
   ]
