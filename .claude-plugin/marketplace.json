@@ -1,10 +1,11 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "humen-dev",
+  "description": "Full-stack Claude Code plugins: backend (Django), frontend and spec-driven development.",
   "owner": {
     "name": "humen-dev"
   },
   "metadata": {
-    "description": "Internal Claude Code plugin marketplace",
     "version": "1.0.0"
   },
   "plugins": [
