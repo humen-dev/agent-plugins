@@ -1,5 +1,5 @@
 {
-  "name": "team-marketplace",
+  "name": "humen-dev",
   "owner": {
     "name": "humen-dev"
   },
@@ -12,31 +12,31 @@
       "name": "django-expert",
       "source": "./plugins/django-expert",
       "description": "Comprehensive Django backend development guidelines and best practices: models, ORM, views, DRF, testing, performance, security, and deployment.",
-      "category": "development"
+      "category": "backend"
     },
     {
       "name": "django-celery-expert",
       "source": "./plugins/django-celery-expert",
       "description": "Django and Celery best practices for asynchronous task processing: task design, worker configuration, retries and error handling, Celery Beat, monitoring, and production deployment.",
-      "category": "development"
+      "category": "backend"
     },
     {
       "name": "cdrf-expert",
       "source": "./plugins/cdrf-expert",
       "description": "Expert guidance for Django REST Framework class-based views using Classy DRF (cdrf.co). Helps choose the right DRF generic/viewset class and override methods safely.",
-      "category": "development"
+      "category": "backend"
     },
     {
       "name": "django-safe-migration",
       "source": "./plugins/django-safe-migration",
       "description": "Write, review, and rewrite Django migrations for PostgreSQL with zero-downtime guarantees: two-file splits, AddIndexConcurrently, FK NOT VALID + VALIDATE, db_default, and RunPython safety.",
-      "category": "development"
+      "category": "backend"
     },
     {
       "name": "django-reviewer",
       "source": "./plugins/django-reviewer",
       "description": "Reviews and refines Django/Python code for clarity, consistency, and maintainability while preserving all functionality. Runs as a dedicated review subagent (Opus).",
-      "category": "development"
+      "category": "backend"
     }
   ]
 }
