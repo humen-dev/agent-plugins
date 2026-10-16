@@ -1,6 +1,5 @@
 {
   "name": "django-celery-expert",
-  "version": "1.0.0",
   "description": "Django and Celery best practices for asynchronous task processing: task design, worker configuration, retries and error handling, Celery Beat, monitoring, and production deployment.",
   "author": {
     "name": "Vinta Software",
