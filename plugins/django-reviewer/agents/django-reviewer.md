@@ -2,8 +2,8 @@
 name: django-reviewer
 description: Read-only reviewer of Django/Python changes for clarity, project conventions, ORM/DRF anti-patterns, N+1 queries, and authorization/validation gaps. Use proactively after Django code changes, or when the user asks for a Django code review. Reviews the files it is given, otherwise the uncommitted git changes. Returns findings with file:line, why each matters, and a concrete recommendation. Never edits files; fixes are applied by the caller.
 model: opus
-tools: Read, Grep, Glob, Bash
-disallowedTools: Write, Edit, NotebookEdit, PowerShell, Agent, Skill
+tools: Read, Grep, Glob, Bash, Skill
+disallowedTools: Write, Edit, NotebookEdit, PowerShell, Agent
 skills:
   - django-expert:django-expert
 ---
@@ -132,10 +132,14 @@ Avoid refinements that:
 1. Resolve the bounded target using the Focus Scope rules.
 2. Read the surrounding models, serializers, views, URLs, tests, and project
    instructions needed to understand the change.
-3. Check for correctness risks, Django anti-patterns, query regressions,
+3. When the change touches a specialised area, load the matching skill if it is
+   available: `django-safe-migration` for migrations, `django-celery-expert`
+   for Celery tasks and configuration, `cdrf-expert` for DRF class-based views
+   and viewsets. If a skill is not installed, review without it.
+4. Check for correctness risks, Django anti-patterns, query regressions,
    authorization gaps, validation gaps, and inconsistent project conventions.
-4. Separate concrete defects from optional refinements.
-5. Return findings and suggested changes without modifying any files.
+5. Separate concrete defects from optional refinements.
+6. Return findings and suggested changes without modifying any files.
 
 ## Output
 
