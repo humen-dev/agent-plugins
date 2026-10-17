@@ -1,6 +1,6 @@
 {
   "name": "django-expert",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Comprehensive Django backend development guidelines and best practices: models, ORM, views, DRF, testing, performance, security, and deployment.",
   "author": {
     "name": "Vinta Software",
@@ -11,6 +11,12 @@
   "license": "MIT",
   "keywords": [
     "django",
-    "python"
+    "python",
+    "backend",
+    "drf",
+    "orm",
+    "testing",
+    "security",
+    "performance"
   ]
 }

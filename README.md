@@ -96,4 +96,11 @@ the same PR as the change** (SemVer):
 
 The Django plugins are copied from
 [vintasoftware/django-ai-plugins](https://github.com/vintasoftware/django-ai-plugins)
-under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+under the MIT License. Each plugin ships its own `THIRD_PARTY_NOTICES.md` with
+the upstream path, source commit, local changes and the licence text:
+
+- [django-expert](plugins/django-expert/THIRD_PARTY_NOTICES.md)
+- [django-celery-expert](plugins/django-celery-expert/THIRD_PARTY_NOTICES.md)
+- [cdrf-expert](plugins/cdrf-expert/THIRD_PARTY_NOTICES.md)
+- [django-safe-migration](plugins/django-safe-migration/THIRD_PARTY_NOTICES.md)
+- [django-reviewer](plugins/django-reviewer/THIRD_PARTY_NOTICES.md)

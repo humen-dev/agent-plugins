@@ -1,0 +1,76 @@
+# django-reviewer
+
+A read-only **Django/Python code reviewer** agent. It reviews changes for
+clarity, project conventions, ORM/DRF anti-patterns, N+1 queries, and
+authorization and validation gaps, and returns findings with `file:line`, why
+each matters and a concrete recommendation. It never edits files; fixes are
+applied by the caller.
+
+| Component | Type | Invoke as |
+|---|---|---|
+| `django-reviewer` | agent | `django-reviewer:django-reviewer` |
+
+No skills of its own, hooks, commands or MCP servers.
+
+## When it triggers
+
+Claude uses the agent proactively after Django code changes, or when you ask for
+a Django code review:
+
+> Review my Django changes with the django-reviewer agent.
+
+or explicitly through the Agent tool with
+`subagent_type: "django-reviewer:django-reviewer"`.
+
+Scope: the files or directories you name; otherwise the uncommitted git changes
+(`git diff`, `git diff --cached`, `git status`). With no changes and no target
+it asks for one instead of reviewing the whole repository.
+
+## How it works
+
+- **Model:** Opus. **Tools:** `Read`, `Grep`, `Glob`, `Bash`, `Skill`;
+  `Write`, `Edit`, `NotebookEdit`, `PowerShell` and `Agent` are disallowed.
+  Its instructions limit `Bash` to read-only git commands.
+- **Preloaded skill:** `django-expert:django-expert`.
+- **Specialised skills, if installed:** `django-safe-migration` for migrations,
+  `django-celery-expert` for Celery tasks and configuration, `cdrf-expert` for
+  DRF class-based views and viewsets. If one is not installed, it reviews
+  without it.
+- Recommendations preserve behaviour; any behaviour change (e.g. a defect fix)
+  is flagged separately. Concrete defects are separated from optional
+  refinements.
+
+## Install
+
+Inside Claude Code:
+
+```text
+/plugin marketplace add humen-dev/agent-plugins
+/plugin install django-reviewer@humen-dev
+```
+
+or from a shell:
+
+```bash
+claude plugin marketplace add humen-dev/agent-plugins
+claude plugin install django-reviewer@humen-dev
+```
+
+The marketplace is private; see the [root README](../../README.md#install) for
+git credential setup.
+
+## Requirements and dependencies
+
+- Depends on [`django-expert`](../django-expert/README.md) `^1.0.0`, which is
+  installed automatically.
+- Optional: [`django-safe-migration`](../django-safe-migration/README.md),
+  [`django-celery-expert`](../django-celery-expert/README.md) and
+  [`cdrf-expert`](../cdrf-expert/README.md) — install them to let the agent load
+  them for specialised reviews.
+
+## Credits
+
+Adapted from
+[vintasoftware/django-ai-plugins](https://github.com/vintasoftware/django-ai-plugins)
+(MIT, © Vinta Software); local changes are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
