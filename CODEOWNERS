@@ -1,0 +1,9 @@
+# Default owner for everything.
+*                       @humen-dev
+
+# Security-sensitive paths always need the owner's review.
+/.claude-plugin/        @humen-dev
+**/hooks/               @humen-dev
+**/.mcp.json            @humen-dev
+/.github/               @humen-dev
+/scripts/               @humen-dev
