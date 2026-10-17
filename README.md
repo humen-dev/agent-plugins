@@ -67,7 +67,11 @@ plugins/<name>/                   one folder per plugin
   .claude-plugin/plugin.json      plugin manifest (name, version, ...)
   skills/<skill>/SKILL.md         skill, with optional references/
   agents/<agent>.md               subagent
-THIRD_PARTY_NOTICES.md            attribution and licenses of copied plugins
+  README.md                       what the plugin adds and how to use it
+  THIRD_PARTY_NOTICES.md          attribution and license, for copied plugins
+docs/                             plugin guidelines, security policy, releases
+scripts/                          structural linter and version-bump check (CI)
+CONTRIBUTING.md                   how to add or change a plugin
 ```
 
 ## Develop locally
@@ -96,4 +100,11 @@ the same PR as the change** (SemVer):
 
 The Django plugins are copied from
 [vintasoftware/django-ai-plugins](https://github.com/vintasoftware/django-ai-plugins)
-under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+under the MIT License. Each plugin ships its own `THIRD_PARTY_NOTICES.md` with
+the upstream path, source commit, local changes and the licence text:
+
+- [django-expert](plugins/django-expert/THIRD_PARTY_NOTICES.md)
+- [django-celery-expert](plugins/django-celery-expert/THIRD_PARTY_NOTICES.md)
+- [cdrf-expert](plugins/cdrf-expert/THIRD_PARTY_NOTICES.md)
+- [django-safe-migration](plugins/django-safe-migration/THIRD_PARTY_NOTICES.md)
+- [django-reviewer](plugins/django-reviewer/THIRD_PARTY_NOTICES.md)

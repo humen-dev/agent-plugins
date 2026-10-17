@@ -1,6 +1,6 @@
 {
   "name": "django-reviewer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Read-only Django/Python code review subagent (Opus) that preloads the django-expert skill and reports findings on clarity, conventions, ORM/DRF anti-patterns, N+1 queries, and authorization/validation gaps. Never edits files.",
   "author": {
     "name": "Vinta Software",
@@ -18,7 +18,9 @@
   "keywords": [
     "django",
     "python",
+    "backend",
     "code-review",
-    "agent"
+    "agent",
+    "read-only"
   ]
 }
