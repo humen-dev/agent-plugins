@@ -135,6 +135,10 @@ function checkPlugin(entry, index) {
     }
   }
 
+  if (!existsSync(join(dir, 'README.md'))) {
+    errors.push(`${entry.name}: missing README.md (see docs/PLUGIN-GUIDELINES.md)`);
+  }
+
   if (existsSync(join(dir, 'SKILL.md'))) {
     warnings.push(`${entry.name}: SKILL.md at plugin root loads the whole plugin as one skill; use skills/<name>/SKILL.md`);
   }
