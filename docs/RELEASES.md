@@ -39,9 +39,15 @@ Rules:
 - Bump dependants' `dependencies` ranges when you make a MAJOR change to a
   plugin they depend on.
 
-### Tags
+### Tags (optional)
 
-After merge, tag the release so `dependencies` ranges can resolve against it:
+Tags are **not** needed for installs or `dependencies` from this catalog.
+Verified on 2026-10-17: with no tags in the repository, installing
+`django-reviewer@humen-dev` from GitHub resolved its `django-expert ^1.0.0`
+dependency from the version in `plugin.json`.
+
+Tag a release only when something has to point at a fixed version, for example
+a future stable channel whose entries pin `ref` + `sha`:
 
 ```bash
 claude plugin tag plugins/<plugin-name> --dry-run
@@ -153,4 +159,4 @@ Not built yet:
 - [ ] `claude plugin validate . --strict` passes.
 - [ ] Installed locally from `./` and tried in a session.
 - [ ] Plugin README and the root README plugin table are updated.
-- [ ] Tag pushed after merge.
+- [ ] Tag pushed after merge (only if a channel or pin needs it).
