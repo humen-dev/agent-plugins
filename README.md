@@ -67,7 +67,11 @@ plugins/<name>/                   one folder per plugin
   .claude-plugin/plugin.json      plugin manifest (name, version, ...)
   skills/<skill>/SKILL.md         skill, with optional references/
   agents/<agent>.md               subagent
-THIRD_PARTY_NOTICES.md            attribution and licenses of copied plugins
+  README.md                       what the plugin adds and how to use it
+  THIRD_PARTY_NOTICES.md          attribution and license, for copied plugins
+docs/                             plugin guidelines, security policy, releases
+scripts/                          structural linter and version-bump check (CI)
+CONTRIBUTING.md                   how to add or change a plugin
 ```
 
 ## Develop locally
