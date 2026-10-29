@@ -22,10 +22,13 @@ This plugin's agent is copied from a third-party project.
   review process, output and success criteria; behaviour changes are now flagged
   separately instead of applied;
 - rewrote the `description` to match (read-only, review scope, output format);
-- **preloads** the `django-expert:django-expert` skill (`skills` frontmatter),
-  with a plugin dependency on `django-expert`;
-- may **load other skills** when available (`Skill` tool):
-  `django-safe-migration`, `django-celery-expert`, `cdrf-expert`;
+- **preloads** the `django-expert:django-expert`,
+  `django-celery-expert:django-celery-expert` and `cdrf-expert:cdrf-expert`
+  skills (`skills` frontmatter), with plugin dependencies on all three; the
+  review process makes the Celery and DRF skills mandatory for matching files
+  and the output ends with a *Skills used* line;
+- may **load** `django-safe-migration` for migrations when available (`Skill`
+  tool);
 - wording "this skill" changed to "this agent";
 - removed the generated-file comment.
 

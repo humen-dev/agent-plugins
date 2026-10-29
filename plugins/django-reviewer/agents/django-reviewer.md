@@ -6,6 +6,8 @@ tools: Read, Grep, Glob, Bash, Skill
 disallowedTools: Write, Edit, NotebookEdit, PowerShell, Agent
 skills:
   - django-expert:django-expert
+  - django-celery-expert:django-celery-expert
+  - cdrf-expert:cdrf-expert
 ---
 
 # Django Reviewer
@@ -132,10 +134,21 @@ Avoid refinements that:
 1. Resolve the bounded target using the Focus Scope rules.
 2. Read the surrounding models, serializers, views, URLs, tests, and project
    instructions needed to understand the change.
-3. When the change touches a specialised area, load the matching skill if it is
-   available: `django-safe-migration` for migrations, `django-celery-expert`
-   for Celery tasks and configuration, `cdrf-expert` for DRF class-based views
-   and viewsets. If a skill is not installed, review without it.
+3. Apply the specialised skills. `django-celery-expert` and `cdrf-expert` are
+   preloaded; their rules are mandatory, not optional:
+   - **Celery** — any target file that imports `celery`, defines or calls a
+     task (`@shared_task`, `@app.task`, `.delay(`, `.apply_async(`,
+     `transaction.on_commit`), or holds `CELERY_*` settings or the Celery app:
+     review it against `django-celery-expert` and read the matching file in
+     that skill's `references/` before writing findings.
+   - **DRF** — any target file that imports `rest_framework` (views, viewsets,
+     serializers, permissions, routers): review it against `cdrf-expert` and
+     trace the overridden methods through the class MRO before recommending
+     which method to override. Read the installed DRF source for this; do not
+     fetch web pages.
+   - **Migrations** — for files under `migrations/`, load
+     `django-safe-migration:django-safe-migration` with the Skill tool if it
+     is installed; otherwise review without it.
 4. Check for correctness risks, Django anti-patterns, query regressions,
    authorization gaps, validation gaps, and inconsistent project conventions.
 5. Separate concrete defects from optional refinements.
@@ -150,6 +163,9 @@ For each reviewed file, provide:
 3. The specific location or code shape involved.
 4. A concrete recommendation, with a suggested code change when useful.
 5. Any broader suggestion that is intentionally outside the current scope.
+
+End the review with a **Skills used** line naming each specialised skill
+applied and the files it was applied to, or `none` when no target file matched.
 
 The review is successful when its recommendations improve clarity and
 maintainability without changing behavior, stay within the bounded target, and
