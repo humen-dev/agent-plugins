@@ -2,3 +2,6 @@
 __pycache__/
 .DS_Store
 .claude/worktrees/
+
+# Personal review notes
+INSIGHTS.md
