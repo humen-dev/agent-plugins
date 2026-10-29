@@ -31,11 +31,13 @@ it asks for one instead of reviewing the whole repository.
 - **Model:** Opus. **Tools:** `Read`, `Grep`, `Glob`, `Bash`, `Skill`;
   `Write`, `Edit`, `NotebookEdit`, `PowerShell` and `Agent` are disallowed.
   Its instructions limit `Bash` to read-only git commands.
-- **Preloaded skill:** `django-expert:django-expert`.
-- **Specialised skills, if installed:** `django-safe-migration` for migrations,
-  `django-celery-expert` for Celery tasks and configuration, `cdrf-expert` for
-  DRF class-based views and viewsets. If one is not installed, it reviews
-  without it.
+- **Preloaded skills:** `django-expert:django-expert`,
+  `django-celery-expert:django-celery-expert`, `cdrf-expert:cdrf-expert`.
+  Files that use Celery or DRF are always reviewed against the matching skill.
+- **Migrations:** loads `django-safe-migration` on demand if it is installed;
+  otherwise reviews without it.
+- The review ends with a **Skills used** line, so you can check which
+  specialised skills were applied to which files.
 - Recommendations preserve behaviour; any behaviour change (e.g. a defect fix)
   is flagged separately. Concrete defects are separated from optional
   refinements.
@@ -61,12 +63,12 @@ git credential setup.
 
 ## Requirements and dependencies
 
-- Depends on [`django-expert`](../django-expert/README.md) `^1.0.0`, which is
-  installed automatically.
-- Optional: [`django-safe-migration`](../django-safe-migration/README.md),
+- Depends on [`django-expert`](../django-expert/README.md),
   [`django-celery-expert`](../django-celery-expert/README.md) and
-  [`cdrf-expert`](../cdrf-expert/README.md) — install them to let the agent load
-  them for specialised reviews.
+  [`cdrf-expert`](../cdrf-expert/README.md) (all `^1.0.0`), installed
+  automatically.
+- Optional: [`django-safe-migration`](../django-safe-migration/README.md) —
+  install it to let the agent load it for migration reviews.
 
 ## Credits
 
