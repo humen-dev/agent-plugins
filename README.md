@@ -58,6 +58,7 @@ update, run `/reload-plugins` (or restart) to load the new version.
 | [`cdrf-expert`](plugins/cdrf-expert/) | skill | DRF class-based views via [Classy DRF](https://www.cdrf.co): choosing the right generic view or viewset, MRO, which method to override |
 | [`django-safe-migration`](plugins/django-safe-migration/) | skill | Write, review and rewrite Django migrations for PostgreSQL with zero downtime |
 | [`django-reviewer`](plugins/django-reviewer/) | agent | Read-only Django/Python code reviewer agent |
+| [`codebase-onboarding`](plugins/codebase-onboarding/) | skill | Onboarding report for an unfamiliar repository: stack, architecture, setup, conventions, CI/CD, deployment |
 
 ## Repository layout
 
