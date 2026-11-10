@@ -22,8 +22,9 @@ plugins/<plugin-name>/
 ```
 
 Components (`skills/`, `agents/`, `commands/`, `hooks/`, …) sit at the
-**plugin root**, never inside `.claude-plugin/`. No plugin uses hooks, MCP
-servers or scripts yet; when one does, it follows [SECURITY.md](SECURITY.md).
+**plugin root**, never inside `.claude-plugin/`. Plugins with hooks, MCP
+servers or scripts follow [SECURITY.md](SECURITY.md); `spec-creator` is the
+first one with a hook and Node scripts.
 
 ## Naming
 

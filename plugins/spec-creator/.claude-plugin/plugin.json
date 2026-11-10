@@ -1,0 +1,18 @@
+{
+  "name": "spec-creator",
+  "version": "1.0.0",
+  "description": "Stack-agnostic spec-creator agent for spec-driven development: interviews first, then writes a behaviour spec (what, never how) with EARS acceptance criteria, module interactions, NFRs and untrusted-input rules. Writes only Markdown in the project's spec folders (hook-enforced).",
+  "author": {
+    "name": "humen-dev"
+  },
+  "repository": "https://github.com/humen-dev/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "sdd",
+    "spec-driven-development",
+    "specification",
+    "ears",
+    "requirements",
+    "agent"
+  ]
+}

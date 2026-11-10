@@ -92,6 +92,20 @@
         "architecture",
         "documentation"
       ]
+    },
+    {
+      "name": "spec-creator",
+      "source": "./plugins/spec-creator",
+      "description": "Stack-agnostic spec-creator agent for spec-driven development: interviews first, then writes a behaviour spec (what, never how) with EARS acceptance criteria, module interactions, NFRs and untrusted-input rules. Writes only Markdown in the project's spec folders (hook-enforced).",
+      "category": "workflow",
+      "tags": [
+        "sdd",
+        "spec-driven-development",
+        "specification",
+        "ears",
+        "requirements",
+        "agent"
+      ]
     }
   ]
 }
