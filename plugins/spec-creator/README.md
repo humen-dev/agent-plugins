@@ -10,13 +10,27 @@ never **how** it is built. Project specifics come only from the repository
 | Component | Type | Invoke as |
 |---|---|---|
 | `spec-creator` | agent | `spec-creator:spec-creator` |
+| `specify` | skill (command) | `/spec-creator:specify <arguments>` |
 | `ears-requirements` | skill (preloaded) | `spec-creator:ears-requirements` |
 | `untrusted-input-threats` | skill (preloaded) | `spec-creator:untrusted-input-threats` |
 | `mermaid-diagram` | skill (preloaded) | `spec-creator:mermaid-diagram` |
 | `write-guard` | `PreToolUse` hook | — |
 | `templates/spec.md` | spec template | used when the project has none |
 
-No commands or MCP servers.
+No MCP servers.
+
+## Usage
+
+```text
+/spec-creator:specify CSV export of the orders list
+/spec-creator:specify approve SPEC-07
+/spec-creator:specify supersede specs/2026-10-04-orders-export.md add XLSX format
+```
+
+`specify` invokes the agent, runs its research requests as parallel
+subagents, asks you its questions and re-invokes it until the spec is
+written. Other modes: `revise <spec path>`, `implemented SPEC-NN`. You can also
+ask for the agent by name.
 
 ## How it works
 
@@ -36,10 +50,6 @@ No commands or MCP servers.
 4. **Status changes** (`approve SPEC-NN`, `implemented SPEC-NN`,
    `supersede <path>`) happen only on the user's explicit instruction. After
    approval the spec goes to the project's planning step.
-
-Example:
-
-> Use spec-creator to write a spec for CSV export of the orders list.
 
 - **Tools:** `Read`, `Grep`, `Glob`, `Write`, `Edit`, `WebSearch`, `WebFetch`.
   `Bash`, `PowerShell`, `NotebookEdit`, `Agent` and `Skill` are disallowed.
