@@ -1,6 +1,6 @@
 ---
 name: ears-requirements
-description: "Write and review testable requirements with EARS (Easy Approach to Requirements Syntax). Use whenever acceptance criteria, edge-case rules, NFRs or untrusted-input rules are written or reviewed for a spec (the project's specs folder, written by spec-creator:spec-creator), when a requirement sounds vague ('should work well', 'handle errors properly'), or when checking that a criterion can be verified by a test. Covers the five EARS patterns plus complex combinations, choosing system names from the project's own glossary, a vague-word blacklist, rewrite rules and a per-requirement quality checklist. Not for implementation plans or test code."
+description: "Write and review testable requirements with EARS (Easy Approach to Requirements Syntax). Use whenever acceptance criteria, edge-case rules, NFRs or untrusted-input rules are written or reviewed for a spec (the project's specs folder, written by spec-driven:spec-creator), when a requirement sounds vague ('should work well', 'handle errors properly'), or when checking that a criterion can be verified by a test. Covers the five EARS patterns plus complex combinations, choosing system names from the project's own glossary, a vague-word blacklist, rewrite rules and a per-requirement quality checklist. Not for implementation plans or test code."
 ---
 
 # EARS requirements
@@ -103,7 +103,7 @@ to *Non-goals* / *Open questions*) · `some, several, many, large, small, minima
 - **Untrusted input** → `IF <input> contains <hostile shape>, THEN the
   <system> shall <neutralising response>` — one per input × threat (prompt
   injection, HTML/Markdown injection, path traversal, SSRF, oversized payload,
-  secret leakage — see `spec-creator:untrusted-input-threats`).
+  secret leakage — see `spec-driven:untrusted-input-threats`).
 - **Optional/config behaviour** → `WHERE` — and write the behaviour for the
   disabled case too, or state it is unchanged.
 - **UI state** (loading / empty / error / partial) → `WHILE` for the state,

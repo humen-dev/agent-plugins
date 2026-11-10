@@ -59,7 +59,7 @@ update, run `/reload-plugins` (or restart) to load the new version.
 | [`django-safe-migration`](plugins/django-safe-migration/) | skill | Write, review and rewrite Django migrations for PostgreSQL with zero downtime |
 | [`django-reviewer`](plugins/django-reviewer/) | agent | Read-only Django/Python code reviewer agent |
 | [`codebase-onboarding`](plugins/codebase-onboarding/) | skill | Onboarding report for an unfamiliar repository: stack, architecture, setup, conventions, CI/CD, deployment |
-| [`spec-creator`](plugins/spec-creator/) | agent, skill | Stack-agnostic behaviour-spec agent for spec-driven development: EARS requirements, module interactions, untrusted-input rules; writes only spec Markdown (hook-enforced); run with `/spec-creator:specify` |
+| [`spec-driven`](plugins/spec-driven/) | agent, skill | Spec-driven development workflow. Available now: the `spec-creator` behaviour-spec agent: EARS requirements, module interactions, untrusted-input rules; writes only spec Markdown (hook-enforced); run with `/spec-driven:specify` |
 
 ## Repository layout
 

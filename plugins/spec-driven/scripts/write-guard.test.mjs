@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const GUARD = path.join(path.dirname(fileURLToPath(import.meta.url)), 'write-guard.mjs');
 
-const SPEC = 'spec-creator:spec-creator';
+const SPEC = 'spec-driven:spec-creator';
 
 function project(config) {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'spec-wg-'));
@@ -52,7 +52,7 @@ function assertAllowed(agent, filePath, root = DEFAULT_PROJECT) {
 function assertBlocked(agent, input, root = DEFAULT_PROJECT, raw = false) {
   const res = run(raw ? input : payload(agent, input, root), root);
   assert.equal(res.status, 2, `expected a block for ${agent} ${raw ? '(raw input)' : input}, got ${res.status}`);
-  assert.match(res.stderr, /^spec-creator write-guard: /);
+  assert.match(res.stderr, /^spec-driven write-guard: /);
   return res.stderr;
 }
 
@@ -105,7 +105,7 @@ test('missing sdd.json → defaults: spec-creator writes *.md under specs/ only'
   }
 });
 
-test('spec-creator: absolute paths are normalized; outside the project is blocked', () => {
+test('spec-creator — absolute paths are normalized; outside the project is blocked', () => {
   assertAllowed(SPEC, path.join(DEFAULT_PROJECT, 'specs', 'a.md'));
   assertBlocked(SPEC, path.join(DEFAULT_PROJECT, 'src', 'a.md'));
   assertBlocked(SPEC, path.resolve(DEFAULT_PROJECT, '..', 'elsewhere', 'specs', 'a.md'));

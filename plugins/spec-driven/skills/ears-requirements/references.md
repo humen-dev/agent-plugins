@@ -7,8 +7,8 @@
 - INCOSE *Guide to Writing Requirements* — the per-requirement quality
   characteristics behind the checklist (singular, unambiguous, verifiable,
   implementation-free, conforming).
-- This plugin: the spec template (`templates/spec.md` in the spec-creator
+- This plugin: the spec template (`templates/spec.md` in the spec-driven
   plugin, or the project's own `specTemplate` from `.claude/sdd.json`) is where
-  EARS requirements live; `spec-creator:spec-creator` writes them with this
+  EARS requirements live; `spec-driven:spec-creator` writes them with this
   skill preloaded; whoever verifies the implementation checks each one by the
   test shape in the table at the end of `SKILL.md`.

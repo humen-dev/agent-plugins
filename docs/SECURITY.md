@@ -5,7 +5,7 @@ matching event, MCP servers start local processes, and skills/agents can steer
 Claude into running tools. Treat every change here as code that runs on
 teammates' machines.
 
-`spec-creator` ships a `PreToolUse` hook with Node scripts; no plugin ships
+`spec-driven` ships a `PreToolUse` hook with Node scripts; no plugin ships
 MCP servers yet. The rules below apply to every plugin with hooks, MCP servers
 or scripts.
 

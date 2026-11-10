@@ -1,5 +1,5 @@
 /**
- * Shared I/O for the spec-creator PreToolUse guard (write-guard).
+ * Shared I/O for the spec-driven PreToolUse guard (write-guard).
  *
  * The guard is a plugin hook: it fires for EVERY Write/Edit call in every
  * session where the plugin is enabled. It therefore first checks `agent_type`
@@ -18,7 +18,7 @@ import path from 'node:path';
 
 /** Block the tool call: reason on stderr, exit 2. */
 export function block(guard, reason) {
-  process.stderr.write(`spec-creator ${guard}: ${reason}\n`);
+  process.stderr.write(`spec-driven ${guard}: ${reason}\n`);
   process.exit(2);
 }
 

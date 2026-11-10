@@ -1,6 +1,6 @@
 /**
  * Loader for the project's optional `.claude/sdd.json` — the one place where a
- * project tells the spec-creator plugin where its specs live, which template
+ * project tells the spec-driven plugin where its specs live, which template
  * to copy, which modules it has and which agent docs to read. Used by the
  * guard hook (`scripts/write-guard.mjs`).
  *

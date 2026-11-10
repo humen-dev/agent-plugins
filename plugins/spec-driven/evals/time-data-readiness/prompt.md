@@ -6,7 +6,7 @@ plugins: ["../.."]
 tags: [spec-creator, lens-f, time-and-data-readiness]
 ---
 
-Use the spec-creator:spec-creator agent to start a spec for this feature.
+Use the spec-driven:spec-creator agent to start a spec for this feature.
 
 - Feature: "Every morning at 06:00, email the finance team a digest of the
   invoices that went overdue yesterday."

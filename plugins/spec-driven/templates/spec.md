@@ -1,12 +1,12 @@
 # Spec: <feature name>
 
-> Template for the `spec-creator:spec-creator` agent. Copy to
+> Template for the `spec-driven:spec-creator` agent. Copy to
 > `<module specs folder>/YYYY-MM-DD-<feature-slug>.md` (one module with its own
 > `specsDir` in `.claude/sdd.json`) or `<specsDir>/YYYY-MM-DD-<feature-slug>.md`
 > (two or more modules) and fill every section; write "none" instead of deleting
 > a section. A spec says **what** the system must do, never **how** — file
 > layout, work units and waves belong to the project's planning step.
-> Requirements follow the `spec-creator:ears-requirements` skill. Delete this
+> Requirements follow the `spec-driven:ears-requirements` skill. Delete this
 > blockquote in the copy.
 
 Spec ID: SPEC-NN
@@ -114,7 +114,7 @@ Each measurable, with units and the measurement condition, EARS-phrased.
 ## Untrusted inputs
 For every untrusted input above, one EARS rule per threat (prompt injection,
 HTML/Markdown rendering, path escape, SSRF, oversized payload, secret leakage —
-see `spec-creator:untrusted-input-threats`):
+see `spec-driven:untrusted-input-threats`):
 
 | ID | Input | Threat | Requirement | Verify by |
 |---|---|---|---|---|

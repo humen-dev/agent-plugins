@@ -1,6 +1,6 @@
 ---
 name: untrusted-input-threats
-description: "Pick the threats for each untrusted input of a spec and turn each input × threat into one EARS 'IF … THEN … shall' rule. Use whenever the Untrusted inputs section of a behaviour spec is written or reviewed (spec-creator:spec-creator), or when deciding whether a data source is trusted. Covers prompt injection, HTML/Markdown rendering, path escape, SSRF, oversized payload and secret leakage, stack-neutral. Not for code review, threat modelling of infrastructure, or implementation advice."
+description: "Pick the threats for each untrusted input of a spec and turn each input × threat into one EARS 'IF … THEN … shall' rule. Use whenever the Untrusted inputs section of a behaviour spec is written or reviewed (spec-driven:spec-creator), or when deciding whether a data source is trusted. Covers prompt injection, HTML/Markdown rendering, path escape, SSRF, oversized payload and secret leakage, stack-neutral. Not for code review, threat modelling of infrastructure, or implementation advice."
 ---
 
 # Untrusted input threats

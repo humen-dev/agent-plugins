@@ -1,0 +1,20 @@
+{
+  "name": "spec-driven",
+  "version": "1.0.0",
+  "description": "Stack-agnostic spec-driven development workflow (specify, then plan, implement, verify). Available now: the spec-creator agent and /spec-driven:specify, which interview first and then write a behaviour spec (what, never how) with EARS acceptance criteria, module interactions, NFRs and untrusted-input rules. Writes only Markdown in the project's spec folders (hook-enforced).",
+  "author": {
+    "name": "humen-dev"
+  },
+  "repository": "https://github.com/humen-dev/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "sdd",
+    "spec-driven-development",
+    "spec-driven",
+    "specification",
+    "ears",
+    "requirements",
+    "workflow",
+    "agent"
+  ]
+}

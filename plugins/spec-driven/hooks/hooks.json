@@ -1,5 +1,5 @@
 {
-  "description": "spec-creator hooks: a guard that limits spec-creator:spec-creator to Markdown files in the configured spec folders (inert for the main session and every other agent).",
+  "description": "spec-driven hooks: a guard that limits spec-driven:spec-creator to Markdown files in the configured spec folders (inert for the main session and every other agent).",
   "hooks": {
     "PreToolUse": [
       {

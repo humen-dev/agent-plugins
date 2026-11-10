@@ -1,7 +1,18 @@
-# spec-creator
+# spec-driven
 
-A **behaviour specification agent** for spec-driven development, in any
-repository and any tech stack. It turns a feature request and its designs into
+The **spec-driven development workflow** for any repository and any tech
+stack: specify, then plan, implement and verify against the spec.
+
+| Step | Component | Status |
+|---|---|---|
+| specify | `spec-creator` agent · `/spec-driven:specify` | available |
+| plan | — | planned |
+| implement | — | planned |
+| verify | — | planned |
+
+## specify
+
+The `spec-creator` agent turns a feature request and its designs into
 a testable spec — **what** the system must do and how to tell that it does,
 never **how** it is built. Project specifics come only from the repository
 (`CLAUDE.md` / `AGENTS.md`, existing specs, code) and an optional
@@ -9,11 +20,11 @@ never **how** it is built. Project specifics come only from the repository
 
 | Component | Type | Invoke as |
 |---|---|---|
-| `spec-creator` | agent | `spec-creator:spec-creator` |
-| `specify` | skill (command) | `/spec-creator:specify <arguments>` |
-| `ears-requirements` | skill (preloaded) | `spec-creator:ears-requirements` |
-| `untrusted-input-threats` | skill (preloaded) | `spec-creator:untrusted-input-threats` |
-| `mermaid-diagram` | skill (preloaded) | `spec-creator:mermaid-diagram` |
+| `spec-creator` | agent | `spec-driven:spec-creator` |
+| `specify` | skill (command) | `/spec-driven:specify <arguments>` |
+| `ears-requirements` | skill (preloaded) | `spec-driven:ears-requirements` |
+| `untrusted-input-threats` | skill (preloaded) | `spec-driven:untrusted-input-threats` |
+| `mermaid-diagram` | skill (preloaded) | `spec-driven:mermaid-diagram` |
 | `write-guard` | `PreToolUse` hook | — |
 | `templates/spec.md` | spec template | used when the project has none |
 
@@ -22,10 +33,10 @@ No MCP servers.
 ## Usage
 
 ```text
-/spec-creator:specify CSV export of the orders list
-/spec-creator:specify review specs/2026-10-04-orders-export.md
-/spec-creator:specify approve SPEC-07
-/spec-creator:specify supersede specs/2026-10-04-orders-export.md add XLSX format
+/spec-driven:specify CSV export of the orders list
+/spec-driven:specify review specs/2026-10-04-orders-export.md
+/spec-driven:specify approve SPEC-07
+/spec-driven:specify supersede specs/2026-10-04-orders-export.md add XLSX format
 ```
 
 `specify` invokes the agent, runs its research requests as parallel
@@ -60,7 +71,10 @@ ask for the agent by name.
 
 - **Tools:** `Read`, `Grep`, `Glob`, `Write`, `Edit`, `WebSearch`, `WebFetch`.
   `Bash`, `PowerShell`, `NotebookEdit`, `Agent` and `Skill` are disallowed.
-- **Model:** `inherit` (the caller's model).
+- **Model:** `opus` by default. The spec is the source every later step
+  builds and tests against, so a missed gap or a weak requirement costs more
+  downstream than the extra model cost here. `specify` never overrides it; to
+  change it, edit `model:` in `agents/spec-creator.md`.
 
 ## Project configuration (optional)
 
@@ -89,8 +103,9 @@ plugin does not read are ignored.
 ### write-guard
 
 Runs `node "${CLAUDE_PLUGIN_ROOT}/scripts/write-guard.mjs"` before every
-`Write` and `Edit` call. It acts only when `agent_type` is exactly
-`spec-creator:spec-creator`; the main session and every other agent pass
+`Write` and `Edit` call. It holds a map from full agent name to a write rule;
+today the only entry is
+`spec-driven:spec-creator`; the main session and every other agent pass
 through untouched (exit 0, no output). For spec-creator it allows only `*.md`
 files inside `specsDir` or a module's `specsDir`, never the spec template or a
 `_TEMPLATE.md`, and never a path outside the project. It fails closed: an
@@ -98,7 +113,7 @@ unreadable payload, a missing `file_path` or a malformed `.claude/sdd.json`
 blocks the write with the reason on stderr. It reads only the hook payload and
 `.claude/sdd.json`; no network, no writes.
 
-Tests: `node --test plugins/spec-creator/scripts/write-guard.test.mjs`.
+Tests: `node --test plugins/spec-driven/scripts/write-guard.test.mjs`.
 
 ## Evals
 
@@ -109,7 +124,7 @@ reason. It runs the agent on your machine and costs tokens; run it from the
 repository root with:
 
 ```bash
-claude plugin eval plugins/spec-creator --case time-data-readiness
+claude plugin eval plugins/spec-driven --case time-data-readiness
 ```
 
 ## Install
@@ -118,14 +133,14 @@ Inside Claude Code:
 
 ```text
 /plugin marketplace add humen-dev/agent-plugins
-/plugin install spec-creator@humen-dev
+/plugin install spec-driven@humen-dev
 ```
 
 or from a shell:
 
 ```bash
 claude plugin marketplace add humen-dev/agent-plugins
-claude plugin install spec-creator@humen-dev
+claude plugin install spec-driven@humen-dev
 ```
 
 The marketplace is private; see the [root README](../../README.md#install) for

@@ -1,13 +1,13 @@
 ---
 name: specify
-description: "Start, continue or review a behaviour spec for a feature with the spec-creator:spec-creator agent, relaying its questions to the user, its research requests to subagents, and every finished draft to a fresh read-only review."
+description: "Start, continue or review a behaviour spec for a feature with the spec-driven:spec-creator agent, relaying its questions to the user, its research requests to subagents, and every finished draft to a fresh read-only review."
 argument-hint: "<feature> | revise <spec path> | review <spec path> | approve SPEC-NN | implemented SPEC-NN | supersede <spec path>"
 ---
 
 # Specify
 
 You are the **main session**. You relay between the user and the
-`spec-creator:spec-creator` agent. The agent writes the spec; you never do.
+`spec-driven:spec-creator` agent. The agent writes the spec; you never do.
 
 Arguments: `$ARGUMENTS`
 
@@ -39,7 +39,7 @@ a path or a link.
 
 ## 3. Invoke the agent
 
-Start `spec-creator:spec-creator` with:
+Start `spec-driven:spec-creator` with:
 
 ```text
 Feature: <feature text>
@@ -84,13 +84,13 @@ unchanged.
 
 ## 6. Fresh review
 
-1. Start a **new** `spec-creator:spec-creator` invocation with
+1. Start a **new** `spec-driven:spec-creator` invocation with
    `Mode: review <spec path>` and nothing else. **Never resume or message the
    agent that wrote the spec** — the review must run in a fresh context, with
    no memory of the writing.
 2. Show the *Spec review findings* block to the user unchanged.
 3. **No findings** → suggest the next step: review the spec file, then run
-   `/spec-creator:specify approve SPEC-NN`.
+   `/spec-driven:specify approve SPEC-NN`.
 4. **Any findings** → ask with `AskUserQuestion`:
    - "Revise with the blocking and should-fix findings" — first and
      "(Recommended)" when any finding is blocking or should fix;
@@ -101,12 +101,14 @@ unchanged.
    findings verbatim (ID, severity, evidence, proposed fix). When it replies
    *Spec ready*, repeat this step with another fresh review — at most **3
    review rounds**; after the third, show what is left and let the user decide.
-6. **Accept** → only now suggest `/spec-creator:specify approve SPEC-NN`.
+6. **Accept** → only now suggest `/spec-driven:specify approve SPEC-NN`.
 
 ## 7. Rules
 
 - Never write or edit a spec, its index or the template yourself — only the
   agent does.
+- Never pass a `model` override when you invoke the agent: it runs on the
+  model its frontmatter sets.
 - Never answer the agent's questions on the user's behalf, never skip one,
   never pick a default the user did not choose. A question the user leaves
   unanswered is passed as `unanswered`; the agent applies its default.
