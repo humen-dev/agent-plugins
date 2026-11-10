@@ -28,6 +28,12 @@ jobs:
         if: github.event_name == 'pull_request'
         run: node scripts/check-version-bump.mjs origin/${{ github.base_ref }}
 
+      - name: Plugin script tests
+        run: |
+          mapfile -t tests < <(find plugins -name '*.test.mjs' -not -path '*/node_modules/*' | sort)
+          if [ ${#tests[@]} -eq 0 ]; then echo "no plugin tests"; exit 0; fi
+          node --test "${tests[@]}"
+
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
