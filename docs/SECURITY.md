@@ -5,8 +5,9 @@ matching event, MCP servers start local processes, and skills/agents can steer
 Claude into running tools. Treat every change here as code that runs on
 teammates' machines.
 
-No plugin in this marketplace ships hooks, MCP servers or scripts yet. The
-rules below apply as soon as one does.
+`spec-driven` ships a `PreToolUse` hook with Node scripts; no plugin ships
+MCP servers yet. The rules below apply to every plugin with hooks, MCP servers
+or scripts.
 
 ## Rules
 

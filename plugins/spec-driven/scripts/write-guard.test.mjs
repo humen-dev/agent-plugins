@@ -1,0 +1,129 @@
+/**
+ * Tests for write-guard.mjs — run from the plugin root: node --test scripts/write-guard.test.mjs
+ * Each case spawns the real hook with a PreToolUse payload on stdin, in a
+ * temporary project with (or without) a `.claude/sdd.json`.
+ */
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const GUARD = path.join(path.dirname(fileURLToPath(import.meta.url)), 'write-guard.mjs');
+
+const SPEC = 'spec-driven:spec-creator';
+
+function project(config) {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'spec-wg-'));
+  if (config !== undefined) {
+    mkdirSync(path.join(dir, '.claude'), { recursive: true });
+    writeFileSync(path.join(dir, '.claude', 'sdd.json'), typeof config === 'string' ? config : JSON.stringify(config));
+  }
+  return dir;
+}
+
+const DEFAULT_PROJECT = project();
+const MODULES_PROJECT = project({
+  specsDir: 'specs/',
+  specTemplate: 'specs/spec-template.md',
+  modules: [
+    { name: 'api', path: 'services/api', specsDir: 'services/api/specs/' },
+    { name: 'web', path: 'apps/web', specsDir: null },
+  ],
+});
+
+function run(input, root = DEFAULT_PROJECT, env = {}) {
+  const { CLAUDE_PROJECT_DIR: _drop, ...base } = process.env;
+  return spawnSync(process.execPath, [GUARD], { input, encoding: 'utf8', cwd: root, env: { ...base, ...env } });
+}
+
+const payload = (agent, filePath, root = DEFAULT_PROJECT, extra = {}) =>
+  JSON.stringify({ tool_name: 'Write', tool_input: { file_path: filePath }, cwd: root, ...(agent ? { agent_type: agent } : {}), ...extra });
+
+function assertAllowed(agent, filePath, root = DEFAULT_PROJECT) {
+  const res = run(payload(agent, filePath, root), root);
+  assert.equal(res.status, 0, `expected ${agent} to be allowed to write ${filePath}, got ${res.status}: ${res.stderr}`);
+  assert.equal(res.stdout, '');
+  assert.equal(res.stderr, '');
+}
+
+function assertBlocked(agent, input, root = DEFAULT_PROJECT, raw = false) {
+  const res = run(raw ? input : payload(agent, input, root), root);
+  assert.equal(res.status, 2, `expected a block for ${agent} ${raw ? '(raw input)' : input}, got ${res.status}`);
+  assert.match(res.stderr, /^spec-driven write-guard: /);
+  return res.stderr;
+}
+
+test('main session, other plugins and unknown agents are never touched', () => {
+  for (const agent of [undefined, 'general-purpose', 'Explore', 'other-plugin:reviewer', 'other-plugin:spec-creator', 'spec-creator']) {
+    assertAllowed(agent, 'src/app.ts');
+    assertAllowed(agent, '../outside.md');
+  }
+});
+
+test('fail-closed for the guarded agent: empty stdin, invalid JSON, no file_path', () => {
+  assertBlocked(SPEC, '', DEFAULT_PROJECT, true);
+  assertBlocked(SPEC, '{not json', DEFAULT_PROJECT, true);
+  assertBlocked(SPEC, JSON.stringify({ tool_name: 'Write', tool_input: {}, cwd: DEFAULT_PROJECT, agent_type: SPEC }), DEFAULT_PROJECT, true);
+});
+
+test('fail-closed on a malformed .claude/sdd.json; other agents unaffected', () => {
+  const broken = project('{ "specsDir": ');
+  assert.match(assertBlocked(SPEC, 'specs/x.md', broken), /sdd\.json is not valid JSON/);
+  const wrongType = project({ specTemplate: 42 });
+  assert.match(assertBlocked(SPEC, 'specs/x.md', wrongType), /"specTemplate" must be/);
+  const escaping = project({ specsDir: '../elsewhere/' });
+  assert.match(assertBlocked(SPEC, '../elsewhere/x.md', escaping), /"specsDir" must be/);
+  assertAllowed(undefined, 'src/x.ts', broken);
+});
+
+test('unknown sdd.json keys are ignored', () => {
+  assertAllowed(SPEC, 'specs/x.md', project({ plansDir: 'docs/plans/', checkCommand: 'make check' }));
+});
+
+test('missing sdd.json → defaults: spec-creator writes *.md under specs/ only', () => {
+  for (const p of ['specs/2026-10-04-severity-filter.md', 'specs/README.md', 'specs/billing/2026-10-04-x.md', 'specs\\2026-10-04-y.md']) {
+    assertAllowed(SPEC, p);
+  }
+  for (const p of [
+    'specs/_TEMPLATE.md',
+    'specs/2026-10-04-x.json',
+    'src/app.ts',
+    'AGENTS.md',
+    'docs/plans/x.md',
+    'docs/specs/x.md',
+    'specsx/a.md',
+    'specs.md',
+    '../specs/x.md',
+    'specs/../src/x.md',
+  ]) {
+    const reason = assertBlocked(SPEC, p);
+    assert.match(reason, /spec-creator may not/);
+    assert.match(reason, /write only Markdown specs under specs\//, 'reason must say what to do instead');
+  }
+});
+
+test('spec-creator — absolute paths are normalized; outside the project is blocked', () => {
+  assertAllowed(SPEC, path.join(DEFAULT_PROJECT, 'specs', 'a.md'));
+  assertBlocked(SPEC, path.join(DEFAULT_PROJECT, 'src', 'a.md'));
+  assertBlocked(SPEC, path.resolve(DEFAULT_PROJECT, '..', 'elsewhere', 'specs', 'a.md'));
+});
+
+test('relative path resolves against the hook cwd', () => {
+  const input = payload(SPEC, '2026-10-04-x.md', DEFAULT_PROJECT, { cwd: path.join(DEFAULT_PROJECT, 'specs') });
+  const res = run(input, DEFAULT_PROJECT, { CLAUDE_PROJECT_DIR: DEFAULT_PROJECT });
+  assert.equal(res.status, 0, res.stderr);
+  const escape = payload(SPEC, '../src/x.md', DEFAULT_PROJECT, { cwd: path.join(DEFAULT_PROJECT, 'specs') });
+  assert.equal(run(escape, DEFAULT_PROJECT, { CLAUDE_PROJECT_DIR: DEFAULT_PROJECT }).status, 2);
+});
+
+test('configured specsDir + module specsDir; configured template protected', () => {
+  for (const p of ['specs/2026-10-04-x.md', 'services/api/specs/2026-10-04-y.md', 'services/api/specs/README.md']) {
+    assertAllowed(SPEC, p, MODULES_PROJECT);
+  }
+  for (const p of ['specs/spec-template.md', 'apps/web/specs/x.md', 'services/api/src/x.md', 'services/api/specs/x.ts', 'planning/x.md']) {
+    assertBlocked(SPEC, p, MODULES_PROJECT);
+  }
+});

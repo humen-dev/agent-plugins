@@ -35,6 +35,7 @@ Run from the repository root before opening a PR (CI runs the same):
 ```bash
 node scripts/validate-marketplace.mjs
 node scripts/check-version-bump.mjs origin/main
+node --test $(find plugins -name '*.test.mjs')
 claude plugin validate . --strict
 ```
 
@@ -42,6 +43,8 @@ claude plugin validate . --strict
   catalog shape, names and sources.
 - [`scripts/check-version-bump.mjs`](scripts/check-version-bump.mjs) — every
   plugin changed against the base branch has a higher `version`.
+- `node --test` — every `*.test.mjs` under `plugins/` (hook and script
+  tests).
 
 ## Try it locally
 
