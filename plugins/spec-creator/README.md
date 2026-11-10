@@ -23,13 +23,17 @@ No MCP servers.
 
 ```text
 /spec-creator:specify CSV export of the orders list
+/spec-creator:specify review specs/2026-10-04-orders-export.md
 /spec-creator:specify approve SPEC-07
 /spec-creator:specify supersede specs/2026-10-04-orders-export.md add XLSX format
 ```
 
 `specify` invokes the agent, runs its research requests as parallel
 subagents, asks you its questions and re-invokes it until the spec is
-written. Other modes: `revise <spec path>`, `implemented SPEC-NN`. You can also
+written. Every written draft then gets a **fresh, read-only review** by a new
+agent invocation (`review` mode); blocking and should-fix findings go into a
+revise round, and `approve` is suggested only once you accept what is left.
+`review <spec path>` runs that review on any spec by hand. Other modes: `revise <spec path>`, `implemented SPEC-NN`. You can also
 ask for the agent by name.
 
 ## How it works
@@ -47,7 +51,10 @@ ask for the agent by name.
    interactions diagram, NFRs, untrusted-input rules, traceability and a
    self-check, `Status: draft`, and adds an index line to the folder's
    `README.md`.
-4. **Status changes** (`approve SPEC-NN`, `implemented SPEC-NN`,
+4. **Review.** `review <spec path>` re-reads the spec and every file it cites
+   in a fresh context and returns findings (`R-F-n`, blocking / should fix /
+   minor, evidence, proposed fix) without writing anything.
+5. **Status changes** (`approve SPEC-NN`, `implemented SPEC-NN`,
    `supersede <path>`) happen only on the user's explicit instruction. After
    approval the spec goes to the project's planning step.
 
@@ -92,6 +99,18 @@ blocks the write with the reason on stderr. It reads only the hook payload and
 `.claude/sdd.json`; no network, no writes.
 
 Tests: `node --test plugins/spec-creator/scripts/write-guard.test.mjs`.
+
+## Evals
+
+`evals/time-data-readiness/` checks lens F (time and data readiness): a digest
+scheduled at 06:00 over data imported at 09:00 must raise that the input is
+not complete at the trigger time and must not default to 06:00 without a
+reason. It runs the agent on your machine and costs tokens; run it from the
+repository root with:
+
+```bash
+claude plugin eval plugins/spec-creator --case time-data-readiness
+```
 
 ## Install
 

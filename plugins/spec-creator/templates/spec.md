@@ -151,4 +151,7 @@ Every story → criteria; every finding, accepted UX proposal and answered quest
 - [ ] Module interactions: every hop has a contract, a source of truth and failure behaviour (or "none")
 - [ ] every untrusted input has ≥ 1 IF … THEN rule
 - [ ] Traceability has no orphans in either direction
+- [ ] every guarantee about repetition or history is backed by state in Data and state (or a Q-n)
+- [ ] scheduled or triggered behaviour: each input's readiness at the trigger time is cited (or a Q-n)
+- [ ] no requirement holds only if an unverified assumption is true (else a Q-n)
 - [ ] SPEC-NN unique across all spec folders; index line added; Status matches the user's decision
