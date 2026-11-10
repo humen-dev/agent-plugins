@@ -1,0 +1,17 @@
+{
+  "description": "spec-creator hooks: a guard that limits spec-creator:spec-creator to Markdown files in the configured spec folders (inert for the main session and every other agent).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/write-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
