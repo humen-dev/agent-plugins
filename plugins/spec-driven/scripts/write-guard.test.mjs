@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 const GUARD = path.join(path.dirname(fileURLToPath(import.meta.url)), 'write-guard.mjs');
 
 const SPEC = 'spec-driven:spec-creator';
+const PLANNER = 'spec-driven:planner';
 
 function project(config) {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'spec-wg-'));
@@ -57,7 +58,7 @@ function assertBlocked(agent, input, root = DEFAULT_PROJECT, raw = false) {
 }
 
 test('main session, other plugins and unknown agents are never touched', () => {
-  for (const agent of [undefined, 'general-purpose', 'Explore', 'other-plugin:reviewer', 'other-plugin:spec-creator', 'spec-creator']) {
+  for (const agent of [undefined, 'general-purpose', 'Explore', 'other-plugin:reviewer', 'other-plugin:spec-creator', 'spec-creator', 'other-plugin:planner', 'planner']) {
     assertAllowed(agent, 'src/app.ts');
     assertAllowed(agent, '../outside.md');
   }
@@ -80,7 +81,8 @@ test('fail-closed on a malformed .claude/sdd.json; other agents unaffected', () 
 });
 
 test('unknown sdd.json keys are ignored', () => {
-  assertAllowed(SPEC, 'specs/x.md', project({ plansDir: 'docs/plans/', checkCommand: 'make check' }));
+  assertAllowed(SPEC, 'specs/x.md', project({ runStateDir: '.sdd/', someOtherTool: { a: 1 } }));
+  assertAllowed(PLANNER, 'docs/plans/x.md', project({ runStateDir: '.sdd/' }));
 });
 
 test('missing sdd.json → defaults: spec-creator writes *.md under specs/ only', () => {
@@ -126,4 +128,52 @@ test('configured specsDir + module specsDir; configured template protected', () 
   for (const p of ['specs/spec-template.md', 'apps/web/specs/x.md', 'services/api/src/x.md', 'services/api/specs/x.ts', 'planning/x.md']) {
     assertBlocked(SPEC, p, MODULES_PROJECT);
   }
+});
+
+test('fail-closed for the planner: empty stdin, no file_path, malformed plansDir / checkCommand', () => {
+  assertBlocked(PLANNER, '', DEFAULT_PROJECT, true);
+  assertBlocked(PLANNER, JSON.stringify({ tool_name: 'Write', tool_input: {}, cwd: DEFAULT_PROJECT, agent_type: PLANNER }), DEFAULT_PROJECT, true);
+  assert.match(assertBlocked(PLANNER, '../plans/x.md', project({ plansDir: '../plans/' })), /"plansDir" must be/);
+  assert.match(assertBlocked(PLANNER, 'docs/plans/x.md', project({ checkCommand: 42 })), /"checkCommand" must be/);
+  assertAllowed(PLANNER, 'docs/plans/x.md', project({ checkCommand: 'run-checks {files}' }));
+});
+
+test('missing sdd.json → defaults: planner writes *.md directly in docs/plans/ only', () => {
+  for (const p of ['docs/plans/2026-11-19-orders-export.md', 'docs/plans/README.md', 'docs\\plans\\x.md', path.join(DEFAULT_PROJECT, 'docs', 'plans', 'a.md')]) {
+    assertAllowed(PLANNER, p);
+  }
+  for (const p of [
+    'docs/plans/sub/x.md',
+    'docs/plans/x.json',
+    'docs/plans.md',
+    'docs/x.md',
+    'src/app.ts',
+    'AGENTS.md',
+    'INSIGHTS.md',
+    '../docs/plans/x.md',
+    'docs/plans/../x.md',
+    path.resolve(DEFAULT_PROJECT, '..', 'elsewhere', 'docs', 'plans', 'a.md'),
+  ]) {
+    const reason = assertBlocked(PLANNER, p);
+    assert.match(reason, /planner may not/);
+    assert.match(reason, /write only the plan Markdown directly in docs\/plans\//, 'reason must say what to do instead');
+  }
+});
+
+test('planner is blocked in every spec folder, even when plansDir overlaps one', () => {
+  for (const p of ['specs/x.md', 'specs/README.md']) assert.match(assertBlocked(PLANNER, p), /spec folder/);
+  const custom = project({ plansDir: 'planning', modules: [{ name: 'api', path: 'services/api', specsDir: 'services/api/specs/' }] });
+  assertAllowed(PLANNER, 'planning/x.md', custom);
+  for (const p of ['docs/plans/x.md', 'specs/x.md', 'services/api/specs/x.md']) assertBlocked(PLANNER, p, custom);
+  const overlap = project({ plansDir: 'specs/', specsDir: 'specs/' });
+  assert.match(assertBlocked(PLANNER, 'specs/x.md', overlap), /spec folder/);
+  const nested = project({ plansDir: 'docs/specs/plans/', specsDir: 'docs/specs/' });
+  assert.match(assertBlocked(PLANNER, 'docs/specs/plans/x.md', nested), /spec folder/);
+});
+
+test('each guarded agent keeps its own rule', () => {
+  assertBlocked(SPEC, 'docs/plans/x.md');
+  assertAllowed(SPEC, 'specs/x.md');
+  assertAllowed(PLANNER, 'docs/plans/x.md');
+  assertBlocked(PLANNER, 'specs/x.md');
 });

@@ -1,7 +1,7 @@
 /**
  * Loader for the project's optional `.claude/sdd.json` — the one place where a
  * project tells the spec-driven plugin where its specs live, which template
- * to copy, which modules it has and which agent docs to read. Used by the
+ * to copy, where plans go, which modules it has and which agent docs to read. Used by the
  * guard hook (`scripts/write-guard.mjs`).
  *
  * Every key is optional; a missing file means "all defaults". Keys this plugin
@@ -17,6 +17,8 @@ export const CONFIG_FILE = '.claude/sdd.json';
 export const DEFAULTS = Object.freeze({
   specsDir: 'specs/',
   specTemplate: null,
+  plansDir: 'docs/plans/',
+  checkCommand: null,
   modules: [{ name: 'root', path: '.', specsDir: null }],
   agentDocs: ['AGENTS.md', 'CLAUDE.md'],
 });
@@ -43,6 +45,8 @@ function validate(cfg) {
   const errors = [];
   if (cfg.specsDir !== undefined && normalizeDir(cfg.specsDir) === null) errors.push('"specsDir" must be a project-relative directory');
   if (cfg.specTemplate !== undefined && cfg.specTemplate !== null && !isStr(cfg.specTemplate)) errors.push('"specTemplate" must be a string or null');
+  if (cfg.plansDir !== undefined && normalizeDir(cfg.plansDir) === null) errors.push('"plansDir" must be a project-relative directory');
+  if (cfg.checkCommand !== undefined && cfg.checkCommand !== null && !isStr(cfg.checkCommand)) errors.push('"checkCommand" must be a string or null');
   if (cfg.agentDocs !== undefined && !(Array.isArray(cfg.agentDocs) && cfg.agentDocs.every(isStr))) {
     errors.push('"agentDocs" must be an array of file names');
   }
