@@ -26,7 +26,7 @@ you never change a file, never fix, never advise. You are not a code review.
    style, naming or performance appear only under *Out-of-plan observations*,
    and never change the verdict.
 4. **Read-only.** Read, search and list files with Read / Grep / Glob. Never use
-   `cat`, `head`, `tail`, `grep`, `ls`, redirects (`>`, `<`) or `cd` in Bash.
+   `cat`, `head`, `tail`, `grep`, `ls`, redirects (`>`, `<`), `cd` or `git -C` in Bash.
    Bash is limited to read-only git and the configured `checkCommand`; the
    bash-guard hook enforces it. A denied command is never retried in another
    form: the row that needed it is NOT VERIFIABLE.

@@ -35,6 +35,7 @@ All paths in this plan are relative to the repository root. Plugin paths start w
 6. **No THIRD_PARTY_NOTICES.** No course text is copied; the README "Based on" section credits the design source. See the Open question.
 7. **The implementer is unchanged.** Its fix mode already accepts row IDs and `T-*` rows (`agents/implementer.md:77-79`, `:98-99`).
 8. **No insights write-back in the verify round.** Its implementer reports' insight candidates go to the summary only. Rejected: a Phase 2 step 7 append, which would widen the verify-round commit.
+9. **Base default = start of implementation** (amended after the first `/spec-driven:verify` run on this branch). The merge base pulls pre-plan commits (research notes, config, the plan itself) into the change set and trips *Must not touch* rows. Default: the parent of the oldest `feat(<slug>): wave` commit, else the merge base; `/spec-driven:verify` also takes an optional base argument. Rejected: merge base only.
 
 ### Open questions
 1. Is the course file's licence fine with a design-level port that credits it but copies no text? Default: yes, no `THIRD_PARTY_NOTICES.md` (`docs/PLUGIN-GUIDELINES.md:21` requires it only for copied content).
@@ -66,7 +67,7 @@ skills:
 ```text
 plan: <plansDir>/<slug>.md                 (required)
 mode: verify | re-verify                   (default verify)
-base: <commit>                             (optional; default: git merge-base HEAD main, else master)
+base: <commit>                             (optional; default: parent of the oldest `feat(<slug>): wave` commit on the branch, else git merge-base HEAD main, else master)
 cwd: <absolute project root>               (run every command from here; never cd)
 previous: <previous report: header table + Traceability table, pasted>   (re-verify: required)
 fixCommit: <sha of the verify-round commit>                              (re-verify: required)
@@ -359,14 +360,14 @@ const GUARDED = new Map([
 | Owns (create/modify) | `plugins/spec-driven/skills/verify/SKILL.md` (new) |
 | Must not touch | `plugins/spec-driven/skills/implement/SKILL.md` |
 | Consumes | §3.2, §3.4, §3.5 |
-| Produces | `/spec-driven:verify <plan path \| slug>` |
+| Produces | `/spec-driven:verify <plan path \| slug> [base commit]` |
 | Checks | `node scripts/validate-marketplace.mjs && node --test 'plugins/**/*.test.mjs'` |
 
 **Steps**
-1. Frontmatter as at `skills/implement/SKILL.md:1-6`: `name: verify`, a description, `argument-hint: "<plan path | slug>"`, `disable-model-invocation: true`.
+1. Frontmatter as at `skills/implement/SKILL.md:1-6`: `name: verify`, a description, `argument-hint: "<plan path | slug> [base commit]"`, `disable-model-invocation: true`.
 2. Body:
    - Read `.claude/sdd.json` and resolve the slug as `<plansDir>/<slug>.md`. Empty arguments → ask once and stop.
-   - Launch `spec-driven:plan-verifier` (description `[verify] <slug>`) with `mode: verify` and `cwd`, and no `base` (the agent takes the merge-base).
+   - Launch `spec-driven:plan-verifier` (description `[verify] <slug>`) with `mode: verify`, `cwd` and `base`: the second argument if given, else the parent of the oldest `feat(<slug>): wave` commit, else omitted (the agent falls back to the merge base) — Decision 9.
    - A Clarification block → ask via AskUserQuestion, re-invoke once.
    - Show the report unchanged.
    - Next steps: fix failed rows by hand, or paste the *Plan gaps* rows into `/spec-driven:plan gap <plan path>`.

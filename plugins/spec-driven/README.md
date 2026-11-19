@@ -269,6 +269,7 @@ The `plan-verifier` agent checks the code against an **approved** plan and the
 ```text
 /spec-driven:verify docs/plans/orders-export.md
 /spec-driven:verify orders-export
+/spec-driven:verify orders-export 1c1b92a   # explicit base commit
 ```
 
 ### How it works
@@ -281,7 +282,9 @@ The `plan-verifier` agent checks the code against an **approved** plan and the
 2. **Evidence.** Each row is `MET`, `PARTIAL`, `NOT MET` or
    `NOT VERIFIABLE (<reason>)`, with `file:line` or a command and its result.
    The change set is `git diff --name-status <base>` plus untracked files; `base`
-   defaults to the merge base with `main` (else `master`). A check that is
+   defaults to the parent of the oldest `feat(<slug>): wave` commit (the start
+   of the implementation), else the merge base with `main` (else `master`);
+   `/spec-driven:verify` also takes a base commit as a second argument. A check that is
    denied, not configured or needs a running stack is `NOT VERIFIABLE`; each
    distinct command runs once.
 3. **Verdict**, a pure function of the rows: any `NOT MET` or `PARTIAL` →
