@@ -1,8 +1,9 @@
 /**
  * Loader for the project's optional `.claude/sdd.json` — the one place where a
  * project tells the spec-driven plugin where its specs live, which template
- * to copy, where plans go, which modules it has and which agent docs to read. Used by the
- * guard hook (`scripts/write-guard.mjs`).
+ * to copy, where plans go, which modules it has, which agent docs to read and which command checks the
+ * code. Used by the guard hooks (`scripts/write-guard.mjs`,
+ * `scripts/bash-guard.mjs`).
  *
  * Every key is optional; a missing file means "all defaults". Keys this plugin
  * does not read are ignored, so the file can be shared with other tools. A file

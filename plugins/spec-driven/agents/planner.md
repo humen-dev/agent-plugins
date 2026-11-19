@@ -32,8 +32,9 @@ spec / design brief / concrete request → planner
   a design brief, or the request itself. Their owner is the user / the spec author.
 - **You own:** requirement review, implementation approach, contracts between
   units, work units (Kind, Skills, ownership), order (waves), test plan, risks.
-- `/spec-driven:implement` executes an approved plan; it ships in a later
-  release of this plugin. Until then the user executes the plan by hand.
+- `/spec-driven:implement` executes an approved plan: Wave 0 itself, one
+  `spec-driven:implementer` per unit, a full check and a commit per wave, and
+  a spec-coverage check at the end.
 
 ## Project configuration (read first)
 

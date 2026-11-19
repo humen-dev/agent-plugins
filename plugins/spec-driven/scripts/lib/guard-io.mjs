@@ -1,12 +1,13 @@
 /**
- * Shared I/O for the spec-driven PreToolUse guard (write-guard).
+ * Shared I/O for the spec-driven PreToolUse guards (write-guard, bash-guard).
  *
- * The guard is a plugin hook: it fires for EVERY Write/Edit call in every
- * session where the plugin is enabled. It therefore first checks `agent_type`
- * and returns immediately (exit 0, no output) for the main session and for any
- * agent it does not own. Only for its own agent does it apply an allow-list.
+ * The guards are plugin hooks: they fire for EVERY matching tool call in every
+ * session where the plugin is enabled. Each guard therefore first checks
+ * `agent_type` and returns immediately (exit 0, no output) for the main session
+ * and for any agent it does not own. Only for its own agents does it apply an
+ * allow-list.
  *
- * For that agent every helper here is fail-closed: anything the guard cannot
+ * For those agents every helper here is fail-closed: anything the guard cannot
  * read or resolve becomes a block, never an allow. A guard that silently opens
  * on bad input is worse than no guard, because the agent's prompt assumes it holds.
  *
@@ -84,4 +85,31 @@ export function isUnder(rel, dir) {
   const r = process.platform === 'win32' ? rel.toLowerCase() : rel;
   const d = process.platform === 'win32' ? dir.toLowerCase() : dir;
   return r.startsWith(`${d}/`);
+}
+
+/** Split a shell command into segments that each start a new command. */
+export function segments(command) {
+  return command.split(/&&|\|\||;|\||\n/g).map((s) => s.trim()).filter(Boolean);
+}
+
+/** Whitespace tokenizer that keeps quoted runs together. */
+export function tokenize(segment) {
+  const tokens = [];
+  let cur = '';
+  let quote = null;
+  for (const ch of segment) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      else cur += ch;
+      continue;
+    }
+    if (ch === '"' || ch === "'") { quote = ch; continue; }
+    if (/\s/.test(ch)) {
+      if (cur) { tokens.push(cur); cur = ''; }
+      continue;
+    }
+    cur += ch;
+  }
+  if (cur) tokens.push(cur);
+  return tokens;
 }

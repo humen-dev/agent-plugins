@@ -1,5 +1,5 @@
 {
-  "description": "spec-driven hooks: a guard that limits spec-driven:spec-creator to Markdown files in the configured spec folders and spec-driven:planner to Markdown files directly in the plans folder (inert for the main session and every other agent).",
+  "description": "spec-driven hooks: a write guard that limits spec-driven:spec-creator to Markdown files in the configured spec folders and spec-driven:planner to Markdown files directly in the plans folder, and a Bash guard that limits spec-driven:implementer to read-only git and the project's configured check commands (both inert for the main session and every other agent).",
   "hooks": {
     "PreToolUse": [
       {
@@ -8,6 +8,16 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/write-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/bash-guard.mjs\"",
             "timeout": 10
           }
         ]
