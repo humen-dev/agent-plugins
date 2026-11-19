@@ -1,7 +1,7 @@
 {
   "name": "spec-driven",
-  "version": "1.0.1",
-  "description": "Stack-agnostic spec-driven development workflow (specify, then plan, implement, verify). Available now: the spec-creator agent and /spec-driven:specify, which interview first and then write a behaviour spec (what, never how) with EARS acceptance criteria, module interactions, NFRs and untrusted-input rules. Writes only Markdown in the project's spec folders (hook-enforced).",
+  "version": "1.1.0",
+  "description": "Stack-agnostic spec-driven development workflow (specify, then plan, implement, verify). Available now: the spec-creator agent and /spec-driven:specify, which interview first and then write a behaviour spec (what, never how) with EARS acceptance criteria, module interactions, NFRs and untrusted-input rules; and the planner agent and /spec-driven:plan, which review the requirements and then write an implementation plan (contracts, work units with disjoint ownership per wave, skills, checks, traceability to the spec). Each writes only Markdown in its own folder (hook-enforced).",
   "author": {
     "name": "humen-dev"
   },
@@ -15,6 +15,7 @@
     "ears",
     "requirements",
     "workflow",
+    "planning",
     "agent"
   ]
 }
