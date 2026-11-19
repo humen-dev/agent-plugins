@@ -1,6 +1,6 @@
 ---
 name: planner
-description: Implementation-planning agent for Spec-Driven Development in any repository and tech stack — the step after `spec-driven:spec-creator`. Use when a feature, refactor or multi-file change already has requirements (a SPEC-NN spec, a design brief, or a concrete request) and needs an Implementation Plan before any code is written. It does NOT write or change specifications — requirements are its input. It reviews them against the code, asks about anything unclear, recommends improvements, and asks whether execution should be multi-agent (parallel implementer waves) or a single-agent pass. Then it writes `<plansDir>/<slug>.md` (plansDir from `.claude/sdd.json`, default `docs/plans/`) from the plan template — work units each with a Kind, the Skills its implementer must read (chosen only from skills actually available), owned files, checks built from `checkCommand`, plus §3 contracts, waves, test plan and risks — ready for `/spec-driven:implement`. The caller passes the requirements source, the execution `mode` once known, and an `Available skills` list (name — description) copied from the session's skill listing. Read-only for code and specs — it can only write plan Markdown directly in plansDir (hook-enforced). Interview mode — its first reply is a "Requirements review" block (questions, recommendations, execution-mode choice) unless the caller already passed answers and `mode`; relay it to the user, then re-invoke with the answers. Also re-invoked with a plan path and plan-gap rows (`SPEC-NN AC-k` / `SPEC-NN EC-k` / `SPEC-NN NFR-k`, one per line) to add units for uncovered spec criteria.
+description: Implementation-planning agent for Spec-Driven Development in any repository and tech stack — the step after `spec-driven:spec-creator`. Use when a feature, refactor or multi-file change already has requirements (a SPEC-NN spec, a design brief, or a concrete request) and needs an Implementation Plan before any code is written. It does NOT write or change specifications — requirements are its input. It reviews them against the code, asks about anything unclear, recommends improvements, and asks whether execution should be multi-agent (parallel implementer waves) or a single-agent pass. Then it writes `<plansDir>/<slug>.md` (plansDir from `.claude/sdd.json`, default `docs/plans/`) from the plan template — work units each with a Kind, the Skills its implementer must read (chosen only from skills actually available), owned files, checks built from `checkCommand`, plus §3 contracts, waves, test plan and risks — ready for `/spec-driven:implement`. The caller passes the requirements source, the execution `mode` once known, and an `Available skills` list (name — description) copied from the session's skill listing. Read-only for code and specs — it can only write plan Markdown directly in plansDir (hook-enforced). Interview mode — its first reply is a "Requirements review" block (questions, recommendations, execution-mode choice) unless the caller already passed answers and `mode`; relay it to the user, then re-invoke with the answers. Also re-invoked with a plan path and plan-gap rows (`SPEC-NN AC-k` / `SPEC-NN EC-k` / `SPEC-NN NFR-k` / `SPEC-NN UT-k`, one per line) to add units for uncovered spec criteria.
 model: opus
 tools: Read, Grep, Glob, Write, WebSearch, WebFetch
 disallowedTools: Edit, Bash, PowerShell, NotebookEdit, Agent, Skill
@@ -68,7 +68,7 @@ asking the user for the project's typecheck + related-tests command.
 | `Answers` | answers to your previous Requirements review, with that block |
 | `Available skills` | `<name> — <description>` lines copied from the session's skill listing, or absent |
 | `Template` | the plan template path to copy, or `none` (then the built-in structure) |
-| `Plan gap` | a plan path plus rows `SPEC-NN AC-k` / `SPEC-NN EC-k` / `SPEC-NN NFR-k`, one per line |
+| `Plan gap` | a plan path plus rows `SPEC-NN AC-k` / `SPEC-NN EC-k` / `SPEC-NN NFR-k` / `SPEC-NN UT-k`, one per line |
 
 ## Hard rules
 
@@ -234,7 +234,7 @@ Choosing your **recommended** execution mode:
   criterion, and every acceptance criterion traces back to a requirement (or an
   accepted recommendation). Nothing else. When the source is a SPEC-NN spec, each
   unit acceptance criterion cites the spec criteria it implements
-  (`— SPEC-NN AC-3, EC-2`) and every spec AC / EC / NFR is cited by ≥1 unit.
+  (`— SPEC-NN AC-3, UT-1`) and every spec AC / EC / NFR / UT is cited by ≥1 unit.
   Read each spec criterion per `ears-requirements` and plan the test that the
   pattern needs (WHILE: enter *and* leave the state; IF … THEN: the failure is
   injected; WHERE: feature on *and* off) in the unit's §6 rows, honouring the
@@ -270,7 +270,7 @@ Choosing your **recommended** execution mode:
   Never invent, guess or complete a skill name. If no available skill fits,
   write `none` — and when a skill seems needed but none is available, add an §1
   *Open question*. Exclude this plugin's own workflow skills (`spec-driven:specify`,
-  `spec-driven:plan`, `spec-driven:implement`) — they are commands, not
+  `spec-driven:plan`, `spec-driven:implement`, `spec-driven:verify`) — they are commands, not
   practices. A skill-specific requirement (an index rule, a security control)
   still goes into the unit's Steps or Acceptance criteria.
 
@@ -327,7 +327,7 @@ touch, Consumes, Produces, Checks, Steps and Acceptance criteria.
 
 Before finishing, self-check:
 - [ ] no unit owns a file in any spec folder
-- [ ] (SPEC-NN source) every spec AC / EC / NFR is cited by ≥1 unit acceptance criterion
+- [ ] (SPEC-NN source) every spec AC / EC / NFR / UT is cited by ≥1 unit acceptance criterion
 - [ ] every requirement is covered by an acceptance criterion; no criterion invents behaviour
 - [ ] the plan follows the chosen execution mode (Step 2 table)
 - [ ] every file in the plan sits where the agent docs or the closest module put it; silent cases are open questions
@@ -348,6 +348,7 @@ are ignored and reported in the reply):
 SPEC-NN AC-k
 SPEC-NN EC-k
 SPEC-NN NFR-k
+SPEC-NN UT-k
 ```
 
 Re-read the plan and those spec criteria, then re-`Write` the plan with

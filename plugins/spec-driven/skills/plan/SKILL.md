@@ -1,7 +1,7 @@
 ---
 name: plan
-description: "Write an implementation plan for an approved spec, a SPEC-NN id or a concrete request with the spec-driven:planner agent, relaying its Requirements review to the user; or close plan gaps from SPEC-NN AC/EC/NFR rows."
-argument-hint: "<spec path> | SPEC-NN | <request> | gap <plan path> <SPEC-NN AC-k rows, one per line>"
+description: "Write an implementation plan for an approved spec, a SPEC-NN id or a concrete request with the spec-driven:planner agent, relaying its Requirements review to the user; or close plan gaps from SPEC-NN AC/EC/NFR/UT rows."
+argument-hint: "<spec path> | SPEC-NN | <request> | gap <plan path> <SPEC-NN AC-k | UT-k rows, one per line>"
 disable-model-invocation: true
 ---
 
@@ -32,10 +32,12 @@ Arguments: `$ARGUMENTS`
   SPEC-NN AC-k
   SPEC-NN EC-k
   SPEC-NN NFR-k
+  SPEC-NN UT-k
   ```
 
-  This is the format of the coverage report of `/spec-driven:implement`, so
-  its uncovered rows can be pasted unchanged. Pass the rows verbatim. If the
+  This is the format of the verifier's *Plan gaps* section (printed by
+  `/spec-driven:implement` and `/spec-driven:verify`), so its uncovered rows
+  can be pasted unchanged. Pass the rows verbatim. If the
   plan path or every row is missing, ask for it in one question and stop.
   Name any line that is not a row to the user; do not pass it.
 
@@ -46,7 +48,7 @@ Never guess a path or an id.
 From the skill listing of **this session**, copy every skill that is
 available to agents as one line `<name> — <description>`, verbatim. Leave out
 this plugin's workflow commands (`spec-driven:specify`, `spec-driven:plan`,
-`spec-driven:implement`). Never add, rename or shorten a skill. If the session
+`spec-driven:implement`, `spec-driven:verify`). Never add, rename or shorten a skill. If the session
 lists none, pass `Available skills: none`.
 
 ## 3. Invoke the agent

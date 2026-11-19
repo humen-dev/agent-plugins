@@ -74,7 +74,7 @@ Keep each block ≤ ~60 lines — every implementer reads it; code belongs in §
 1. …
 
 **Acceptance criteria**
-- [ ] observable behaviour, testable — SPEC-NN AC-n, EC-n
+- [ ] observable behaviour, testable — SPEC-NN AC-n, EC-n, UT-n
 
 ## 5. Waves (execution order)
 | Wave | Units | Runs | Why this order |

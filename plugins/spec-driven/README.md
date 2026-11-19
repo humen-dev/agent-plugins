@@ -8,18 +8,17 @@ stack: specify, then plan, implement and verify against the spec.
 | specify | `spec-creator` agent · `/spec-driven:specify` | available |
 | plan | `planner` agent · `/spec-driven:plan` | available |
 | implement | `implementer` agent · `/spec-driven:implement` | available |
-| verify | plan verifier agent | planned |
+| verify | `plan-verifier` agent · `/spec-driven:verify` | available |
 
 The full flow:
 
 ```text
-/spec-driven:specify → you approve the spec → /spec-driven:plan → you approve the plan → /spec-driven:implement
+/spec-driven:specify → you approve the spec → /spec-driven:plan → you approve the plan → /spec-driven:implement → /spec-driven:verify
 ```
 
-A plan verifier (which checks every unit and spec criterion against the code
-after each wave) and reviewers are planned for a later release. Until then
-`/spec-driven:implement` ends with a spec-coverage check, and the review of the
-branch is yours.
+`/spec-driven:implement` now ends with the plan verifier, which checks every
+plan item and spec criterion against the code once, after the last wave. Reviewers
+are planned for a later release; until then the review of the branch is yours.
 
 ## specify
 
@@ -110,6 +109,7 @@ or specs.
 /spec-driven:plan gap docs/plans/orders-export.md
 SPEC-07 AC-3
 SPEC-07 EC-2
+SPEC-07 UT-2
 ```
 
 `plan` invokes the agent, asks you its Requirements review questions one
@@ -121,9 +121,9 @@ must read. Invoke the agent directly only if you accept that it then sees
 project skills (`.claude/skills/`) only; its summary then says so.
 
 **Plan-gap rows.** `gap <plan path>` takes one row per line, exactly in the
-form `SPEC-NN AC-k`, `SPEC-NN EC-k` or `SPEC-NN NFR-k` — the format of the
-coverage report of `/spec-driven:implement`, so its uncovered rows can be
-pasted unchanged. The agent adds new units in a new wave and leaves existing
+form `SPEC-NN AC-k`, `SPEC-NN EC-k`, `SPEC-NN NFR-k` or `SPEC-NN UT-k` — the
+format of the *Plan gaps* block of the verifier report, so its uncovered rows
+can be pasted unchanged. The agent adds new units in a new wave and leaves existing
 units and contracts as they are. Other lines are reported and ignored.
 
 ### How it works
@@ -214,14 +214,18 @@ the plan; a note that changes scope or a contract stops the run.
    by your choice): `feat(<slug>): wave <k> — U<a>, U<b>`, plus
    ` (check rounds: <r>)` when fix rounds ran. No attribution trailers. It never
    pushes and never opens a pull request.
-8. **Spec coverage.** After the last wave, every `AC-n` / `EC-n` / `NFR-n`
-   row of the `SPEC-NN` specs in the plan's *Requirements source* must be
-   cited by a finished unit (a citation may list several ids:
-   `SPEC-01 AC-1, EC-2`). A criterion the plan never cites is a gap too. Gaps are listed one per
-   line, ready to paste into `/spec-driven:plan gap <plan path>`.
-9. **Summary**: commits, check results, coverage, deviations from plan,
-   `INSIGHTS.md` appends, and *How to verify manually* (copied from the plan's
-   test plan).
+8. **Verify.** After the last wave, one `spec-driven:plan-verifier` run checks
+   the code against the plan and its specs (see [verify](#verify)); never per
+   wave. Failed rows go to the owning units' implementers in `mode: fix`, for
+   **one** fix round: a failed `U<n>-MNT-*` row stops the run and asks you, and
+   a spec row that no unit cites is not fixed but listed as a plan gap. The fix
+   round's full check and ownership check run again, then one commit
+   `fix(<slug>): verify round — U<a>, U<b>[, orchestrator]` (no attribution
+   trailer), then a re-verify. Gaps are listed one per line, ready to paste
+   into `/spec-driven:plan gap <plan path>`.
+9. **Summary**: commits, check results, the verifier verdict, deviations from
+   plan, `INSIGHTS.md` appends, and *How to verify manually* (copied from the
+   plan's test plan).
 
 `resume <slug>` reads the plan and `git log` and continues at the first wave
 without a `feat(<slug>): wave <k>` commit. A dirty tree is shown to you first.
@@ -249,6 +253,55 @@ without a `feat(<slug>): wave <k>` commit. A dirty tree is shown to you first.
   `Agent`, `Skill`, `NotebookEdit`, `WebSearch`, `WebFetch` and `PowerShell`
   are disallowed. **Model:** `sonnet`, unless the unit sets *Model*.
 
+## verify
+
+The `plan-verifier` agent checks the code against an **approved** plan and the
+`SPEC-NN` specs it names. It is read-only and is not a code review.
+
+| Component | Type | Invoke as |
+|---|---|---|
+| `plan-verifier` | agent | `spec-driven:plan-verifier` |
+| `verify` | skill (command, manual only) | `/spec-driven:verify <arguments>` |
+| `bash-guard` | `PreToolUse` hook | — |
+
+### Usage
+
+```text
+/spec-driven:verify docs/plans/orders-export.md
+/spec-driven:verify orders-export
+```
+
+### How it works
+
+1. **Items first.** The item list is fixed before any code is read: one row
+   per contract subsection, unit *Owns* path, *Must not touch* entry, unit
+   acceptance criterion and *Checks* command, per test-plan row and
+   verification item, and per `AC` / `EC` / `NFR` / `UT` row of every spec in
+   the plan's *Requirements source*.
+2. **Evidence.** Each row is `MET`, `PARTIAL`, `NOT MET` or
+   `NOT VERIFIABLE (<reason>)`, with `file:line` or a command and its result.
+   The change set is `git diff --name-status <base>` plus untracked files; `base`
+   defaults to the merge base with `main` (else `master`). A check that is
+   denied, not configured or needs a running stack is `NOT VERIFIABLE`; each
+   distinct command runs once.
+3. **Verdict**, a pure function of the rows: any `NOT MET` or `PARTIAL` →
+   `FAIL`; else any `NOT VERIFIABLE` → `INCOMPLETE`; else `PASS`. A spec row
+   that no unit acceptance criterion cites is `NOT MET` and also listed under
+   *Plan gaps*, in the `SPEC-NN UT-2` form that `/spec-driven:plan gap` takes.
+4. **Re-verify** (run by `implement` after its one fix round) re-checks the
+   rows that failed and the rows whose evidence cites a file of the fix commit;
+   every other row is copied from the previous report. A changed item list
+   triggers a full verify.
+
+Advice (style, naming, performance) appears only under *Out-of-plan
+observations* and never changes the verdict.
+
+- **Tools:** `Read`, `Grep`, `Glob`, `Bash` (guarded). `Write`, `Edit`,
+  `NotebookEdit`, `PowerShell`, `Agent`, `Skill`, `WebSearch` and `WebFetch`
+  are disallowed.
+- **Preloaded skill:** `spec-driven:ears-requirements`, only to read spec rows.
+- **Model:** `sonnet`. **maxTurns:** `100`.
+
 ## Project configuration (optional)
 
 `.claude/sdd.json` at the project root. Every key is optional; keys this
@@ -259,7 +312,7 @@ plugin does not read are ignored.
 | `specsDir` | `specs/` | root spec folder (cross-module specs, global id scan) |
 | `specTemplate` | none → the bundled `templates/spec.md` structure | project spec template; the agent never edits it |
 | `plansDir` | `docs/plans/` | where plans are written; the planner writes only `*.md` directly in it |
-| `checkCommand` | none | typecheck + related tests for one unit: each unit's *Checks* row, the implementer's check and the full check per module after each wave (see below). Include an architecture check here if you want one |
+| `checkCommand` | none | typecheck + related tests for one unit: each unit's *Checks* row, the implementer's check, the full check per module after each wave and the verifier's check rows (see below). Include an architecture check here if you want one |
 | `modules` | `[{ "name": "root", "path": "." }]` | module names and paths; a module may set its own `specsDir` |
 | `agentDocs` | `["AGENTS.md", "CLAUDE.md"]` | agent docs read if present |
 
@@ -305,10 +358,10 @@ Tests: `node --test plugins/spec-driven/scripts/write-guard.test.mjs`.
 ### bash-guard
 
 Runs `node "${CLAUDE_PLUGIN_ROOT}/scripts/bash-guard.mjs"` before every
-`Bash` call. It acts only for `spec-driven:implementer`; the main session and
-every other agent pass through untouched (`spec-creator` and `planner` have no
-`Bash` at all — it is in their `disallowedTools`). For the implementer it is
-an allow-list: read-only git (`status`, `diff`, `log`, `show`, `merge-base`,
+`Bash` call. It acts only for `spec-driven:implementer` and
+`spec-driven:plan-verifier`; the main session and every other agent pass
+through untouched (`spec-creator` and `planner` have no `Bash` at all — it is
+in their `disallowedTools`). For both it is an allow-list: read-only git (`status`, `diff`, `log`, `show`, `merge-base`,
 `rev-parse`, `ls-files`, `blame`, `grep`) and the project's `checkCommand`
 with `{module}` / `{files}` filled in. There is no built-in test runner. It
 rejects redirection, `$` and backtick substitution, background `&`, `tee`,
@@ -353,6 +406,12 @@ git credential setup.
 
 - No plugin dependencies.
 - Node.js on `PATH` for the `write-guard` and `bash-guard` hooks.
+
+## Based on
+
+- [`docs/research/2026-11-19-plan-verifier.md`](../../docs/research/2026-11-19-plan-verifier.md)
+- `plugins/sdd-engineering/agents/plan-verifier.md` in the course repository
+  `dev-digest-ai-marketplace`: a design reference only; no text is copied.
 
 ## Credits
 
