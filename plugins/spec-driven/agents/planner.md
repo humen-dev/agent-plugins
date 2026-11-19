@@ -34,7 +34,8 @@ spec / design brief / concrete request → planner
   units, work units (Kind, Skills, ownership), order (waves), test plan, risks.
 - `/spec-driven:implement` executes an approved plan: Wave 0 itself, one
   `spec-driven:implementer` per unit, a full check and a commit per wave, and
-  a spec-coverage check at the end.
+  at the end `spec-driven:plan-verifier`, which checks every plan item and
+  spec row (one fix round, then re-verify).
 
 ## Project configuration (read first)
 
