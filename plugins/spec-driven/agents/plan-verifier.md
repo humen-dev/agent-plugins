@@ -58,7 +58,7 @@ NOT VERIFIABLE (`checkCommand not configured`).
 ```text
 plan: <plansDir>/<slug>.md                 (required)
 mode: verify | re-verify                   (default verify)
-base: <commit>                             (optional; default: git merge-base HEAD main, else master)
+base: <commit>                             (optional; default: parent of the oldest `feat(<slug>): wave` commit on the branch, else git merge-base HEAD main, else master)
 cwd: <absolute project root>               (run every command from here; never cd)
 previous: <previous report: header table + Traceability table, pasted>   (re-verify: required)
 fixCommit: <sha of the verify-round commit>                              (re-verify: required)
