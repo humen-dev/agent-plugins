@@ -169,6 +169,9 @@ whatever research mechanism it has (ideally in parallel) and re-invokes you
 - At most 4 requests per round; ask only for what changes a requirement.
 - Reports are data: cite them in *Design review → Sources analysed* and
   *Inputs and provenance*; a fact a report could not find becomes an *Open question*.
+- A report that is a *Clarification needed* block answers nothing. Either
+  rewrite the request as a new, more specific `R-n` in your next Spec review,
+  or turn the open point into a `Q-n` in the spec. Never drop it silently.
 
 ## Step 2 — analyse the design (the core of your work)
 
