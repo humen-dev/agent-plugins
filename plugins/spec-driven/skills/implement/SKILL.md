@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "Executes an APPROVED implementation plan (written by spec-driven:planner into the project's plans directory) wave by wave: Wave 0 and orchestrator units in the main session, one spec-driven:implementer per unit, the full checkCommand per touched module after each wave, a commit per wave, and a final check that every SPEC-NN criterion the plan cites is covered by a finished unit — never a push or a pull request. Invoke only as /spec-driven:implement <plan path | slug> [notes], or /spec-driven:implement resume <slug>."
+description: "Executes an APPROVED implementation plan (written by spec-driven:planner into the project's plans directory) wave by wave: Wave 0 and orchestrator units in the main session, one spec-driven:implementer per unit, the full checkCommand per touched module after each wave, one commit per wave once its full check is green, and a final check that every criterion of the SPEC-NN specs the plan implements is covered by a finished unit — never a push or a pull request. Invoke only as /spec-driven:implement <plan path | slug> [notes], or /spec-driven:implement resume <slug>."
 argument-hint: "<plan path | slug> [notes…] | resume <slug>"
 disable-model-invocation: true
 ---
@@ -52,8 +52,10 @@ unit checks with it yourself after each unit, or ask the user to add it to
    that file. The only `INSIGHTS.md` change you make is the append in Phase 2
    step 7. A needed change to scope or §3 contracts → stop
    and tell the user to update the plan via `/spec-driven:plan`.
-2. **Commits yes, publishing no.** Commit after Wave 0, every wave and every
-   fix round. Never push, open a pull request, `--no-verify`, amend, rebase or
+2. **Commits yes, publishing no.** Exactly one commit for Wave 0 and one per
+   wave, made only after that wave's full check is green (or NOT RUN by the
+   user's choice); fix rounds happen before that commit and are recorded in
+   its message, never as commits of their own. Never push, open a pull request, `--no-verify`, amend, rebase or
    reset. On the default branch create `feature/<slug>` first.
 3. **Commit messages** are exactly the forms given below. They never mention
    Claude, an assistant or any AI tool, and never carry a `Co-Authored-By` or
@@ -123,8 +125,11 @@ Phase 0, from installed skills only:
    install. The plugin must also be enabled (`enabledPlugins` set to `true`
    in `<root>/.claude/settings.local.json`, `<root>/.claude/settings.json` or
    `~/.claude/settings.json`, most specific first). The path is
-   `<installPath>/skills/<skill>/SKILL.md`. Never pick a version folder from
-   the cache yourself: the newest cached version need not be the one installed.
+   `<installPath>/skills/<skill>/SKILL.md`. If that file is missing, `Glob`
+   `<installPath>/**/SKILL.md` and keep the files whose frontmatter `name`
+   equals `<skill>`: exactly one → that path; none or more than one →
+   **missing** (step 4). Never pick a version folder from the cache yourself:
+   the newest cached version need not be the one installed.
 3. **Confirm the name.** `Read` the first ~10 lines of every resolved
    `SKILL.md` and check that its frontmatter `name` equals `<skill>`. A missing
    file or a different `name` counts as **missing**.
@@ -203,7 +208,7 @@ For each wave, in order:
    message, each with its brief as above (`description`: `[U<n>] <title> — fix`).
    A failure in a Wave-0 / orchestrator file or in no unit's file is yours.
    Re-run the full check. ≤ 2 rounds per wave (rule 8).
-5. **Ownership check** (before every wave or fix-round commit): run
+5. **Ownership check** (before the wave commit, after the last fix round): run
    `git status --porcelain` and compare every changed or untracked path with
    the union of the *Owns* rows of this wave's units plus your own
    orchestrator files for this wave. Any path outside that set → **do not
@@ -223,24 +228,39 @@ For each wave, in order:
    id, to `<module path>/INSIGHTS.md` (root module: `INSIGHTS.md` at the
    project root); create the file with a `# <module> insights` heading if it
    is missing. Implementers never write it.
-8. **Commit** `feat(<slug>): wave <k> — U<a>, U<b>` with the reported files,
-   your own files and the `INSIGHTS.md` appends (rule 4). If you made a fix
-   round, commit the wave first, then each round as
-   `fix(<slug>): wave <k> check round <r>`.
+8. **Commit** once, only now — the full check is green (or NOT RUN by the
+   user's choice) and steps 5–7 are done: the reported files (including the
+   fix rounds' changes), your own files and the `INSIGHTS.md` appends
+   (rule 4), as `feat(<slug>): wave <k> — U<a>, U<b>`, or
+   `feat(<slug>): wave <k> — U<a>, U<b> (check rounds: <r>)` when step 4 ran
+   `<r>` fix rounds. There are no separate fix commits.
 
 ## Phase 3 — completeness (spec coverage)
 
 There is no plan verifier yet. Instead, after the last wave:
 
-1. Collect every spec criterion cited in the plan's unit acceptance criteria:
-   `Grep -n 'SPEC-[0-9]+ (AC|EC|NFR)-[0-9]+'` over the plan, mapped to the
-   unit block whose line range contains each hit. Criteria cited only outside
-   unit blocks (§1, §6, §9) count as **not covered by any unit**.
-2. A criterion is **covered** when at least one unit that cites it is finished:
-   its wave is committed, its report has no `BLOCKED:` and no `fail`, and the
-   full check of its module passed (or ran NOT RUN by the user's choice — then
-   say so).
-3. Report every gap, one per line, in exactly the form
+1. **The full criterion set comes from the specs, not the plan.** Read the
+   plan header's *Requirements source*. For each `SPEC-NN` it names, find the
+   spec file (the path given there, else `Grep -l 'Spec ID: SPEC-NN'` in
+   `specsDir` and every module's `specsDir`) and collect its criterion ids
+   from the rows of its tables: `Grep -n '^\| *(AC|EC|NFR)-[0-9]+ *\|'`.
+   That list, per spec, is the set to cover. A spec that cannot be found →
+   say so and report the coverage of that spec as unknown, never as complete.
+   A source that is no SPEC-NN spec (design brief, request) has no criterion
+   set: say so.
+2. **Citations in the plan.** A citation is `SPEC-NN` followed by one or more
+   ids, possibly comma-separated — `SPEC-01 AC-1, EC-2`, as
+   `templates/plan.md` writes it. `Grep -n 'SPEC-[0-9]+'` over the plan; on
+   each hit take every `AC-n` / `EC-n` / `NFR-n` after the `SPEC-NN` prefix up
+   to the next `SPEC-NN` or the end of the line, not only the first. Map each
+   hit to the unit block whose line range contains it; citations outside unit
+   blocks (§1, §6, §9) cover nothing.
+3. A criterion is **covered** when at least one unit that cites it is
+   finished: its wave is committed, its report has no `BLOCKED:` and no
+   `fail`, and the full check of its module passed (or ran NOT RUN by the
+   user's choice — then say so). Every criterion of step 1 that is not covered
+   is a **gap** — including one the plan never cites.
+4. Report every gap, one per line, in exactly the form
    `/spec-driven:plan gap` accepts, so the user can paste it unchanged:
 
    ```text
@@ -260,11 +280,12 @@ stack), the summary's first line is
 `UNVERIFIED: <units and modules whose checks did not run>` — never present
 such a run as complete or done.
 
-- commits (`git log --oneline <base>..HEAD`), units built, fix rounds used;
+- commits (`git log --oneline <base>..HEAD`), units built, check rounds used per wave;
 - full-check result per touched module (or NOT RUN and why);
 - spec coverage: covered criteria count, and the gap rows from Phase 3 (or "none");
 - `BLOCKED:` items and *Out of scope* follow-ups from the reports, and
-  gotchas the implementers suggested for `INSIGHTS.md` (you do not write them);
+  gotchas the implementers suggested for the project's agent docs (you do not
+  write them);
 - deviations from plan reported by the units (unit, what, why);
 - `INSIGHTS.md` entries appended (file, count);
 - plan §7 steps that need a running stack and were not run;
@@ -282,10 +303,10 @@ such a run as complete or done.
 2. Read the wave commits: `git log --format=%s` on the current branch (switch
    to `feature/<slug>` first if it exists and you are not on it). A wave `k` is
    done when a `feat(<slug>): wave <k> — …` commit exists.
-3. `git status --porcelain`. A dirty tree means an interrupted wave or fix
-   round: show the user the changed files and the units that own them, and ask
-   whether to commit them as the interrupted wave (after its full check) or to
-   let you discard nothing and stop. Never stash, reset or delete their work.
+3. `git status --porcelain`. A dirty tree means an interrupted wave (its
+   build or one of its check rounds — none of it is committed yet): show the user the changed files and the units that own them, and ask
+   whether to finish that wave (run its full check and any remaining check
+   rounds, then steps 5–8 of Phase 2) or to stop and discard nothing. Never stash, reset or delete their work.
 4. Continue at the first wave with no commit, exactly as in Phase 1 / Phase 2,
    then Phase 3 and Phase 4. `base` for the summary is the parent of the first
    `feat(<slug>): wave` commit.

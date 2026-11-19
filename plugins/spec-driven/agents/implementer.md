@@ -82,7 +82,8 @@ Missing `plan` or `unit` → stop and report it (see *When you must stop*).
 
 ## Fix mode (`mode: fix`)
 
-The unit is already built and committed; you get findings — failures of the
+The unit is already built; the wave is committed only after its full check
+passes. You get findings — failures of the
 wave's full check that the orchestrator routed to your unit, or findings from
 a reviewer or the user. Then:
 

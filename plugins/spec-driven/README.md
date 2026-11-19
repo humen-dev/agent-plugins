@@ -210,11 +210,14 @@ the plan; a note that changes scope or a contract stops the run.
 6. **Insights.** Implementers report *Insights (candidates)*; after the wave
    check passes, new, non-duplicate ones are appended to
    `<module>/INSIGHTS.md` and committed with the wave.
-7. **Commit per wave** as `feat(<slug>): wave <k> — U<a>, U<b>` (fix rounds:
-   `fix(<slug>): wave <k> check round <r>`). No attribution trailers. It never
+7. **One commit per wave**, only after its full check is green (or `NOT RUN`
+   by your choice): `feat(<slug>): wave <k> — U<a>, U<b>`, plus
+   ` (check rounds: <r>)` when fix rounds ran. No attribution trailers. It never
    pushes and never opens a pull request.
-8. **Spec coverage.** After the last wave, every `SPEC-NN AC/EC/NFR` row the
-   plan cites must be covered by a finished unit. Gaps are listed one per
+8. **Spec coverage.** After the last wave, every `AC-n` / `EC-n` / `NFR-n`
+   row of the `SPEC-NN` specs in the plan's *Requirements source* must be
+   cited by a finished unit (a citation may list several ids:
+   `SPEC-01 AC-1, EC-2`). A criterion the plan never cites is a gap too. Gaps are listed one per
    line, ready to paste into `/spec-driven:plan gap <plan path>`.
 9. **Summary**: commits, check results, coverage, deviations from plan,
    `INSIGHTS.md` appends, and *How to verify manually* (copied from the plan's
