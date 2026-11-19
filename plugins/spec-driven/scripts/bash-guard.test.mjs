@@ -83,6 +83,8 @@ test('main session, other agents and look-alike names are never touched', () => 
     'implementer',
     'other-plugin:implementer',
     'spec-driven:implementer-extra',
+    'plan-verifier',
+    'spec-driven:plan-verifier-extra',
     'spec-driven:planner',
     'spec-driven:spec-creator',
   ]) {
@@ -100,6 +102,26 @@ test('spec-creator and planner have no Bash at all (frontmatter)', () => {
 test('implementer frontmatter: Bash allowed, PowerShell and Skill disallowed', () => {
   assert.deepEqual(frontmatterTools('implementer.md', 'tools'), ['Read', 'Grep', 'Glob', 'Edit', 'Write', 'Bash']);
   assert.deepEqual(frontmatterTools('implementer.md', 'disallowedTools'), ['Agent', 'Skill', 'NotebookEdit', 'WebSearch', 'WebFetch', 'PowerShell']);
+});
+
+test('plan-verifier frontmatter: tools, disallowedTools, maxTurns, description length', () => {
+  assert.deepEqual(frontmatterTools('plan-verifier.md', 'tools'), ['Read', 'Grep', 'Glob', 'Bash']);
+  assert.deepEqual(frontmatterTools('plan-verifier.md', 'disallowedTools'), ['Write', 'Edit', 'NotebookEdit', 'PowerShell', 'Agent', 'Skill', 'WebSearch', 'WebFetch']);
+  const fm = readFileSync(path.join(AGENTS, 'plan-verifier.md'), 'utf8').split(/^---$/m)[1] ?? '';
+  assert.match(fm, /^maxTurns: 100\r?$/m);
+  const desc = /^description: "(.*)"\r?$/m.exec(fm)?.[1];
+  assert.ok(desc, 'description must be a one-line quoted string');
+  assert.ok(desc.length <= 600, `description is ${desc.length} characters (max 600)`);
+});
+
+test('plan-verifier: same allow-list as the implementer', () => {
+  const V = 'spec-driven:plan-verifier';
+  for (const cmd of ['git status', 'git diff --name-status main', 'git ls-files --others --exclude-standard', CHECK, `${CHECK} --full`]) assertAllowed(V, cmd);
+  for (const cmd of ['git add .', 'git commit -m x', 'git push', 'git diff --output=x', 'cat src/a.py', 'rm -rf x', 'git log > out.txt', 'cd src', 'make test']) {
+    assert.match(assertBlocked(V, cmd), /plan-verifier may not/);
+  }
+  assert.match(assertBlocked(V, 'git status', project('{')), /sdd\.json is not valid JSON/);
+  assert.match(assertBlocked(V, CHECK, DEFAULT_PROJECT), /NOT RUN/);
 });
 
 test('fail-closed: empty stdin, invalid JSON, no command', () => {
