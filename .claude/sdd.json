@@ -1,0 +1,4 @@
+{
+  "plansDir": "docs/plans/",
+  "checkCommand": "node scripts/validate-marketplace.mjs && node --test 'plugins/**/*.test.mjs'"
+}
