@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | draft |
+| Status | approved |
 | Goal | After `/spec-driven:implement` (or on demand with `/spec-driven:verify`), the user gets a read-only, row-by-row verdict of the finished code against every item of the approved plan and every AC/EC/NFR/UT row of its SPEC-NN specs, with `file:line` evidence and pasteable plan-gap rows. |
 | Requirements source | Request text (no SPEC-NN spec), plus the research input `docs/research/2026-11-19-plan-verifier.md` (input — this plan never edits it) |
 | Execution mode | multi-agent (parallel waves) — chosen by the user |
