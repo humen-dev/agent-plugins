@@ -59,7 +59,7 @@ update, run `/reload-plugins` (or restart) to load the new version.
 | [`django-safe-migration`](plugins/django-safe-migration/) | skill | Write, review and rewrite Django migrations for PostgreSQL with zero downtime |
 | [`django-reviewer`](plugins/django-reviewer/) | agent | Read-only Django/Python code reviewer agent |
 | [`codebase-onboarding`](plugins/codebase-onboarding/) | skill | Onboarding report for an unfamiliar repository: stack, architecture, setup, conventions, CI/CD, deployment |
-| [`spec-driven`](plugins/spec-driven/) | agent, skill | Spec-driven development workflow. Available now: the `spec-creator` behaviour-spec agent (EARS requirements, module interactions, untrusted-input rules; run with `/spec-driven:specify`) and the `planner` implementation-plan agent (contracts, waves, skills, checks; run with `/spec-driven:plan`); each writes only its own Markdown (hook-enforced) |
+| [`spec-driven`](plugins/spec-driven/) | agent, skill | Spec-driven development workflow. Available now: the `spec-creator` behaviour-spec agent (EARS requirements, module interactions, untrusted-input rules; run with `/spec-driven:specify`) and the `planner` implementation-plan agent (contracts, waves, skills, checks; run with `/spec-driven:plan`), each writing only its own Markdown (hook-enforced); and the `implementer` agent, run wave by wave on an approved plan with `/spec-driven:implement` (Bash limited to read-only git and the project's `checkCommand`) |
 | [`research-tools`](plugins/research-tools/) | agent | Read-only researcher agent for repository and web questions: structured report with evidence and explicit gaps |
 
 ## Repository layout

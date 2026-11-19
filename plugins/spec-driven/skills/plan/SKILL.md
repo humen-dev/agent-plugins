@@ -96,8 +96,7 @@ to step 5.
 
 Show the agent's *Plan ready* block to the user **unchanged**. Then suggest
 the next step: review the plan file, set *Status* to `approved`, then run
-`/spec-driven:implement <plan path>` (it ships in a later release of this
-plugin).
+`/spec-driven:implement <plan path>`.
 
 ## 6. Rules
 

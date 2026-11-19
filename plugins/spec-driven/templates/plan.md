@@ -60,6 +60,7 @@ Keep each block ≤ ~60 lines — every implementer reads it; code belongs in §
 |---|---|
 | Kind | <free-form per project: server · ui · library · e2e · cli · docs · …> (→ implementer) · `orchestrator` (done by the implement step itself) |
 | Skills | exact names of available skills the implementer must read for this unit (`<plugin>:<skill>` or a project skill name) · "none" |
+| Model | optional: `haiku` · `sonnet` · `opus` — the implementer's model for this unit; omit the row for the default (`sonnet`). The planner fills it in a later release |
 | Module | <module name from `modules`> |
 | Wave | 0 · 1 · 2 … |
 | Depends on | U… (or "none") |

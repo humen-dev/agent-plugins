@@ -7,8 +7,19 @@ stack: specify, then plan, implement and verify against the spec.
 |---|---|---|
 | specify | `spec-creator` agent · `/spec-driven:specify` | available |
 | plan | `planner` agent · `/spec-driven:plan` | available |
-| implement | — | planned |
-| verify | — | planned |
+| implement | `implementer` agent · `/spec-driven:implement` | available |
+| verify | plan verifier agent | planned |
+
+The full flow:
+
+```text
+/spec-driven:specify → you approve the spec → /spec-driven:plan → you approve the plan → /spec-driven:implement
+```
+
+A plan verifier (which checks every unit and spec criterion against the code
+after each wave) and reviewers are planned for a later release. Until then
+`/spec-driven:implement` ends with a spec-coverage check, and the review of the
+branch is yours.
 
 ## specify
 
@@ -142,7 +153,7 @@ units and contracts as they are. Other lines are reported and ignored.
    skill the implementer will follow. It never invents a name; if none fits,
    it writes `none`.
 5. **Next step:** you review the plan, set `Status: approved`, then run
-   `/spec-driven:implement <plan path>` (coming in a later release).
+   `/spec-driven:implement <plan path>`.
 
 - **Tools:** `Read`, `Grep`, `Glob`, `Write`, `WebSearch`, `WebFetch`.
   `Edit`, `Bash`, `PowerShell`, `NotebookEdit`, `Agent` and `Skill` are
@@ -150,6 +161,90 @@ units and contracts as they are. Other lines are reported and ignored.
 - **Preloaded skill:** `spec-driven:ears-requirements` only.
 - **Model:** `opus`. A wrong contract or a missed criterion in the plan is
   repeated by every implementer; `plan` never overrides the model.
+
+## implement
+
+`/spec-driven:implement` builds an **approved** plan wave by wave. It refuses a
+plan whose *Status* is not `approved`.
+
+| Component | Type | Invoke as |
+|---|---|---|
+| `implementer` | agent | `spec-driven:implementer` |
+| `implement` | skill (command, manual only) | `/spec-driven:implement <arguments>` |
+| `bash-guard` | `PreToolUse` hook | — |
+
+### Usage
+
+```text
+/spec-driven:implement docs/plans/orders-export.md
+/spec-driven:implement orders-export keep the export button disabled while loading
+/spec-driven:implement resume orders-export
+```
+
+Text after the plan is passed to every implementer as notes, subordinate to
+the plan; a note that changes scope or a contract stops the run.
+
+### How it works
+
+1. **Intake.** Reads `.claude/sdd.json` and the plan's unit blocks, requires a
+   clean working tree, and on `main` / `master` creates `feature/<slug>`. If
+   no `checkCommand` is configured it asks once: add one, or run without
+   checks (every check is then `NOT RUN` and the summary starts with
+   `UNVERIFIED:`).
+2. **Skills.** Each name in a unit's *Skills* field is resolved to the
+   absolute path of an installed `SKILL.md`: project and personal skills by
+   folder, plugin skills by the `installPath` of the enabled install in
+   `~/.claude/plugins/installed_plugins.json`. The frontmatter `name` must
+   match; otherwise the skill counts as missing and the run stops and asks.
+3. **Wave 0** and every unit with Kind `orchestrator` are done by the main
+   session (contracts, migrations, dependencies, moves and deletes).
+4. **Waves 1…N.** One `spec-driven:implementer` per unit — in parallel in
+   `multi-agent` plans, one after another in `single-agent` plans. Each
+   invocation's description starts with `[U<n>]` and the unit title; an
+   optional `Model: haiku|sonnet|opus` row in the unit block sets its model.
+   Then the full `checkCommand` runs once per touched module; failures go back
+   to the owning unit in fix mode (at most 2 rounds per wave).
+5. **Ownership check.** Before each wave commit, `git status --porcelain` is
+   compared with the wave's owned files; any other changed file stops the run
+   and is shown to you.
+6. **Insights.** Implementers report *Insights (candidates)*; after the wave
+   check passes, new, non-duplicate ones are appended to
+   `<module>/INSIGHTS.md` and committed with the wave.
+7. **Commit per wave** as `feat(<slug>): wave <k> — U<a>, U<b>` (fix rounds:
+   `fix(<slug>): wave <k> check round <r>`). No attribution trailers. It never
+   pushes and never opens a pull request.
+8. **Spec coverage.** After the last wave, every `SPEC-NN AC/EC/NFR` row the
+   plan cites must be covered by a finished unit. Gaps are listed one per
+   line, ready to paste into `/spec-driven:plan gap <plan path>`.
+9. **Summary**: commits, check results, coverage, deviations from plan,
+   `INSIGHTS.md` appends, and *How to verify manually* (copied from the plan's
+   test plan).
+
+`resume <slug>` reads the plan and `git log` and continues at the first wave
+without a `feat(<slug>): wave <k>` commit. A dirty tree is shown to you first.
+
+### The implementer
+
+- Implements exactly **one** unit, of any Kind except `orchestrator`, and
+  edits only the files in its *Owns* row. Several may run in parallel in the
+  same checkout.
+- **Stack-agnostic:** preloads no skills; it reads in full every `SKILL.md`
+  path passed for the unit's *Skills* field and follows it. A missing path →
+  `BLOCKED`. It also reads the module's `INSIGHTS.md` (if present) before
+  coding, and never edits it.
+- **Verifies only its own changes** with `checkCommand` (`{module}` and
+  `{files}` filled in); without one, verification is `NOT RUN` — it never
+  invents a command. At most 3 fix rounds. Architecture and security review
+  are not its job.
+- Never touches git state, dependencies, lockfiles, or migration and schema
+  files outside its *Owns* row.
+- Returns a fixed **Implementer result**: Changed · Deviations from plan ·
+  Skills applied (`<skill> → <rule applied, where>`) · Verification ·
+  Insights (candidates) · Out of scope. `mode: fix` with `findings` adds a
+  Findings table.
+- **Tools:** `Read`, `Grep`, `Glob`, `Edit`, `Write`, `Bash` (guarded).
+  `Agent`, `Skill`, `NotebookEdit`, `WebSearch`, `WebFetch` and `PowerShell`
+  are disallowed. **Model:** `sonnet`, unless the unit sets *Model*.
 
 ## Project configuration (optional)
 
@@ -161,7 +256,7 @@ plugin does not read are ignored.
 | `specsDir` | `specs/` | root spec folder (cross-module specs, global id scan) |
 | `specTemplate` | none → the bundled `templates/spec.md` structure | project spec template; the agent never edits it |
 | `plansDir` | `docs/plans/` | where plans are written; the planner writes only `*.md` directly in it |
-| `checkCommand` | none | typecheck + related tests for one unit, used in each unit's *Checks* row (see below) |
+| `checkCommand` | none | typecheck + related tests for one unit: each unit's *Checks* row, the implementer's check and the full check per module after each wave (see below). Include an architecture check here if you want one |
 | `modules` | `[{ "name": "root", "path": "." }]` | module names and paths; a module may set its own `specsDir` |
 | `agentDocs` | `["AGENTS.md", "CLAUDE.md"]` | agent docs read if present |
 
@@ -204,6 +299,22 @@ blocks the write with the reason on stderr. It reads only the hook payload and
 
 Tests: `node --test plugins/spec-driven/scripts/write-guard.test.mjs`.
 
+### bash-guard
+
+Runs `node "${CLAUDE_PLUGIN_ROOT}/scripts/bash-guard.mjs"` before every
+`Bash` call. It acts only for `spec-driven:implementer`; the main session and
+every other agent pass through untouched (`spec-creator` and `planner` have no
+`Bash` at all — it is in their `disallowedTools`). For the implementer it is
+an allow-list: read-only git (`status`, `diff`, `log`, `show`, `merge-base`,
+`rev-parse`, `ls-files`, `blame`, `grep`) and the project's `checkCommand`
+with `{module}` / `{files}` filled in. There is no built-in test runner. It
+rejects redirection, `$` and backtick substitution, background `&`, `tee`,
+env assignments, `cd`, `..` paths, git state changes, installs, `rm` and `mv`,
+with a reason that says what is allowed instead. It fails closed on an
+unreadable payload or a malformed `.claude/sdd.json`.
+
+Tests: `node --test plugins/spec-driven/scripts/bash-guard.test.mjs`.
+
 ## Evals
 
 `evals/time-data-readiness/` checks lens F (time and data readiness): a digest
@@ -238,7 +349,7 @@ git credential setup.
 ## Requirements and dependencies
 
 - No plugin dependencies.
-- Node.js on `PATH` for the `write-guard` hook.
+- Node.js on `PATH` for the `write-guard` and `bash-guard` hooks.
 
 ## Credits
 
