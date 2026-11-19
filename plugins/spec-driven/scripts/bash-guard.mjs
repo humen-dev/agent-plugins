@@ -4,11 +4,11 @@
  *   node "${CLAUDE_PLUGIN_ROOT}/scripts/bash-guard.mjs"
  *
  * Acts only when the hook payload's `agent_type` is exactly
- * `spec-driven:implementer`; the main session and every other agent pass
- * through untouched. (spec-creator and planner have no Bash at all: it is in
- * their `disallowedTools`.)
+ * `spec-driven:implementer` or `spec-driven:plan-verifier`; the main session
+ * and every other agent pass through untouched. (spec-creator and planner have
+ * no Bash at all: it is in their `disallowedTools`.)
  *
- *   spec-driven:implementer → read-only git and the project's `checkCommand`
+ *   both guarded agents     → read-only git and the project's `checkCommand`
  *                             from .claude/sdd.json (`{module}` / `{files}`
  *                             placeholders filled in). A project that wants an
  *                             architecture check includes it in checkCommand.
@@ -28,7 +28,10 @@ import { allow, agentType, block, projectRoot, readPayload, segments, tokenize }
 import { loadConfig, normalizeDir } from './lib/sdd-config.mjs';
 
 const GUARD = 'bash-guard';
-const IMPLEMENTER = 'spec-driven:implementer';
+const GUARDED = new Map([
+  ['spec-driven:implementer', 'implementer'],
+  ['spec-driven:plan-verifier', 'plan-verifier'],
+]);
 
 const GIT_READ = new Set(['status', 'diff', 'log', 'show', 'merge-base', 'rev-parse', 'ls-files', 'blame', 'grep']);
 
@@ -91,9 +94,9 @@ const FORBIDDEN = [
 ];
 
 const payload = readPayload(GUARD);
-if (agentType(payload) !== IMPLEMENTER) allow();
+const name = GUARDED.get(agentType(payload));
+if (!name) allow();
 
-const name = 'implementer';
 const { config, error } = loadConfig(projectRoot(payload));
 if (error) block(GUARD, `${error} — fix the project config before ${name} runs commands.`);
 
