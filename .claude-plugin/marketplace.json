@@ -108,6 +108,19 @@
         "workflow",
         "agent"
       ]
+    },
+    {
+      "name": "research-tools",
+      "source": "./plugins/research-tools",
+      "description": "Read-only researcher agent (Sonnet) for questions about this repository (where something lives, how it works, what uses it) or external sources (docs, APIs, versions, known issues, practices). Returns a structured report with evidence for every finding and states what it could not find. Asks clarifying questions first when the request is unclear. Never edits files.",
+      "category": "productivity",
+      "tags": [
+        "research",
+        "codebase",
+        "documentation",
+        "agent",
+        "read-only"
+      ]
     }
   ]
 }

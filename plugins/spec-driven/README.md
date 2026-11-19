@@ -55,7 +55,8 @@ ask for the agent by name.
    options and defaults). No file is written yet.
 2. **Research requests** are returned to the main session, which runs them
    with whatever research mechanism it has and re-invokes the agent with the
-   reports.
+   reports. `specify` uses `research-tools:researcher` when that plugin is
+   installed (optional, not a dependency), otherwise the built-in agents.
 3. **Spec file.** After the answers it writes
    `<specs dir>/YYYY-MM-DD-<slug>.md` with a global `SPEC-NN` id, EARS
    acceptance criteria (priority + verification method), edge cases, a module

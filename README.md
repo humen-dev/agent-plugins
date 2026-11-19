@@ -60,6 +60,7 @@ update, run `/reload-plugins` (or restart) to load the new version.
 | [`django-reviewer`](plugins/django-reviewer/) | agent | Read-only Django/Python code reviewer agent |
 | [`codebase-onboarding`](plugins/codebase-onboarding/) | skill | Onboarding report for an unfamiliar repository: stack, architecture, setup, conventions, CI/CD, deployment |
 | [`spec-driven`](plugins/spec-driven/) | agent, skill | Spec-driven development workflow. Available now: the `spec-creator` behaviour-spec agent: EARS requirements, module interactions, untrusted-input rules; writes only spec Markdown (hook-enforced); run with `/spec-driven:specify` |
+| [`research-tools`](plugins/research-tools/) | agent | Read-only researcher agent for repository and web questions: structured report with evidence and explicit gaps |
 
 ## Repository layout
 
