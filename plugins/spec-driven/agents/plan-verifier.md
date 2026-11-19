@@ -45,7 +45,7 @@ you never change a file, never fix, never advise. You are not a code review.
 |---|---|---|
 | `checkCommand` | none | plan *Checks* rows that name it |
 | `modules` | `[{ "name": "root", "path": "." }]` | module paths, per-module `specsDir` |
-| `specsDir` | `docs/specs/` | where specs live (plus every `modules[].specsDir`) |
+| `specsDir` | `specs/` | where specs live (plus every `modules[].specsDir`) |
 | `plansDir` | `docs/plans/` | resolving a plan slug |
 
 `checkCommand` runs from the project root; `{module}` is the unit's module

@@ -1,7 +1,7 @@
 ---
 name: plan
 description: "Write an implementation plan for an approved spec, a SPEC-NN id or a concrete request with the spec-driven:planner agent, relaying its Requirements review to the user; or close plan gaps from SPEC-NN AC/EC/NFR/UT rows."
-argument-hint: "<spec path> | SPEC-NN | <request> | gap <plan path> <SPEC-NN AC-k | UT-k rows, one per line>"
+argument-hint: "<spec path> | SPEC-NN | <request> | gap <plan path> <SPEC-NN AC-k | EC-k | NFR-k | UT-k rows, one per line>"
 disable-model-invocation: true
 ---
 
