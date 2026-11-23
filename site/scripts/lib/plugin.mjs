@@ -66,11 +66,17 @@ function summarize(md, fallback) {
   if (cur.length) blocks.push(cur);
   const para = blocks.find((b) => !/^(\||[-*+]\s|\d+[.)]\s|<|#|---|\*\*\*)/.test(b[0]));
   if (!para) return fallback;
-  const text = para.join(' ')
+  let text = para.join(' ')
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/<[^>]*>/g, '')
-    .replace(/[<>]/g, '') // unclosed or nested tags must not leave a tag start behind
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+  // Strip tags until none is left (nested tags like `<<script>script>` re-form after one pass),
+  // then drop any `<`/`>` an unclosed tag left behind: the summary is plain text.
+  for (let prev = ''; prev !== text;) {
+    prev = text;
+    text = text.replace(/<[^>]*>/g, '');
+  }
+  text = text
+    .replace(/[<>]/g, '')
     .replace(/[`*_~]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
