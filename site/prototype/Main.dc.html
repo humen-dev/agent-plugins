@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>humen-dev plugin catalog</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./catalog.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" data-theme="{{theme}}" onKeyDown="{{onRootKey}}">
+
+<div class="proto" role="region" aria-label="Prototype controls (not part of the site)">
+<div class="wrap">
+<b>Prototype</b>
+<span class="row" role="group" aria-label="Catalog state">
+<sc-for list="{{demoBtns}}" as="d" hint-placeholder-count="4"><button type="button" class="pbtn" aria-pressed="{{d.pressed}}" onClick="{{d.pick}}">{{d.label}}</button></sc-for>
+</span>
+<button type="button" class="pbtn" aria-pressed="{{failCopyPressed}}" onClick="{{toggleFailCopy}}">Simulate copy failure</button>
+<label class="row">Jump to
+<select aria-label="Jump to a screen or state" onChange="{{onPreset}}" value="">
+<option value="">choose a state…</option>
+<option value="#/">Home — every plugin</option>
+<option value="#/?q=I+need+a+skill+for+safe+migrations">Search: “I need a skill for safe migrations”</option>
+<option value="#/?q=I+need+a+skill">Filler-only query: “I need a skill”</option>
+<option value="#/?kind=hook">Empty query + Kind = Hook</option>
+<option value="#/?q=django&amp;kind=skill">Facet counts: “django” + Skill</option>
+<option value="#/?q=kubernetes+helm+chart">Empty result</option>
+<option value="#/?q=kubernetes+helm+chart&amp;cat=backend">Empty result + filters</option>
+<option value="#/plugins/spec-driven">Plugin: spec-driven</option>
+<option value="#/plugins/django-reviewer">Plugin: django-reviewer</option>
+<option value="#/plugins/codebase-onboarding">Plugin: codebase-onboarding (omitted sections)</option>
+<option value="#/plugins/django-safe-migration/skill/django-safe-migration">Skill: django-safe-migration</option>
+<option value="#/plugins/spec-driven/skill/plan">Skill (user-invoked): spec-driven/plan</option>
+<option value="#/plugins/django-reviewer/agent/django-reviewer">Agent: django-reviewer</option>
+<option value="#/plugins/spec-driven/hook/bash-guard">Hook: spec-driven/bash-guard</option>
+<option value="#/install">Install set: empty</option>
+<option value="#/install?p=django-reviewer">Install set: django-reviewer (+3 added)</option>
+<option value="#/install?p=django-reviewer,spec-creator&amp;scope=project">Shared install link with a removed plugin</option>
+<option value="#/new">What’s new</option>
+<option value="#/plugins/kubernetes">Not found</option>
+</select>
+</label>
+<span class="url" aria-label="Current URL">…/agent-plugins/{{url}}</span>
+</div>
+</div>
+
+<sc-if value="{{showNoJs}}" hint-placeholder-val="{{ false }}">
+<div style="background: #ffffff; color: #000000; font-family: Times, serif; font-size: 16px; padding: 16px; min-height: 400px">
+<p style="margin: 0 0 12px">humen-dev plugin catalog</p>
+<p style="margin: 0 0 12px">This catalog needs JavaScript to search and show plugins.</p>
+<p style="margin: 0">Browse the plugins in the repository instead: <a href="https://github.com/humen-dev/agent-plugins" style="color: #0000ee">github.com/humen-dev/agent-plugins</a> · <a href="https://github.com/humen-dev/agent-plugins#readme" style="color: #0000ee">README</a></p>
+</div>
+</sc-if>
+
+<sc-if value="{{showApp}}" hint-placeholder-val="{{ true }}">
+<a class="skip" href="#main-{{uid}}" onClick="{{skipToMain}}">Skip to content</a>
+<p class="sr-only" aria-live="polite">{{announce}}</p>
+
+<header class="hdr">
+<div class="wrap">
+<a class="brand" href="#/" onClick="{{goHome}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.logo}}"></path></svg>humen-dev <span class="muted">plugins</span></a>
+<nav class="nav" aria-label="Main">
+<a href="#/" onClick="{{goHome}}" aria-current="{{navHome}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg>Search</a>
+<a href="#/install" onClick="{{goInstall}}" aria-current="{{navInstall}}">Install set <span class="{{instPillCls}}">{{instCount}}</span><span class="sr-only"> plugins</span></a>
+<a href="#/new" onClick="{{goNew}}" aria-current="{{navNew}}">What’s new</a>
+<a href="{{requestUrl}}" target="_blank" rel="noopener noreferrer">Request a skill<svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ext}}"></path></svg><span class="sr-only"> (opens on GitHub)</span></a>
+<a href="{{repoUrl}}" target="_blank" rel="noopener noreferrer"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.code}}"></path></svg>GitHub<span class="sr-only"> repository (opens on GitHub)</span></a>
+</nav>
+<button type="button" class="btn ghost theme-toggle desk" aria-pressed="{{themePressed}}" onClick="{{toggleTheme}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{themeIcon}}"></path></svg>Light theme</button>
+<button type="button" class="btn menu-btn" aria-expanded="{{menuExpanded}}" aria-controls="mnav-{{uid}}" onClick="{{toggleMenu}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{menuIcon}}"></path></svg>Menu<sc-if value="{{instHas}}"><span class="{{instPillCls}}">{{instCount}}</span></sc-if></button>
+</div>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
+<nav class="mnav" id="mnav-{{uid}}" aria-label="Main">
+<a href="#/" onClick="{{goHome}}" aria-current="{{navHome}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg>Search</a>
+<a href="#/install" onClick="{{goInstall}}" aria-current="{{navInstall}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.list}}"></path></svg>Install set <span class="{{instPillCls}}">{{instCount}}</span><span class="sr-only"> plugins</span></a>
+<a href="#/new" onClick="{{goNew}}" aria-current="{{navNew}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.clock}}"></path></svg>What’s new</a>
+<a href="{{requestUrl}}" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ext}}"></path></svg>Request a skill<span class="sr-only"> (opens on GitHub)</span></a>
+<a href="{{repoUrl}}" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.code}}"></path></svg>GitHub<span class="sr-only"> repository (opens on GitHub)</span></a>
+<button type="button" class="btn theme-toggle" aria-pressed="{{themePressed}}" onClick="{{toggleTheme}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{themeIcon}}"></path></svg>Light theme</button>
+</nav>
+</sc-if>
+</header>
+
+<main id="main-{{uid}}" tabindex="-1" ref="{{setMainEl}}" style="outline: none">
+
+<sc-if value="{{errorState}}" hint-placeholder-val="{{ false }}">
+<div class="wrap" style="padding-top: 48px">
+<div class="state-panel err-p" role="alert">
+<svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.err}}"></path></svg>
+<h1 style="font-size: 1.375rem">The catalog didn’t load</h1>
+<p class="t2">The plugin list couldn’t be read, so there is nothing to show yet. Check your connection and try again.</p>
+<button type="button" class="btn primary" onClick="{{retry}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.refresh}}"></path></svg>Retry</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{rHome}}" hint-placeholder-val="{{ true }}">
+<div class="wrap">
+<section class="hero" aria-labelledby="h-{{uid}}">
+<h1 id="h-{{uid}}">Find a plugin, skill, agent or hook</h1>
+<p class="lede">Describe a task in plain words. Every result shows what it adds, what it runs on your machine, and the command to install it.</p>
+<div class="search" role="search">
+<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg>
+<label class="sr-only" for="q-{{uid}}">Search plugins, skills, agents and hooks</label>
+<input id="q-{{uid}}" type="search" autocomplete="off" spellcheck="false" placeholder="e.g. a skill for safe Django migrations" value="{{q}}" onChange="{{onQ}}" onKeyDown="{{onSearchKey}}" ref="{{setSearchEl}}" aria-describedby="kh-{{uid}} cnt-{{uid}}">
+<sc-if value="{{hasQ}}" hint-placeholder-val="{{ false }}"><button type="button" class="icon-btn has-tip" aria-label="Clear search" onClick="{{clearQ}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg><span class="tip" aria-hidden="true">Clear search (Esc)</span></button></sc-if>
+<span class="kbd-hint" id="kh-{{uid}}"><kbd>/</kbd> to search · <kbd>Esc</kbd> to clear</span>
+</div>
+<p class="count-line" id="cnt-{{uid}}" role="status" aria-live="polite">{{countText}}</p>
+</section>
+
+<div class="home-grid">
+<div class="stack">
+<button type="button" class="btn ftoggle" aria-expanded="{{filtersExpanded}}" aria-controls="filters-{{uid}}" onClick="{{toggleFilters}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.filter}}"></path></svg>Filters<sc-if value="{{hasActive}}"><span class="count-pill on">{{activeCount}}</span><span class="sr-only"> active</span></sc-if></button>
+<div class="{{filtersCls}}" id="filters-{{uid}}">
+<div class="sheet">
+<div class="sheet-head"><h2 style="font-size: 1.125rem">Filters</h2><button type="button" class="btn sm" onClick="{{toggleFilters}}">Done</button></div>
+<div class="fgroup" role="group" aria-labelledby="gk-{{uid}}">
+<span class="fgroup-title" id="gk-{{uid}}">Kind</span>
+<div class="chips">
+<sc-for list="{{kindChips}}" as="c" hint-placeholder-count="4"><button type="button" class="chip" aria-pressed="{{c.pressed}}" disabled="{{c.disabled}}" onClick="{{c.toggle}}"><svg class="ico sm tick" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg><span class="kdot" data-kind="{{c.kind}}" aria-hidden="true"></span>{{c.label}}<span class="n">{{c.count}}</span></button></sc-for>
+</div>
+<sc-if value="{{fromQueryKinds}}" hint-placeholder-val="{{ false }}"><p class="from-q">{{fromQueryText}}</p></sc-if>
+</div>
+<div class="fgroup" role="group" aria-labelledby="gc-{{uid}}">
+<span class="fgroup-title" id="gc-{{uid}}">Category</span>
+<div class="chips">
+<sc-for list="{{catChips}}" as="c" hint-placeholder-count="3"><button type="button" class="chip" aria-pressed="{{c.pressed}}" disabled="{{c.disabled}}" onClick="{{c.toggle}}"><svg class="ico sm tick" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>{{c.label}}<span class="n">{{c.count}}</span></button></sc-for>
+</div>
+</div>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn sm ghost" style="align-self: flex-start" onClick="{{clearFilters}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg>Clear filters</button></sc-if>
+</div>
+</div>
+</div>
+
+<div style="min-width: 0">
+<sc-if value="{{loading}}" hint-placeholder-val="{{ false }}">
+<div class="results" aria-busy="true" aria-label="Loading results">
+<sc-for list="{{skeletons}}" as="s" hint-placeholder-count="6"><div class="skel" aria-hidden="true"><i class="b"></i><i class="h"></i><i class="s"></i><i></i><i class="s"></i><i class="c"></i></div></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{showResults}}" hint-placeholder-val="{{ true }}">
+<div class="results">
+<sc-for list="{{cards}}" as="c" hint-placeholder-count="6">
+<article class="card" aria-labelledby="{{c.hid}}">
+<div class="card-top">
+<span class="badge" data-kind="{{c.badgeKind}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{c.badgeIcon}}"></path></svg>{{c.badgeLabel}}</span>
+<sc-if value="{{c.userOnly}}"><span class="cat-label">User-invoked only</span></sc-if>
+</div>
+<h3 id="{{c.hid}}"><a href="{{c.href}}" onClick="{{c.go}}"><sc-for list="{{c.nameSegs}}" as="s"><sc-if value="{{s.m}}"><mark>{{s.t}}</mark></sc-if><sc-if value="{{s.n}}"><span>{{s.t}}</span></sc-if></sc-for></a></h3>
+<div class="meta">
+<sc-if value="{{c.isArtifact}}"><span>in <a href="{{c.pluginHref}}" onClick="{{c.pluginGo}}">{{c.pluginName}}</a></span></sc-if>
+<span>{{c.category}}</span>
+</div>
+<div>
+<p class="desc"><sc-for list="{{c.descSegs}}" as="s"><sc-if value="{{s.m}}"><mark>{{s.t}}</mark></sc-if><sc-if value="{{s.n}}"><span>{{s.t}}</span></sc-if></sc-for></p>
+<sc-if value="{{c.hasSrc}}"><p class="src">in <code>{{c.src}}</code></p></sc-if>
+</div>
+<sc-if value="{{c.runs}}"><span class="runs"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Runs code<span class="reasons">· {{c.runsText}}</span></span></sc-if>
+<sc-if value="{{c.hasInvoke}}"><div class="invoke"><code>{{c.invokeAs}}</code><sc-if value="{{c.hasHint}}"><span class="arghint">{{c.argHint}}</span></sc-if></div></sc-if>
+<span class="spacer"></span>
+<div><div class="cmd" data-state="{{c.cmd.state}}"><code class="cmd-text" id="{{c.cmd.id}}" tabindex="0" aria-label="Install command">{{c.cmd.text}}</code><button type="button" class="cmd-copy" onClick="{{c.cmd.copy}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{c.cmd.icon}}"></path></svg><span>{{c.cmd.label}}</span></button></div><sc-if value="{{c.cmd.failed}}"><p class="cmd-hint"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p></sc-if></div>
+</article>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{noResults}}" hint-placeholder-val="{{ false }}">
+<div class="state-panel">
+<svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg>
+<h2>{{emptyTitle}}</h2>
+<p class="t2">Try fewer or different words, or start from a popular tag:</p>
+<div class="row"><sc-for list="{{emptyTags}}" as="t" hint-placeholder-count="5"><a class="tag" href="{{t.href}}" onClick="{{t.go}}">{{t.tag}}</a></sc-for></div>
+<div class="row" style="margin-top: 8px">
+<sc-if value="{{hasActive}}"><button type="button" class="btn" onClick="{{clearFilters}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg>Clear filters</button></sc-if>
+<a class="btn primary" href="{{requestUrl}}" target="_blank" rel="noopener noreferrer">Request it<svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ext}}"></path></svg><span class="sr-only"> (opens on GitHub)</span></a>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{rPlugin}}" hint-placeholder-val="{{ false }}">
+<div class="wrap page">
+<header class="ph">
+<div class="row"><span class="badge" data-kind="plugin"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.pkg}}"></path></svg>plugin</span><span class="cat-label">{{pg.category}}</span></div>
+<h1>{{pg.name}}</h1>
+<div class="facts-line">
+<span><span class="k">Version</span><code>{{pg.version}}</code></span>
+<span><span class="k">Author</span><sc-if value="{{pg.hasAuthorUrl}}"><a href="{{pg.authorUrl}}" target="_blank" rel="noopener noreferrer">{{pg.author}}<span class="sr-only"> (external link)</span></a></sc-if><sc-if value="{{pg.noAuthorUrl}}"><span>{{pg.author}}</span></sc-if></span>
+<span><span class="k">License</span>{{pg.license}}</span>
+<span><span class="k">Updated</span><time datetime="{{pg.updated}}">{{pg.updated}}</time></span>
+</div>
+<sc-if value="{{pg.runs}}"><span class="runs lg" style="align-self: flex-start"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Runs code<span class="reasons">· {{pg.runsText}}</span><a href="#wr-{{uid}}" onClick="{{pg.toWr}}" style="color: inherit; font-weight: 600">See what it runs</a></span></sc-if>
+</header>
+
+<div class="cols">
+<div class="stack" style="gap: 40px; min-width: 0">
+
+<section class="sec" aria-labelledby="sum-{{uid}}">
+<h2 id="sum-{{uid}}" class="sr-only">Summary</h2>
+<p class="lead">{{pg.summary}}</p>
+</section>
+
+<section class="sec" aria-labelledby="arts-{{uid}}">
+<h2 id="arts-{{uid}}">What it adds <span class="muted">{{pg.artsSummary}}</span></h2>
+<sc-if value="{{pg.noArts}}"><p class="plain-sentence">This plugin adds no skills, agents, commands, hooks or MCP servers</p></sc-if>
+<sc-if value="{{pg.hasArts}}">
+<div class="tbl-wrap"><div class="tbl t-arts" role="table" aria-labelledby="arts-{{uid}}">
+<div class="tr head" role="row"><div class="th" role="columnheader">Kind</div><div class="th" role="columnheader">Name</div><div class="th" role="columnheader">Invoke as</div><div class="th" role="columnheader">Description</div><div class="th" role="columnheader">Source</div></div>
+<sc-for list="{{pg.arts}}" as="a" hint-placeholder-count="3"><div class="tr" role="row">
+<div class="td" role="cell" data-label="Kind"><span class="badge" data-kind="{{a.kind}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{a.icon}}"></path></svg>{{a.kind}}</span></div>
+<div class="td" role="cell" data-label="Name"><a href="{{a.href}}" onClick="{{a.go}}">{{a.name}}</a></div>
+<div class="td" role="cell" data-label="Invoke as"><sc-if value="{{a.hasInvoke}}"><code>{{a.invokeAs}}</code></sc-if><sc-if value="{{a.noInvoke}}"><span class="muted">runs on {{a.event}}</span></sc-if></div>
+<div class="td t2" role="cell" data-label="Description">{{a.desc}}</div>
+<div class="td" role="cell" data-label="Source"><a href="{{a.src}}" target="_blank" rel="noopener noreferrer" class="row" style="gap: 4px">File<svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ext}}"></path></svg><span class="sr-only"> for {{a.name}} (opens on GitHub)</span></a></div>
+</div></sc-for>
+</div></div>
+</sc-if>
+</section>
+
+<sc-if value="{{pg.hasDeps}}">
+<section class="sec" aria-labelledby="deps-{{uid}}">
+<h2 id="deps-{{uid}}">Dependencies <span class="muted">installed with it</span></h2>
+<ul class="cb-list">
+<sc-for list="{{pg.deps}}" as="d"><li class="cb-row"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--k-plugin)"><path d="{{ic.pkg}}"></path></svg><sc-if value="{{d.inCat}}"><a href="{{d.href}}" onClick="{{d.go}}" class="nm">{{d.name}}</a></sc-if><sc-if value="{{d.notInCat}}"><span class="nm">{{d.name}}</span><span class="runs">not in this marketplace</span></sc-if><code class="pill">{{d.version}}</code></li></sc-for>
+</ul>
+<sc-if value="{{pg.hasMissing}}"><div class="notice warn" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg><div><p class="notice-title">A dependency is not in this marketplace</p><p>Install it from its own marketplace before this plugin will work.</p></div></div></sc-if>
+</section>
+</sc-if>
+
+<section class="sec" id="wr-{{uid}}" aria-labelledby="wrh-{{uid}}" tabindex="-1" ref="{{setWrEl}}">
+<h2 id="wrh-{{uid}}">What it runs</h2>
+<div class="panel-box {{pg.wr.boxCls}}">
+<p class="small t2">Copied from the plugin’s files at commit <a href="{{commitUrl}}" target="_blank" rel="noopener noreferrer"><code>{{shortSha}}</code><span class="sr-only"> (opens on GitHub)</span></a>. Read it before you install.</p>
+<sc-if value="{{pg.runs}}"><span class="runs lg" style="align-self: flex-start"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Runs code<span class="reasons">· {{pg.runsText}}</span></span></sc-if>
+<sc-if value="{{pg.wr.nothing}}"><p class="plain-sentence">This plugin ships no hooks, MCP servers or scripts.</p></sc-if>
+
+<sc-if value="{{pg.wr.hasHooks}}">
+<h3>Hooks <span class="muted small">({{pg.wr.hookCount}})</span></h3>
+<div class="tbl-wrap"><div class="tbl t-hooks" role="table" aria-label="Hooks">
+<div class="tr head" role="row"><div class="th" role="columnheader">Hook</div><div class="th" role="columnheader">Event</div><div class="th" role="columnheader">Matcher</div><div class="th" role="columnheader">Type</div><div class="th" role="columnheader">Command</div><div class="th" role="columnheader">Timeout</div></div>
+<sc-for list="{{pg.wr.hooks}}" as="h"><div class="tr" role="row">
+<div class="td" role="cell" data-label="Hook"><a href="{{h.href}}" onClick="{{h.go}}">{{h.name}}</a></div>
+<div class="td" role="cell" data-label="Event">{{h.event}}</div>
+<div class="td" role="cell" data-label="Matcher"><code>{{h.matcher}}</code></div>
+<div class="td" role="cell" data-label="Type">{{h.type}}</div>
+<div class="td" role="cell" data-label="Command"><code>{{h.command}}</code></div>
+<div class="td" role="cell" data-label="Timeout">{{h.timeout}}</div>
+<div class="td desc small" role="cell">{{h.desc}}</div>
+</div></sc-for>
+</div></div>
+</sc-if>
+
+<sc-if value="{{pg.wr.hasScripts}}">
+<h3>Scripts <span class="muted small">({{pg.wr.scriptCount}})</span></h3>
+<div class="tbl-wrap"><div class="tbl t-scripts" role="table" aria-label="Scripts">
+<div class="tr head" role="row"><div class="th" role="columnheader">Path</div><div class="th" role="columnheader">Source</div><div class="th" role="columnheader">Named by hook</div></div>
+<sc-for list="{{pg.wr.scripts}}" as="s"><div class="tr" role="row">
+<div class="td" role="cell" data-label="Path"><code>{{s.path}}</code></div>
+<div class="td" role="cell" data-label="Source"><a href="{{s.href}}" target="_blank" rel="noopener noreferrer">View<span class="sr-only"> {{s.path}} (opens on GitHub)</span></a></div>
+<div class="td" role="cell" data-label="Named by"><sc-if value="{{s.hasBy}}"><span class="row" style="gap: 4px"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--k-hook)"><path d="{{ic.hook}}"></path></svg><sc-for list="{{s.by}}" as="b"><a href="{{b.href}}" onClick="{{b.go}}">{{b.name}}</a></sc-for></span></sc-if><sc-if value="{{s.noBy}}"><span class="muted">not named in a hook command</span></sc-if></div>
+</div></sc-for>
+</div></div>
+</sc-if>
+
+<sc-if value="{{pg.wr.hasMcp}}">
+<h3>MCP servers</h3>
+<div class="tbl-wrap"><div class="tbl t-mcp" role="table" aria-label="MCP servers">
+<div class="tr head" role="row"><div class="th" role="columnheader">Server</div><div class="th" role="columnheader">Type</div><div class="th" role="columnheader">Command or URL</div></div>
+</div></div>
+</sc-if>
+
+<sc-if value="{{pg.wr.hasAgents}}">
+<h3>Agents <span class="muted small">({{pg.wr.agentCount}})</span></h3>
+<div class="tbl-wrap"><div class="tbl t-agents" role="table" aria-label="Agents and their tools">
+<div class="tr head" role="row"><div class="th" role="columnheader">Agent</div><div class="th" role="columnheader">Model</div><div class="th" role="columnheader">Tools</div><div class="th" role="columnheader">Disallowed tools</div></div>
+<sc-for list="{{pg.wr.agents}}" as="g"><div class="tr" role="row">
+<div class="td" role="cell" data-label="Agent"><a href="{{g.href}}" onClick="{{g.go}}">{{g.name}}</a></div>
+<div class="td" role="cell" data-label="Model"><code>{{g.model}}</code></div>
+<div class="td" role="cell" data-label="Tools"><sc-if value="{{g.declared}}"><span class="vlist row" style="gap: 4px"><sc-for list="{{g.tools}}" as="t"><span class="{{t.cls}}">{{t.name}}</span></sc-for></span></sc-if><sc-if value="{{g.notDeclared}}"><span class="muted">not declared: inherits the session's tools</span></sc-if></div>
+<div class="td" role="cell" data-label="Disallowed"><span class="row" style="gap: 4px"><sc-for list="{{g.disallowed}}" as="t"><span class="pill no">{{t}}</span></sc-for></span></div>
+</div></sc-for>
+</div></div>
+</sc-if>
+
+<sc-if value="{{pg.wr.hasAuthor}}">
+<h3>Author's description</h3>
+<p class="small muted">From the plugin README’s “What it runs” section, as written by the author.</p>
+<sc-for list="{{pg.wr.author}}" as="w"><div class="stack" style="gap: 6px"><h4 style="font-size: 1rem; font-family: var(--mono)">{{w.heading}}</h4><dc-import name="Markdown" md="{{w.text}}" base="{{pg.base}}" hint-size="100%,200px"></dc-import></div></sc-for>
+</sc-if>
+</div>
+</section>
+
+<section class="sec" aria-labelledby="rd-{{uid}}">
+<h2 id="rd-{{uid}}">README</h2>
+<div class="panel-box">
+<p class="t2">{{pg.summary}}</p>
+<p class="small muted">The full <code>README.md</code> renders here from the repository (headings, lists, tables, code). It is not part of this design sample.</p>
+<a href="{{pg.readmeHref}}" target="_blank" rel="noopener noreferrer" class="small">Read README.md on GitHub<span class="sr-only"> (opens on GitHub)</span></a>
+</div>
+</section>
+
+<sc-if value="{{pg.hasNotices}}">
+<section class="sec" aria-labelledby="tn-{{uid}}">
+<h2 id="tn-{{uid}}">Third-party notices</h2>
+<details class="coll">
+<summary><svg class="ico sm chev" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.chevR}}"></path></svg>THIRD_PARTY_NOTICES.md <span class="sub">{{pg.noticePath}}</span></summary>
+<div class="coll-body"><dc-import name="Markdown" md="{{pg.noticeMd}}" base="{{pg.base}}" hint-size="100%,220px"></dc-import><a class="small" href="{{pg.noticeHref}}" target="_blank" rel="noopener noreferrer">Full notice on GitHub<span class="sr-only"> (opens on GitHub)</span></a></div>
+</details>
+</section>
+</sc-if>
+
+<sc-if value="{{pg.hasChanges}}">
+<section class="sec" aria-labelledby="rc-{{uid}}">
+<h2 id="rc-{{uid}}">Recent changes <span class="muted">{{pg.changesNote}}</span></h2>
+<ol class="chg-list">
+<sc-for list="{{pg.changes}}" as="r"><li class="chg">
+<span class="ctype" data-type="{{r.type}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.icon}}"></path></svg>{{r.typeLabel}}<sc-if value="{{r.hasV}}"><span class="v">{{r.vText}}</span></sc-if></span>
+<time class="small muted" datetime="{{r.date}}" style="font-family: var(--mono)">{{r.date}}</time>
+<span class="subj">{{r.subject}}</span>
+<a class="sha" href="{{r.url}}" target="_blank" rel="noopener noreferrer">{{r.sha}}<span class="sr-only"> commit (opens on GitHub)</span></a>
+</li></sc-for>
+</ol>
+<a href="#/new" onClick="{{pg.goNew}}" class="small">All changes for {{pg.name}}</a>
+</section>
+</sc-if>
+</div>
+
+<aside class="side" aria-label="Install">
+<div class="panel-box">
+<h2 style="font-size: 1.125rem">Install</h2>
+<p class="small t2">1. Add the marketplace (once)</p>
+<div><div class="cmd" data-state="{{pg.addCmd.state}}"><code class="cmd-text" id="{{pg.addCmd.id}}" tabindex="0" aria-label="Command">{{pg.addCmd.text}}</code><button type="button" class="cmd-copy" onClick="{{pg.addCmd.copy}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{pg.addCmd.icon}}"></path></svg><span>{{pg.addCmd.label}}</span></button></div><sc-if value="{{pg.addCmd.failed}}"><p class="cmd-hint">Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p></sc-if></div>
+<p class="small t2">2. Install the plugin</p>
+<div><div class="cmd" data-state="{{pg.instCmd.state}}"><code class="cmd-text" id="{{pg.instCmd.id}}" tabindex="0" aria-label="Command">{{pg.instCmd.text}}</code><button type="button" class="cmd-copy" onClick="{{pg.instCmd.copy}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{pg.instCmd.icon}}"></path></svg><span>{{pg.instCmd.label}}</span></button></div><sc-if value="{{pg.instCmd.failed}}"><p class="cmd-hint">Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p></sc-if></div>
+<button type="button" class="{{pg.setBtnCls}}" aria-pressed="{{pg.inSetStr}}" onClick="{{pg.toggleSet}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{pg.setIcon}}"></path></svg>{{pg.setLabel}}</button>
+<sc-if value="{{pg.inSet}}"><a class="small" href="#/install" onClick="{{goInstall}}">Open install set ({{instCount}})</a></sc-if>
+</div>
+<div class="panel-box">
+<h2 style="font-size: 1.125rem">Links</h2>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px" class="small">
+<li><a href="{{pg.sourceUrl}}" target="_blank" rel="noopener noreferrer">Source on GitHub<span class="sr-only"> (opens on GitHub)</span></a></li>
+<sc-if value="{{pg.hasHomepage}}"><li><a href="{{pg.homepage}}" target="_blank" rel="noopener noreferrer">Homepage<span class="sr-only"> (external link)</span></a> <span class="muted" style="overflow-wrap: anywhere">{{pg.homepageShort}}</span></li></sc-if>
+<li><a href="{{pg.repository}}" target="_blank" rel="noopener noreferrer">Repository<span class="sr-only"> (external link)</span></a> <span class="muted" style="overflow-wrap: anywhere">{{pg.repositoryShort}}</span></li>
+</ul>
+</div>
+<div class="panel-box">
+<h2 style="font-size: 1.125rem">Tags</h2>
+<div class="row"><sc-for list="{{pg.tags}}" as="t"><a class="tag" href="{{t.href}}" onClick="{{t.go}}">{{t.tag}}</a></sc-for></div>
+</div>
+</aside>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{rArtifact}}" hint-placeholder-val="{{ false }}">
+<div class="wrap page">
+<nav class="crumbs" aria-label="Breadcrumb"><ol>
+<li><a href="{{ar.pluginHref}}" onClick="{{ar.pluginGo}}">{{ar.plugin}}</a></li>
+<li><a href="{{ar.kindHref}}" onClick="{{ar.kindGo}}">{{ar.kindPlural}}</a></li>
+<li><span aria-current="page">{{ar.name}}</span></li>
+</ol></nav>
+<header class="ph">
+<div class="row"><span class="badge" data-kind="{{ar.kind}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ar.icon}}"></path></svg>{{ar.kind}}</span><sc-if value="{{ar.userOnly}}"><span class="cat-label">User-invoked only</span></sc-if></div>
+<h1>{{ar.name}}</h1>
+<p class="lead">{{ar.desc}}</p>
+<sc-if value="{{ar.hasInvoke}}"><div class="invoke"><span class="muted">Invoke as</span><code>{{ar.invokeAs}}</code><sc-if value="{{ar.hasHint}}"><span class="arghint">{{ar.argHint}}</span></sc-if></div></sc-if>
+<sc-if value="{{ar.shell}}"><span class="runs lg" style="align-self: flex-start"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Runs code<span class="reasons">· {{ar.shellText}}</span></span></sc-if>
+</header>
+
+<div class="cols">
+<div class="stack" style="gap: 40px; min-width: 0">
+<section class="sec" aria-labelledby="facts-{{uid}}">
+<h2 id="facts-{{uid}}">Facts</h2>
+<dl class="facts">
+<sc-for list="{{ar.facts}}" as="f" hint-placeholder-count="5"><dt>{{f.label}}</dt><dd>
+<sc-if value="{{f.isText}}"><span>{{f.value}}</span></sc-if>
+<sc-if value="{{f.isMono}}"><code>{{f.value}}</code></sc-if>
+<sc-if value="{{f.isPills}}"><span class="vlist"><sc-for list="{{f.pills}}" as="p"><span class="{{p.cls}}">{{p.name}}</span></sc-for></span></sc-if>
+<sc-if value="{{f.isLinks}}"><span class="vlist"><sc-for list="{{f.links}}" as="l"><a href="{{l.href}}" onClick="{{l.go}}" class="pill" style="color: var(--link)">{{l.name}}</a></sc-for></span></sc-if>
+<sc-if value="{{f.isMuted}}"><span class="muted">{{f.value}}</span></sc-if>
+</dd></sc-for>
+</dl>
+</section>
+
+<sc-if value="{{ar.hasFiles}}">
+<section class="sec" aria-labelledby="sf-{{uid}}">
+<h2 id="sf-{{uid}}">Supporting files <span class="muted">{{ar.fileCount}}</span></h2>
+<div class="stack" style="gap: 8px">
+<sc-for list="{{ar.files}}" as="f"><details class="coll"><summary><svg class="ico sm chev" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.chevR}}"></path></svg><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--muted)"><path d="{{ic.file}}"></path></svg>{{f.title}} <span class="sub">{{f.rel}}</span></summary><div class="coll-body"><p class="small muted">The file renders here as Markdown from the repository. Its text is not part of this design sample.</p><a class="small" href="{{f.href}}" target="_blank" rel="noopener noreferrer">Open {{f.rel}} on GitHub<span class="sr-only"> (opens on GitHub)</span></a></div></details></sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ar.hasBody}}">
+<section class="sec" aria-labelledby="body-{{uid}}">
+<h2 id="body-{{uid}}">{{ar.bodyTitle}} <span class="muted">excerpt</span></h2>
+<div class="panel-box"><dc-import name="Markdown" md="{{ar.body}}" base="{{ar.base}}" hint-size="100%,320px"></dc-import></div>
+</section>
+</sc-if>
+
+<sc-if value="{{ar.hasFm}}">
+<section class="sec" aria-labelledby="fm-{{uid}}">
+<h2 id="fm-{{uid}}">All frontmatter <span class="muted">{{ar.fmCount}} keys, verbatim</span></h2>
+<div class="tbl-wrap"><div class="tbl t-fm" role="table" aria-labelledby="fm-{{uid}}">
+<div class="tr head" role="row"><div class="th" role="columnheader">Key</div><div class="th" role="columnheader">Value</div></div>
+<sc-for list="{{ar.fm}}" as="k"><div class="tr" role="row"><div class="td" role="cell" data-label="Key"><code>{{k.key}}</code></div><div class="td mono fm-val" role="cell" data-label="Value">{{k.value}}</div></div></sc-for>
+</div></div>
+</section>
+</sc-if>
+</div>
+
+<aside class="side" aria-label="Install">
+<div class="panel-box">
+<h2 style="font-size: 1.125rem">Install the plugin</h2>
+<p class="small t2">{{ar.name}} ships in <a href="{{ar.pluginHref}}" onClick="{{ar.pluginGo}}">{{ar.plugin}}</a>.</p>
+<div><div class="cmd" data-state="{{ar.instCmd.state}}"><code class="cmd-text" id="{{ar.instCmd.id}}" tabindex="0" aria-label="Command">{{ar.instCmd.text}}</code><button type="button" class="cmd-copy" onClick="{{ar.instCmd.copy}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ar.instCmd.icon}}"></path></svg><span>{{ar.instCmd.label}}</span></button></div><sc-if value="{{ar.instCmd.failed}}"><p class="cmd-hint">Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p></sc-if></div>
+<a class="small" href="{{ar.src}}" target="_blank" rel="noopener noreferrer">Source: <code>{{ar.path}}</code><span class="sr-only"> (opens on GitHub)</span></a>
+</div>
+</aside>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{rInstall}}" hint-placeholder-val="{{ false }}">
+<div class="wrap page">
+<header class="ph">
+<h1>Install set</h1>
+<p class="lead">Pick plugins to get one block of install commands, or a settings snippet to commit with your project. Nothing is installed from this page.</p>
+</header>
+<sc-for list="{{ins.dropped}}" as="d"><div class="notice info" role="status"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.info}}"></path></svg><div><p class="notice-title">“{{d}}” was removed from the shared selection</p><p>It is no longer in this marketplace. The rest of the shared link was kept.</p></div></div></sc-for>
+<sc-for list="{{ins.missing}}" as="m"><div class="notice warn" role="note"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg><div><p class="notice-title">{{m.dep}} {{m.version}} — not in this marketplace</p><p>{{m.forName}} needs it. Install it from its own marketplace; it is not in the commands below.</p></div></div></sc-for>
+
+<div class="cols">
+<section class="sec" aria-labelledby="pick-{{uid}}">
+<h2 id="pick-{{uid}}">Plugins <span class="muted">{{ins.countText}}</span></h2>
+<ul class="cb-list">
+<sc-for list="{{ins.rows}}" as="r" hint-placeholder-count="8"><li class="cb-row">
+<input type="checkbox" id="{{r.id}}" checked="{{r.checked}}" disabled="{{r.auto}}" onChange="{{r.toggle}}">
+<label for="{{r.id}}"><span class="nm">{{r.name}}</span><span class="cat-label">{{r.category}}</span><sc-if value="{{r.auto}}"><span class="auto-label">{{r.autoText}}</span></sc-if><sc-if value="{{r.runs}}"><span class="runs">Runs code</span></sc-if></label>
+<a href="{{r.href}}" onClick="{{r.go}}" class="small">Details<span class="sr-only"> for {{r.name}}</span></a>
+</li></sc-for>
+</ul>
+</section>
+
+<aside class="side" aria-label="Output">
+<div class="panel-box">
+<h2 style="font-size: 1.125rem" id="scope-{{uid}}">Scope</h2>
+<div class="seg" role="group" aria-labelledby="scope-{{uid}}">
+<button type="button" aria-pressed="{{ins.userPressed}}" onClick="{{ins.setUser}}">User</button>
+<button type="button" aria-pressed="{{ins.projPressed}}" onClick="{{ins.setProject}}">Project</button>
+</div>
+<p class="small muted">{{ins.scopeHelp}}</p>
+</div>
+</aside>
+</div>
+
+<sc-if value="{{ins.empty}}">
+<div class="state-panel">
+<svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.list}}"></path></svg>
+<h2>No plugins picked yet</h2>
+<p class="t2">Tick one or more plugins above. The commands and the settings snippet appear here, ready to copy.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{ins.has}}">
+<div class="out-grid">
+<section class="sec" aria-labelledby="oa-{{uid}}">
+<h2 id="oa-{{uid}}">CLI commands <span class="muted">{{ins.lineCount}} lines</span></h2>
+<div><div class="cmd multi" data-state="{{ins.cli.state}}"><code class="cmd-text" id="{{ins.cli.id}}" tabindex="0" aria-label="CLI commands">{{ins.cli.text}}</code><button type="button" class="cmd-copy" onClick="{{ins.cli.copy}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ins.cli.icon}}"></path></svg><span>{{ins.cli.label}}</span></button></div><sc-if value="{{ins.cli.failed}}"><p class="cmd-hint">Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p></sc-if></div>
+</section>
+<section class="sec" aria-labelledby="ob-{{uid}}">
+<h2 id="ob-{{uid}}">Settings <span class="muted"><code>{{ins.settingsPath}}</code></span></h2>
+<div><div class="cmd multi json" data-state="{{ins.json.state}}"><code class="cmd-text" id="{{ins.json.id}}" tabindex="0" aria-label="Settings JSON">{{ins.json.text}}</code><button type="button" class="cmd-copy" onClick="{{ins.json.copy}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ins.json.icon}}"></path></svg><span>{{ins.json.label}}</span></button></div><sc-if value="{{ins.json.failed}}"><p class="cmd-hint">Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p></sc-if></div>
+</section>
+</div>
+<p class="small muted">Share this selection: <a href="{{ins.shareHash}}" onClick="{{ins.shareGo}}"><code>…/agent-plugins/{{ins.shareHash}}</code></a></p>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{rNew}}" hint-placeholder-val="{{ false }}">
+<div class="wrap page">
+<header class="ph">
+<h1>What’s new</h1>
+<p class="lead">Every catalog change from the repository history, newest first. Dates are UTC.</p>
+</header>
+<div class="fgroup" role="group" aria-labelledby="np-{{uid}}">
+<span class="fgroup-title" id="np-{{uid}}">Plugin</span>
+<div class="chips"><sc-for list="{{nw.chips}}" as="c" hint-placeholder-count="9"><button type="button" class="chip" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}"><svg class="ico sm tick" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>{{c.label}}<span class="n">{{c.count}}</span></button></sc-for></div>
+</div>
+<p class="count-line" role="status" aria-live="polite">{{nw.countText}}</p>
+<div class="stack" style="gap: 24px">
+<sc-for list="{{nw.days}}" as="d" hint-placeholder-count="4"><section aria-labelledby="{{d.hid}}" class="stack" style="gap: 8px">
+<h2 class="day-h" id="{{d.hid}}"><time datetime="{{d.day}}">{{d.day}}</time></h2>
+<ol class="chg-list">
+<sc-for list="{{d.rows}}" as="r"><li class="chg">
+<span class="ctype" data-type="{{r.type}}"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.icon}}"></path></svg>{{r.typeLabel}}<sc-if value="{{r.hasV}}"><span class="v">{{r.vText}}</span></sc-if></span>
+<span><sc-if value="{{r.inCat}}"><a href="{{r.pHref}}" onClick="{{r.pGo}}" style="font-family: var(--mono); font-size: .875rem">{{r.plugin}}</a></sc-if><sc-if value="{{r.oldName}}"><span class="old">{{r.plugin}}</span></sc-if></span>
+<span class="subj">{{r.subject}}</span>
+<a class="sha" href="{{r.url}}" target="_blank" rel="noopener noreferrer">{{r.sha}}<span class="sr-only"> commit (opens on GitHub)</span></a>
+</li></sc-for>
+</ol>
+</section></sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{rNotFound}}" hint-placeholder-val="{{ false }}">
+<div class="wrap" style="padding-top: 48px">
+<div class="state-panel">
+<svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.compass}}"></path></svg>
+<h1 style="font-size: 1.375rem">Page not found</h1>
+<p class="t2">Nothing in the catalog lives at <code>{{url}}</code>. The plugin or item may have been renamed or removed.</p>
+<a class="btn primary" href="#/" onClick="{{goHome}}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.arrowL}}"></path></svg>Back to search</a>
+</div>
+</div>
+</sc-if>
+
+</main>
+
+<footer class="ftr">
+<div class="wrap">
+<span><strong style="color: var(--text)">humen-dev</strong> marketplace <code>{{mpVersion}}</code></span>
+<span>built from <a href="{{commitUrl}}" target="_blank" rel="noopener noreferrer"><code>{{shortSha}}</code><span class="sr-only"> commit (opens on GitHub)</span></a> on <time datetime="{{buildDate}}">{{buildDate}}</time></span>
+<a href="{{repoUrl}}" target="_blank" rel="noopener noreferrer">Repository<span class="sr-only"> (opens on GitHub)</span></a>
+<a href="{{requestUrl}}" target="_blank" rel="noopener noreferrer">Request a skill<span class="sr-only"> (opens on GitHub)</span></a>
+</div>
+</footer>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2800}}'>
+var CATALOG_URL = '/_blob/5c14339279ab8704967735b319a98290';
+var REPO_URL = 'https://github.com/humen-dev/agent-plugins';
+var REQUEST_URL = 'https://github.com/humen-dev/agent-plugins/issues/new';
+var KINDS = ['plugin', 'skill', 'agent', 'hook'];
+var KORDER = { skill: 0, agent: 1, command: 2, hook: 3, mcp: 4 };
+var KLABEL = { plugin: 'Plugin', skill: 'Skill', agent: 'Agent', hook: 'Hook', command: 'Command', mcp: 'MCP server' };
+var KPLURAL = { plugin: 'plugins', skill: 'skills', agent: 'agents', hook: 'hooks', command: 'commands', mcp: 'MCP servers' };
+var ICON = {
+  logo: 'M4 4h7v7H4zM13 13h7v7h-7zM13 4h7v7M4 13v7h7',
+  search: 'M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13zM20 20l-4.8-4.8',
+  x: 'M6 6l12 12M18 6L6 18',
+  sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  moon: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  filter: 'M4 6h16M7 12h10M10 18h4',
+  copy: 'M9 9h10v10H9zM5 15V5h10',
+  check: 'M5 12.5l4.5 4.5L19 7.5',
+  ext: 'M14 5h5v5M19 5l-8 8M18 14v5H5V6h5',
+  chevD: 'M6 9l6 6 6-6',
+  chevR: 'M9 6l6 6-6 6',
+  plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
+  arrowR: 'M5 12h14M13 6l6 6-6 6',
+  arrowL: 'M19 12H5M11 6l-6 6 6 6',
+  dot: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z',
+  warn: 'M12 3.5l9 16H3zM12 10v4M12 17v.5',
+  err: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7.5v5.5M12 16.5v.5',
+  info: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 11v5.5M12 7.5v.5',
+  pkg: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9',
+  skill: 'M6 4h11a1 1 0 0 1 1 1v15H8a2 2 0 0 1-2-2zM6 18a2 2 0 0 1 2-2h10M10 8h5',
+  agent: 'M7 8h10a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3zM12 4v4M9 13v1.5M15 13v1.5',
+  hook: 'M15 3v10a5 5 0 0 1-10 0v-1M5 12l-2 2.5M5 12l2.5 2M15 3h-3',
+  command: 'M4 4h16v16H4zM14.5 8l-5 8',
+  mcp: 'M9 3v5M15 3v5M7 8h10v3a5 5 0 0 1-10 0zM12 16v5',
+  file: 'M6 3h8l4 4v14H6zM14 3v4h4',
+  refresh: 'M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6',
+  code: 'M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12',
+  list: 'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',
+  clock: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7v5l3 2',
+  compass: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM15.5 8.5l-2 5-5 2 2-5z'
+};
+var KICON = { plugin: ICON.pkg, skill: ICON.skill, agent: ICON.agent, hook: ICON.hook, command: ICON.command, mcp: ICON.mcp };
+var CICON = { added: ICON.plus, version: ICON.arrowR, change: ICON.dot };
+var STOP = {};
+'i me my we our you a an the for to with that this of in on at and or is are be can could would should need needs want wants looking look find some something anything thing things help helps please how do does which what using use one any'.split(' ').forEach(function (w) { STOP[w] = 1; });
+var KINDW = { plugin: 'plugin', plugins: 'plugin', skill: 'skill', skills: 'skill', agent: 'agent', agents: 'agent', subagent: 'agent', subagents: 'agent', hook: 'hook', hooks: 'hook' };
+
+function stem(w) { if (w.length > 4 && /ies$/.test(w)) return w.slice(0, -3) + 'y'; if (w.length > 3 && /s$/.test(w) && !/ss$/.test(w)) return w.slice(0, -1); return w; }
+function parseQuery(q) {
+  var ws = (q || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean), terms = [], kinds = [];
+  ws.forEach(function (w) {
+    if (KINDW[w]) { if (kinds.indexOf(KINDW[w]) < 0) kinds.push(KINDW[w]); }
+    else if (!STOP[w]) { var s = stem(w); if (terms.indexOf(s) < 0) terms.push(s); }
+  });
+  return { terms: terms, kinds: kinds };
+}
+function wordsOf(t) { return (t || '').toLowerCase().match(/[a-z0-9]+/g) || []; }
+function hit(t, term) { return wordsOf(t).some(function (w) { return w.indexOf(term) === 0; }); }
+function buildDocs(c, byId) {
+  var docs = [];
+  c.plugins.forEach(function (p) {
+    var arts = p.artifactIds.map(function (id) { return byId[id]; }).filter(Boolean);
+    var m = arts.length === 1 && arts[0].name === p.name ? arts[0] : null;
+    docs.push({ key: 'p-' + p.id, merged: !!m, kinds: m ? ['plugin', m.kind] : ['plugin'], p: p, a: m, name: p.name, category: p.category, desc: p.description });
+    if (!m) arts.forEach(function (a) { docs.push({ key: a.id.replace(/[^a-z0-9]+/gi, '-'), merged: false, kinds: [a.kind], p: p, a: a, name: a.name, category: p.category, desc: a.description }); });
+  });
+  docs.forEach(function (d) {
+    var a = d.a, plugLevel = !a || d.merged;
+    d.f = [[8, d.name], [5, a && a.invokeAs], [4, plugLevel ? d.p.tags.join(' ') : ''], [3, d.desc], [3, d.merged ? a.description : ''],
+      [2, plugLevel ? d.p.summary : ''], [1.5, a ? (a.headings || []).join(' ') : ''], [1, a ? (a.bodyExcerpt || '') : '']];
+  });
+  return docs;
+}
+function scoreDoc(d, terms) {
+  var s = 0, n = 0, inMain = true;
+  terms.forEach(function (t) {
+    var best = 0;
+    d.f.forEach(function (f) { if (f[1] && f[0] > best && hit(f[1], t)) best = f[0]; });
+    if (best) { n++; s += best; if (best < 3) inMain = false; }
+  });
+  return { s: s, n: n, inMain: inMain };
+}
+function hl(text, terms) {
+  text = text || '';
+  if (!terms || !terms.length) return [{ t: text, n: true }];
+  var parts = text.split(/([A-Za-z0-9]+)/), out = [], buf = '';
+  parts.forEach(function (p, ix) {
+    var low = p.toLowerCase();
+    if (ix % 2 === 1 && terms.some(function (t) { return low.indexOf(t) === 0; })) { if (buf) { out.push({ t: buf, n: true }); buf = ''; } out.push({ t: p, m: true }); }
+    else buf += p;
+  });
+  if (buf) out.push({ t: buf, n: true });
+  return out;
+}
+function cut(t, n) {
+  t = t || ''; if (t.length <= n) return t;
+  var s = t.slice(0, n), ix = s.lastIndexOf(' ');
+  if (ix > n * 0.6) s = s.slice(0, ix);
+  return s.replace(/[\s,;:.—(-]+$/, '') + '…';
+}
+function snippet(text, terms) {
+  var clean = (text || '').replace(/[#*`|>]/g, ' ').replace(/\s+/g, ' ').trim(), low = clean.toLowerCase(), at = -1;
+  terms.forEach(function (t) { var re = new RegExp('(^|[^a-z0-9])' + t.replace(/[^a-z0-9]/g, '')); var m = re.exec(low); if (m && (at < 0 || m.index < at)) at = m.index; });
+  if (at < 0) return cut(clean, 160);
+  var start = Math.max(0, at - 50); if (start > 0) { var sp = clean.indexOf(' ', start); start = sp > 0 && sp < at ? sp + 1 : start; }
+  return (start > 0 ? '…' : '') + cut(clean.slice(start), start > 0 ? 159 : 160);
+}
+function utcDay(s) { return new Date(s).toISOString().slice(0, 10); }
+function shortUrl(u) { return (u || '').replace(/^https?:\/\//, '').replace(/\/$/, ''); }
+function safeKey(s) { return String(s).replace(/[^a-z0-9]+/gi, '-'); }
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var th = 'dark';
+    try { if (window.localStorage.getItem('humen-dev-theme') === 'light') th = 'light'; } catch (e) { }
+    this.uid = 'u' + Math.random().toString(36).slice(2, 7);
+    this.timers = {};
+    this.state = { theme: th, demo: 'live', cat: null, loadErr: false, route: { name: 'home' }, q: '', qa: '', kinds: [], cats: [],
+      fOpen: false, menu: false, sel: [], scope: 'user', dropped: [], copy: {}, failCopy: false, newPlugin: '', announce: '' };
+    var self = this;
+    this.setSearchEl = function (el) { self.searchEl = el; };
+    this.setMainEl = function (el) { self.mainEl = el; };
+    this.setWrEl = function (el) { self.wrEl = el; };
+  }
+  componentDidMount() { this.load(); }
+  componentWillUnmount() { var t = this.timers; Object.keys(t).forEach(function (k) { clearTimeout(t[k]); }); clearTimeout(this.qt); }
+  load() {
+    var self = this;
+    this.setState({ loadErr: false });
+    fetch(CATALOG_URL).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (c) { self.prep(c); self.setState({ cat: c, loadErr: false }); })
+      .catch(function () { self.setState({ loadErr: true }); });
+  }
+  prep(c) {
+    var byId = {}, pById = {}, bySha = {};
+    c.artifacts.forEach(function (a) { byId[a.id] = a; });
+    c.plugins.forEach(function (p) { pById[p.id] = p; });
+    c.changes.forEach(function (ch) { (bySha[ch.commit] = bySha[ch.commit] || []).push(ch); });
+    this.byId = byId; this.pById = pById; this.bySha = bySha;
+    this.docs = buildDocs(c, byId);
+    var cnt = {}, first = {}, ix = 0;
+    c.plugins.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (p) { p.tags.forEach(function (t) { cnt[t] = (cnt[t] || 0) + 1; if (!(t in first)) first[t] = ix++; }); });
+    this.topTags = Object.keys(cnt).sort(function (a, b) { return (cnt[b] - cnt[a]) || (first[a] - first[b]); }).slice(0, 5);
+  }
+
+  /* ---------- routing ---------- */
+  link(hash) { var self = this; return { href: hash, go: function (e) { if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) return; if (e) e.preventDefault(); self.go(hash); } }; }
+  go(hash) {
+    this.applyHash(hash);
+    var self = this;
+    setTimeout(function () { try { window.scrollTo(0, 0); } catch (e) { } if (self.mainEl && !/^#\/(\?|$)/.test(hash)) self.mainEl.focus({ preventScroll: true }); }, 0);
+  }
+  applyHash(h) {
+    var s = (h || '').replace(/^#?\/?/, ''), qi = s.indexOf('?');
+    var path = qi >= 0 ? s.slice(0, qi) : s, qs = qi >= 0 ? s.slice(qi + 1) : '';
+    var P = new URLSearchParams(qs), seg = path.split('/').filter(Boolean).map(function (x) { try { return decodeURIComponent(x); } catch (e) { return x; } });
+    var list = function (k) { return (P.get(k) || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean); };
+    var base = { menu: false, fOpen: false };
+    if (seg.length === 0) {
+      var q = P.get('q') || '';
+      clearTimeout(this.qt);
+      this.setState(Object.assign(base, { route: { name: 'home' }, q: q, qa: q, kinds: list('kind').filter(function (k) { return KINDS.indexOf(k) >= 0; }), cats: list('cat') }));
+    } else if (seg[0] === 'plugins' && seg.length === 2) this.setState(Object.assign(base, { route: { name: 'plugin', id: seg[1] } }));
+    else if (seg[0] === 'plugins' && seg.length === 4) this.setState(Object.assign(base, { route: { name: 'artifact', plugin: seg[1], kind: seg[2], aname: seg[3] } }));
+    else if (seg[0] === 'install' && seg.length === 1) {
+      var pids = list('p'), known = this.pById || {}, keep = [], dropped = [];
+      pids.forEach(function (id) { if (known[id]) { if (keep.indexOf(id) < 0) keep.push(id); } else dropped.push(id); });
+      var upd = { route: { name: 'install' }, dropped: dropped };
+      if (pids.length) upd.sel = keep;
+      if (P.get('scope')) upd.scope = P.get('scope') === 'project' ? 'project' : 'user';
+      this.setState(Object.assign(base, upd));
+    } else if (seg[0] === 'new' && seg.length === 1) this.setState(Object.assign(base, { route: { name: 'new' }, newPlugin: P.get('plugin') || '' }));
+    else this.setState(Object.assign(base, { route: { name: 'notfound', raw: '#/' + s } }));
+  }
+  hashNow() {
+    var st = this.state, r = st.route;
+    if (r.name === 'home') {
+      var ps = [];
+      if (st.q.trim()) ps.push('q=' + encodeURIComponent(st.q.trim()).replace(/%20/g, '+'));
+      if (st.kinds.length) ps.push('kind=' + st.kinds.join(','));
+      if (st.cats.length) ps.push('cat=' + st.cats.join(','));
+      return '#/' + (ps.length ? '?' + ps.join('&') : '');
+    }
+    if (r.name === 'plugin') return '#/plugins/' + r.id;
+    if (r.name === 'artifact') return '#/plugins/' + r.plugin + '/' + r.kind + '/' + r.aname;
+    if (r.name === 'install') return this.installHash();
+    if (r.name === 'new') return '#/new' + (st.newPlugin ? '?plugin=' + st.newPlugin : '');
+    return r.raw || '#/';
+  }
+  installHash() {
+    var st = this.state, ps = [];
+    if (st.sel.length) ps.push('p=' + st.sel.slice().sort().join(','));
+    if (st.scope === 'project') ps.push('scope=project');
+    return '#/install' + (ps.length ? '?' + ps.join('&') : '');
+  }
+
+  /* ---------- copy ---------- */
+  doCopy(key, text) {
+    var self = this;
+    var done = function (ok) {
+      var copy = Object.assign({}, self.state.copy); copy[key] = ok ? 'ok' : 'fail';
+      self.setState({ copy: copy, announce: ok ? 'Copied' : 'Copy failed. The text is selected: press Ctrl/Cmd+C' });
+      clearTimeout(self.timers[key]);
+      if (ok) self.timers[key] = setTimeout(function () { var c2 = Object.assign({}, self.state.copy); delete c2[key]; self.setState({ copy: c2, announce: '' }); }, 2000);
+      else {
+        var el = document.getElementById(self.uid + '-' + key);
+        if (el) { try { var rg = document.createRange(); rg.selectNodeContents(el); var sl = window.getSelection(); sl.removeAllRanges(); sl.addRange(rg); el.focus(); } catch (e) { } }
+      }
+    };
+    if (this.state.failCopy || !navigator.clipboard || !navigator.clipboard.writeText) { done(false); return; }
+    navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+  }
+  cmd(key, text) {
+    key = safeKey(key);
+    var st = this.state.copy[key], self = this;
+    return { text: text, id: this.uid + '-' + key, state: st || 'idle', copy: function () { self.doCopy(key, text); },
+      label: st === 'ok' ? 'Copied' : 'Copy', icon: st === 'ok' ? ICON.check : ICON.copy, failed: st === 'fail' };
+  }
+
+  /* ---------- helpers ---------- */
+  reasons(p) {
+    var R = p.runs, out = [], byId = this.byId, k = {};
+    if (!R.runsCode) return out;
+    if (R.hooks.length) out.push('hooks');
+    if (R.mcpServers.length) out.push('MCP servers');
+    if (R.scripts.length) out.push('scripts');
+    R.shellArtifacts.forEach(function (id) { var a = byId[id]; if (a) k[a.kind] = 1; });
+    ['agent', 'skill', 'command'].forEach(function (x) { if (k[x]) out.push(x + ' with shell access'); });
+    return out;
+  }
+  artHash(a) { return '#/plugins/' + a.plugin + '/' + a.kind + '/' + a.name; }
+  install() {
+    var st = this.state, pById = this.pById || {}, sel = st.sel.filter(function (id) { return pById[id]; });
+    var fin = {}, auto = {}, missing = [], queue = sel.slice();
+    sel.forEach(function (id) { fin[id] = 1; });
+    while (queue.length) {
+      var id = queue.shift(), p = pById[id]; if (!p) continue;
+      p.dependencies.forEach(function (d) {
+        if (!d.inCatalog || !pById[d.name]) { missing.push({ dep: d.name, version: d.version, forName: id }); return; }
+        if (sel.indexOf(d.name) < 0) { (auto[d.name] = auto[d.name] || []); if (auto[d.name].indexOf(id) < 0) auto[d.name].push(id); }
+        if (!fin[d.name]) { fin[d.name] = 1; queue.push(d.name); }
+      });
+    }
+    return { sel: sel, final: Object.keys(fin).sort(), auto: auto, missing: missing };
+  }
+  toggleSel(id) { var s = this.state.sel.slice(), i = s.indexOf(id); if (i >= 0) s.splice(i, 1); else s.push(id); this.setState({ sel: s, dropped: [] }); }
+  changeRow(ch) {
+    var inCat = !!(this.pById && this.pById[ch.plugin]), v = ch.version, l = this.link('#/plugins/' + ch.plugin);
+    return { type: ch.type, icon: CICON[ch.type], typeLabel: ch.type === 'version' ? '' : ch.type,
+      hasV: !!(v && (ch.type === 'version' || v.to)), vText: ch.type === 'version' ? v.from + ' → ' + v.to : (v ? v.to : ''),
+      plugin: ch.plugin, inCat: inCat, oldName: !inCat, pHref: l.href, pGo: l.go, subject: ch.subject,
+      sha: ch.commit.slice(0, 7), url: ch.url, date: utcDay(ch.date) };
+  }
+
+  /* ---------- view models ---------- */
+  homeVM(c) {
+    var st = this.state, self = this, pq = parseQuery(st.qa), terms = pq.terms, has = terms.length > 0;
+    var ks = st.kinds.slice(); pq.kinds.forEach(function (k) { if (ks.indexOf(k) < 0) ks.push(k); });
+    var base = this.docs;
+    if (has) base = this.docs.map(function (d) { return Object.assign({}, d, { sc: scoreDoc(d, terms) }); }).filter(function (d) { return d.sc.n === terms.length; });
+    var pk = function (d) { return ks.length === 0 ? (has || d.kinds.indexOf('plugin') >= 0) : d.kinds.some(function (k) { return ks.indexOf(k) >= 0; }); };
+    var pc = function (d) { return st.cats.length === 0 || st.cats.indexOf(d.category) >= 0; };
+    var res = base.filter(function (d) { return pk(d) && pc(d); });
+    res.sort(function (x, y) { return has ? ((y.sc.s - x.sc.s) || x.name.localeCompare(y.name)) : (x.name.localeCompare(y.name) || (x.merged ? -1 : 1)); });
+    var kindChips = KINDS.map(function (k) {
+      var n = base.filter(function (d) { return pc(d) && d.kinds.indexOf(k) >= 0; }).length, on = ks.indexOf(k) >= 0;
+      return { kind: k, label: KLABEL[k], count: n, pressed: on ? 'true' : 'false', disabled: n === 0 && !on, toggle: function () { self.toggleKind(k, pq.kinds); } };
+    });
+    var catChips = c.categories.map(function (x) {
+      var n = base.filter(function (d) { return pk(d) && d.category === x; }).length, on = st.cats.indexOf(x) >= 0;
+      return { label: x, count: n, pressed: on ? 'true' : 'false', disabled: n === 0 && !on, toggle: function () { var cs = st.cats.slice(), i = cs.indexOf(x); if (i >= 0) cs.splice(i, 1); else cs.push(x); self.setState({ cats: cs }); } };
+    });
+    var cards = res.map(function (d) { return self.cardVM(d, terms); });
+    var active = ks.length + st.cats.length, derived = pq.kinds.filter(function (k) { return st.kinds.indexOf(k) < 0; });
+    var tags = (this.topTags || []).map(function (t) { var l = self.link('#/?q=' + encodeURIComponent(t)); return { tag: t, href: l.href, go: l.go }; });
+    return { cards: cards, kindChips: kindChips, catChips: catChips, active: active, n: res.length, derived: derived, tags: tags, hasTerms: has };
+  }
+  toggleKind(k, derivedKinds) {
+    var st = this.state, kinds = st.kinds.slice(), i = kinds.indexOf(k);
+    if (i >= 0) { kinds.splice(i, 1); this.setState({ kinds: kinds }); return; }
+    if (derivedKinds.indexOf(k) >= 0) {
+      var q = st.q.split(/(\s+)/).filter(function (w) { return KINDW[w.toLowerCase().replace(/[^a-z]/g, '')] !== k; }).join('').replace(/\s+/g, ' ').trim();
+      this.setState({ q: q, qa: q }); return;
+    }
+    kinds.push(k); this.setState({ kinds: kinds });
+  }
+  cardVM(d, terms) {
+    var p = d.p, a = d.a, art = !!(a && !d.merged), l = this.link(art ? this.artHash(a) : '#/plugins/' + p.id), pl = this.link('#/plugins/' + p.id);
+    var useSnip = d.sc && !d.sc.inMain && a && a.bodyExcerpt;
+    var r = this.reasons(p), bk = d.merged ? a.kind : d.kinds[0];
+    return { hid: this.uid + '-h-' + d.key, badgeKind: bk, badgeIcon: KICON[bk], badgeLabel: d.merged ? a.kind + ' · plugin' : d.kinds[0],
+      nameSegs: hl(d.name, terms), href: l.href, go: l.go, isArtifact: art, pluginName: p.name, pluginHref: pl.href, pluginGo: pl.go, category: p.category,
+      descSegs: hl(useSnip ? snippet(a.bodyExcerpt, terms) : cut(d.desc, 160), terms), hasSrc: !!useSnip, src: useSnip ? a.path.slice(p.path.length + 1) : '',
+      runs: r.length > 0, runsText: r.join(' · '), hasInvoke: !!(a && a.invokeAs), invokeAs: a ? a.invokeAs : '',
+      hasHint: !!(a && a.argumentHint), argHint: a ? a.argumentHint : '', userOnly: !!(a && a.userInvokedOnly),
+      cmd: this.cmd('card-' + d.key, p.installCommand) };
+  }
+  pluginVM(c, p) {
+    var self = this, byId = this.byId, r = this.reasons(p);
+    var arts = p.artifactIds.map(function (id) { return byId[id]; }).filter(Boolean).sort(function (x, y) { return (KORDER[x.kind] - KORDER[y.kind]) || x.name.localeCompare(y.name); });
+    var countBy = {}; arts.forEach(function (a) { countBy[a.kind] = (countBy[a.kind] || 0) + 1; });
+    var artsSummary = arts.length + (arts.length === 1 ? ' item' : ' items') + (Object.keys(countBy).length ? ': ' + Object.keys(countBy).sort(function (x, y) { return KORDER[x] - KORDER[y]; }).map(function (k) { return countBy[k] + ' ' + (countBy[k] === 1 ? k : KPLURAL[k]); }).join(' · ') : '');
+    var R = p.runs, base = p.sourceUrl.replace('/tree/', '/blob/');
+    var hooks = R.hooks.map(function (id) { var h = byId[id], l = self.link(self.artHash(h)); return { name: h.name, href: l.href, go: l.go, event: h.event, matcher: h.matcher, type: h.type, command: h.command, timeout: h.timeout + ' s', desc: h.description }; });
+    var hookByScript = {}; R.hooks.forEach(function (id) { (byId[id].scripts || []).forEach(function (sp) { (hookByScript[sp] = hookByScript[sp] || []).push(byId[id]); }); });
+    var order = {}; R.hooks.forEach(function (id, i) { order[id] = i; });
+    var scripts = R.scripts.slice().sort(function (x, y) {
+      var ox = x.referencedBy.length ? order[x.referencedBy[0]] : 99, oy = y.referencedBy.length ? order[y.referencedBy[0]] : 99;
+      return (ox - oy) || x.path.localeCompare(y.path);
+    }).map(function (s) {
+      var by = s.referencedBy.map(function (id) { var h = byId[id], l = self.link(self.artHash(h)); return { name: h.name, href: l.href, go: l.go }; });
+      return { path: s.path.slice(p.path.length + 1), href: s.sourceUrl, by: by, hasBy: by.length > 0, noBy: by.length === 0 };
+    });
+    var agents = R.agentTools.map(function (t) {
+      var a = byId[t.agent], l = self.link(self.artHash(a)), tools = t.tools || [];
+      return { name: a.name, href: l.href, go: l.go, model: t.model || 'inherit', declared: tools.length > 0, notDeclared: tools.length === 0,
+        tools: tools.map(function (x) { return { name: x, cls: x === 'Bash' || x === 'PowerShell' ? 'pill shell' : 'pill' }; }), disallowed: t.disallowedTools || [] };
+    });
+    var nothing = !R.hooks.length && !R.mcpServers.length && !R.scripts.length;
+    var shas = p.recentChanges.slice(0, 10), rows = [];
+    shas.forEach(function (sha) { (self.bySha[sha] || []).forEach(function (ch) { if (ch.plugin === p.id && rows.length < 10) rows.push(self.changeRow(ch)); }); });
+    var inSet = this.install().final.indexOf(p.id) >= 0, isExplicit = this.state.sel.indexOf(p.id) >= 0;
+    var deps = p.dependencies.map(function (d) { var l = self.link('#/plugins/' + d.name); return { name: d.name, version: d.version, inCat: !!d.inCatalog, notInCat: !d.inCatalog, href: l.href, go: l.go }; });
+    var tags = p.tags.map(function (t) { var l = self.link('#/?q=' + encodeURIComponent(t)); return { tag: t, href: l.href, go: l.go }; });
+    var nl = this.link('#/new?plugin=' + p.id);
+    return {
+      name: p.name, version: p.version, category: p.category, author: p.author.name, authorUrl: p.author.url || '', hasAuthorUrl: !!p.author.url, noAuthorUrl: !p.author.url,
+      license: p.license, updated: utcDay(p.updated), runs: r.length > 0, runsText: r.join(' · '),
+      toWr: function (e) { if (e) e.preventDefault(); if (self.wrEl) { self.wrEl.scrollIntoView({ block: 'start' }); self.wrEl.focus({ preventScroll: true }); } },
+      summary: p.summary, base: base,
+      arts: arts.map(function (a) { var l = self.link(self.artHash(a)); return { kind: a.kind, icon: KICON[a.kind], name: a.name, href: l.href, go: l.go, hasInvoke: !!a.invokeAs, noInvoke: !a.invokeAs, invokeAs: a.invokeAs || '', event: a.event || '', desc: cut(a.description, 160), src: a.sourceUrl }; }),
+      hasArts: arts.length > 0, noArts: arts.length === 0, artsSummary: artsSummary,
+      deps: deps, hasDeps: deps.length > 0, hasMissing: deps.some(function (d) { return d.notInCat; }),
+      wr: { boxCls: r.length ? 'trust' : '', nothing: nothing, hooks: hooks, hasHooks: hooks.length > 0, hookCount: hooks.length,
+        scripts: scripts, hasScripts: scripts.length > 0, scriptCount: scripts.length, hasMcp: R.mcpServers.length > 0,
+        agents: agents, hasAgents: agents.length > 0, agentCount: agents.length, author: R.whatItRuns, hasAuthor: R.whatItRuns.length > 0 },
+      readmeHref: base + '/README.md',
+      hasNotices: !!p.thirdPartyNotices, noticeMd: p.thirdPartyNotices ? p.thirdPartyNotices.excerpt : '', noticePath: p.thirdPartyNotices ? p.thirdPartyNotices.path : '',
+      noticeHref: p.thirdPartyNotices ? REPO_URL + '/blob/' + c.build.commit + '/' + p.thirdPartyNotices.path : '',
+      changes: rows, hasChanges: rows.length > 0, changesNote: rows.length === 10 ? 'latest 10' : rows.length + (rows.length === 1 ? ' entry' : ' entries'), goNew: nl.go,
+      addCmd: this.cmd('padd-' + p.id, c.marketplace.addCommand), instCmd: this.cmd('pinst-' + p.id, p.installCommand),
+      inSet: inSet, inSetStr: isExplicit ? 'true' : 'false', setBtnCls: isExplicit ? 'btn' : 'btn primary', setIcon: isExplicit ? ICON.check : ICON.plus,
+      setLabel: isExplicit ? 'In install set — remove' : (inSet ? 'Added as a dependency — add directly' : 'Add to install set'),
+      toggleSet: function () { self.toggleSel(p.id); },
+      sourceUrl: p.sourceUrl, hasHomepage: !!p.homepage, homepage: p.homepage || '', homepageShort: shortUrl(p.homepage), repository: p.repository, repositoryShort: shortUrl(p.repository), tags: tags
+    };
+  }
+  artifactVM(c, a, p) {
+    var self = this, facts = [], pl = this.link('#/plugins/' + p.id), kl = this.link('#/?kind=' + a.kind);
+    var T = function (label, value) { facts.push({ label: label, value: String(value), isText: true }); };
+    var M = function (label, value) { facts.push({ label: label, value: String(value), isMono: true }); };
+    T('Plugin', p.name + ' ' + p.version);
+    T('Kind', KLABEL[a.kind]);
+    if (a.kind === 'hook') {
+      T('Event', a.event); M('Matcher', a.matcher); T('Type', a.type); M('Command', a.command); T('Timeout', a.timeout + ' s');
+      facts.push({ label: 'Scripts', isPills: true, pills: (a.scripts || []).map(function (s) { return { name: s.slice(p.path.length + 1), cls: 'pill' }; }) });
+      M('Defined in', a.definedIn.slice(p.path.length + 1));
+    } else {
+      if (a.invokeAs) M('Invoke as', a.invokeAs);
+      if (a.kind === 'skill') {
+        if (a.argumentHint) M('Argument hint', a.argumentHint);
+        T('Invocation', a.userInvokedOnly ? 'User-invoked only' : 'By you or by Claude when relevant');
+        if (a.allowedTools) facts.push({ label: 'Allowed tools', isPills: true, pills: [].concat(a.allowedTools).map(function (t) { return { name: t, cls: 'pill' }; }) });
+        if (a.model) M('Model', a.model);
+      }
+      if (a.kind === 'agent') {
+        M('Model', a.model || 'inherit');
+        if (a.tools && a.tools.length) facts.push({ label: 'Tools', isPills: true, pills: a.tools.map(function (t) { return { name: t, cls: t === 'Bash' || t === 'PowerShell' ? 'pill shell' : 'pill' }; }) });
+        else facts.push({ label: 'Tools', isMuted: true, value: "not declared: inherits the session's tools" });
+        if (a.disallowedTools && a.disallowedTools.length) facts.push({ label: 'Disallowed tools', isPills: true, pills: a.disallowedTools.map(function (t) { return { name: t, cls: 'pill no' }; }) });
+        if (a.preloadedSkills && a.preloadedSkills.length) facts.push({ label: 'Preloaded skills', isLinks: true, links: a.preloadedSkills.map(function (s) { var pr = s.split(':'), l = self.link('#/plugins/' + pr[0] + '/skill/' + pr[1]); return { name: s, href: l.href, go: l.go }; }) });
+        if (a.maxTurns) T('Max turns', a.maxTurns);
+      }
+      M('Path', a.path.slice(p.path.length + 1));
+    }
+    var fm = Object.keys(a.frontmatter || {}).map(function (k) { var v = a.frontmatter[k]; return { key: k, value: Array.isArray(v) ? v.map(function (x) { return '- ' + x; }).join('\n') : String(v) }; });
+    var shell = a.kind === 'agent' && (a.tools || []).indexOf('Bash') >= 0;
+    var dir = a.path.replace(/\/[^/]+$/, '');
+    return { name: a.name, kind: a.kind, icon: KICON[a.kind], kindPlural: KPLURAL[a.kind], kindHref: kl.href, kindGo: kl.go, plugin: p.name, pluginHref: pl.href, pluginGo: pl.go,
+      desc: a.description, hasInvoke: !!a.invokeAs, invokeAs: a.invokeAs || '', hasHint: !!a.argumentHint, argHint: a.argumentHint || '', userOnly: !!a.userInvokedOnly,
+      shell: shell, shellText: 'agent with shell access', facts: facts,
+      files: (a.files || []).map(function (f) { return { title: f.title, rel: f.path.slice(dir.length + 1), href: REPO_URL + '/blob/' + c.build.commit + '/' + f.path }; }),
+      hasFiles: !!(a.files && a.files.length), fileCount: a.files ? a.files.length : 0,
+      hasBody: !!a.bodyExcerpt, body: a.bodyExcerpt || '', bodyTitle: a.kind === 'agent' ? 'Agent instructions' : 'Skill body', base: REPO_URL + '/blob/' + c.build.commit + '/' + dir,
+      fm: fm, hasFm: fm.length > 0, fmCount: fm.length, instCmd: this.cmd('ainst-' + a.id, p.installCommand), src: a.sourceUrl, path: a.path };
+  }
+  installVM(c) {
+    var self = this, st = this.state, I = this.install();
+    var rows = c.plugins.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (p) {
+      var explicit = I.sel.indexOf(p.id) >= 0, auto = !explicit && !!I.auto[p.id], l = self.link('#/plugins/' + p.id);
+      return { id: self.uid + '-cb-' + p.id, name: p.name, category: p.category, checked: explicit || auto, auto: auto,
+        autoText: auto ? 'added for ' + I.auto[p.id].join(', ') : '', runs: p.runs.runsCode, href: l.href, go: l.go, toggle: function () { self.toggleSel(p.id); } };
+    });
+    var proj = st.scope === 'project';
+    var lines = [c.marketplace.addCommand].concat(I.final.map(function (id) { return 'claude plugin install ' + id + '@' + c.marketplace.name + (proj ? ' --scope project' : ''); }));
+    var json = '{\n  "enabledPlugins": {\n' + I.final.map(function (id, i) { return '    "' + id + '@' + c.marketplace.name + '": true' + (i < I.final.length - 1 ? ',' : ''); }).join('\n') +
+      '\n  },\n  "extraKnownMarketplaces": {\n    "' + c.marketplace.name + '": { "source": { "source": "github", "repo": "' + c.marketplace.repo + '" } }\n  }\n}';
+    var sh = this.installHash(), sl = this.link(sh);
+    return { rows: rows, dropped: st.dropped, missing: I.missing, empty: I.final.length === 0, has: I.final.length > 0,
+      countText: I.final.length + ' of ' + c.plugins.length + ' selected',
+      userPressed: proj ? 'false' : 'true', projPressed: proj ? 'true' : 'false',
+      setUser: function () { self.setState({ scope: 'user' }); }, setProject: function () { self.setState({ scope: 'project' }); },
+      scopeHelp: proj ? 'Project: plugins are enabled for this repository and shared with everyone who clones it.' : 'User: plugins are enabled for you in every project on this machine.',
+      settingsPath: proj ? '.claude/settings.json' : '~/.claude/settings.json',
+      lineCount: lines.length, cli: this.cmd('cli', lines.join('\n')), json: this.cmd('json', json), shareHash: sh, shareGo: sl.go };
+  }
+  newVM(c) {
+    var self = this, st = this.state, f = st.newPlugin;
+    var list = c.changes.filter(function (ch) { return !f || ch.plugin === f; });
+    var days = [], byDay = {};
+    list.slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); }).forEach(function (ch) {
+      var d = utcDay(ch.date); if (!byDay[d]) { byDay[d] = { day: d, hid: self.uid + '-d-' + d, rows: [] }; days.push(byDay[d]); }
+      byDay[d].rows.push(self.changeRow(ch));
+    });
+    var chips = [{ label: 'All plugins', count: c.changes.length, pressed: f ? 'false' : 'true', pick: function () { self.setState({ newPlugin: '' }); } }].concat(
+      c.plugins.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (p) {
+        return { label: p.name, count: c.changes.filter(function (ch) { return ch.plugin === p.id; }).length, pressed: f === p.id ? 'true' : 'false', pick: function () { self.setState({ newPlugin: p.id }); } };
+      }));
+    return { days: days, chips: chips, countText: list.length + (list.length === 1 ? ' change' : ' changes') + ' on ' + days.length + (days.length === 1 ? ' day' : ' days') };
+  }
+
+  renderVals() {
+    var self = this, st = this.state, c = st.cat, r = st.route;
+    var isNoJs = st.demo === 'nojs', forcedErr = st.demo === 'error', forcedLoad = st.demo === 'loading';
+    var errorState = !isNoJs && (forcedErr || (st.loadErr && !c));
+    var ready = !!c && !forcedLoad && !errorState;
+    var loading = !isNoJs && !errorState && !ready;
+    var I = c ? this.install() : { final: [] };
+    var demoBtns = [['live', 'Live'], ['loading', 'Loading'], ['error', 'Catalog error'], ['nojs', 'No JavaScript']].map(function (d) {
+      return { label: d[1], pressed: st.demo === d[0] ? 'true' : 'false', pick: function () { self.setState({ demo: d[0] }); } };
+    });
+    var H = this.link('#/'), Ins = this.link('#/install'), N = this.link('#/new');
+    var v = {
+      ic: ICON, uid: this.uid, theme: st.theme, themePressed: st.theme === 'light' ? 'true' : 'false', themeIcon: st.theme === 'light' ? ICON.sun : ICON.moon,
+      toggleTheme: function () { var t = st.theme === 'light' ? 'dark' : 'light'; try { window.localStorage.setItem('humen-dev-theme', t); } catch (e) { } self.setState({ theme: t }); },
+      demoBtns: demoBtns, failCopyPressed: st.failCopy ? 'true' : 'false', toggleFailCopy: function () { self.setState({ failCopy: !st.failCopy, copy: {} }); },
+      onPreset: function (e) { var val = e.target.value; if (val) { if (st.demo !== 'live') self.setState({ demo: 'live' }); self.go(val); } e.target.value = ''; },
+      url: this.hashNow(), showNoJs: isNoJs, showApp: !isNoJs, errorState: errorState, loading: loading && r.name === 'home',
+      retry: function () { self.setState({ demo: 'live' }); self.load(); },
+      skipToMain: function (e) { if (e) e.preventDefault(); if (self.mainEl) self.mainEl.focus(); },
+      goHome: H.go, goInstall: Ins.go, goNew: N.go, requestUrl: REQUEST_URL, repoUrl: REPO_URL,
+      navHome: r.name === 'home' ? 'page' : undefined, navInstall: r.name === 'install' ? 'page' : undefined, navNew: r.name === 'new' ? 'page' : undefined,
+      instCount: I.final.length, instHas: I.final.length > 0, instPillCls: I.final.length ? 'count-pill on' : 'count-pill',
+      menuOpen: st.menu, menuExpanded: st.menu ? 'true' : 'false', menuIcon: st.menu ? ICON.x : ICON.menu, toggleMenu: function () { self.setState({ menu: !st.menu }); },
+      announce: st.announce, setMainEl: this.setMainEl, setWrEl: this.setWrEl, setSearchEl: this.setSearchEl,
+      onRootKey: function (e) {
+        var tg = e.target && e.target.tagName;
+        if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(tg || '') && !(e.target && e.target.isContentEditable)) {
+          e.preventDefault(); if (st.route.name !== 'home') self.go('#/');
+          setTimeout(function () { if (self.searchEl) self.searchEl.focus(); }, 0);
+        }
+        if (e.key === 'Escape' && st.fOpen) self.setState({ fOpen: false });
+      },
+      mpVersion: c ? c.marketplace.version : '', shortSha: c ? c.build.commit.slice(0, 7) : '', commitUrl: c ? REPO_URL + '/commit/' + c.build.commit : REPO_URL,
+      buildDate: c ? c.build.commitDate.slice(0, 10) : '',
+      rHome: !errorState && r.name === 'home', rPlugin: false, rArtifact: false, rInstall: false, rNew: false, rNotFound: false,
+      q: st.q, hasQ: st.q.length > 0,
+      onQ: function (e) { var val = e.target.value; self.setState({ q: val }); clearTimeout(self.qt); self.qt = setTimeout(function () { self.setState({ qa: val }); }, 120); },
+      onSearchKey: function (e) { if (e.key === 'Escape') { e.preventDefault(); clearTimeout(self.qt); self.setState({ q: '', qa: '' }); } },
+      clearQ: function () { clearTimeout(self.qt); self.setState({ q: '', qa: '' }); if (self.searchEl) self.searchEl.focus(); },
+      skeletons: [1, 2, 3, 4, 5, 6], showResults: false, noResults: false, cards: [], countText: loading ? 'Loading the catalog…' : '',
+      kindChips: KINDS.map(function (k) { return { kind: k, label: KLABEL[k], count: '', pressed: 'false', disabled: true, toggle: function () { } }; }),
+      catChips: [], hasActive: false, activeCount: 0, fromQueryKinds: false, fromQueryText: '', emptyTags: [], emptyTitle: st.qa.trim() ? 'Nothing matched “' + st.qa.trim() + '”' : 'Nothing matched these filters',
+      filtersCls: st.fOpen ? 'filters open' : 'filters', filtersExpanded: st.fOpen ? 'true' : 'false', toggleFilters: function () { self.setState({ fOpen: !st.fOpen }); },
+      clearFilters: function () {
+        var pq = parseQuery(st.q), q = st.q;
+        if (pq.kinds.length) q = st.q.split(/(\s+)/).filter(function (w) { return !KINDW[w.toLowerCase().replace(/[^a-z]/g, '')]; }).join('').replace(/\s+/g, ' ').trim();
+        self.setState({ kinds: [], cats: [], q: q, qa: q });
+      },
+      pg: {}, ar: {}, ins: {}, nw: {}
+    };
+    if (!ready) return v;
+
+    if (r.name === 'home') {
+      var hv = this.homeVM(c);
+      v.cards = hv.cards; v.kindChips = hv.kindChips; v.catChips = hv.catChips; v.hasActive = hv.active > 0; v.activeCount = hv.active;
+      v.showResults = hv.n > 0; v.noResults = hv.n === 0; v.emptyTags = hv.tags;
+      v.countText = hv.n + (hv.n === 1 ? ' result' : ' results') + (hv.hasTerms ? ', best match first' : ', sorted by name');
+      v.fromQueryKinds = hv.derived.length > 0;
+      v.fromQueryText = hv.derived.map(function (k) { return KLABEL[k]; }).join(', ') + ' selected from the words in your search.';
+    } else if (r.name === 'plugin') {
+      var p = this.pById[r.id];
+      if (p) { v.rPlugin = true; v.pg = this.pluginVM(c, p); } else v.rNotFound = true;
+    } else if (r.name === 'artifact') {
+      var pp = this.pById[r.plugin], aa = this.byId[r.kind + ':' + r.plugin + '/' + r.aname];
+      if (pp && aa) { v.rArtifact = true; v.ar = this.artifactVM(c, aa, pp); } else v.rNotFound = true;
+    } else if (r.name === 'install') { v.rInstall = true; v.ins = this.installVM(c); }
+    else if (r.name === 'new') { v.rNew = true; v.nw = this.newVM(c); }
+    else v.rNotFound = true;
+    return v;
+  }
+}
+</script>
+</body>
+</html>

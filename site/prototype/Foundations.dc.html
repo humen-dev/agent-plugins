@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Catalog foundations</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./catalog.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.fd h2{font-size:1.375rem;margin:0 0 4px}
+.fd .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.fd .tok{display:grid;grid-template-columns:200px 1fr 1fr;gap:0;border:1px solid var(--divider);border-radius:10px;overflow:hidden;font-size:13px}
+.fd .tok > div{padding:8px 12px;border-top:1px solid var(--divider);display:flex;align-items:center;gap:10px;min-width:0}
+.fd .tok > .h{background:var(--sunken);color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;border-top:0}
+.fd .tok code{font-size:12px;color:var(--code)}
+.fd .grp{grid-column:1 / -1;background:var(--kind-bg);font-weight:700;color:var(--text)}
+.fd .ratio{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.fd .ts1{font-size:2.25rem}.fd .ts2{font-size:1.75rem}.fd .ts3{font-size:1.375rem}.fd .ts4{font-size:1.125rem}.fd .ts5{font-size:1rem}.fd .ts6{font-size:.875rem}.fd .ts7{font-size:.75rem}
+.fd .icons{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+.fd .icons > div{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:1px solid var(--divider);border-radius:10px;font-size:11px;color:var(--text-2);font-family:var(--mono)}
+</style>
+</helmet>
+<div class="app fd" data-theme="dark" style="padding: 48px; display: flex; flex-direction: column; gap: 48px; min-height: 3000px">
+<header class="stack" style="gap: 8px">
+<p class="label-sm">humen-dev catalog · SPEC-01</p>
+<h1 style="font-size: 2.25rem">Foundations</h1>
+<p class="t2" style="max-width: 60em">Tokens are CSS custom properties defined once in <code>catalog.css</code>; components read only tokens. Dark is the default on first visit, light is the toggle. Ratios are WCAG 2.x contrast, computed for each pair; text needs ≥ 4.5:1, UI boundaries (inputs, chips, cards, focus ring) ≥ 3:1.</p>
+</header>
+
+<section class="stack">
+<h2>Colour tokens</h2>
+<div class="tok" role="table" aria-label="Colour tokens, dark and light">
+<div class="h" role="columnheader">Token</div><div class="h" role="columnheader">Dark (default)</div><div class="h" role="columnheader">Light</div>
+<sc-for list="{{tokens}}" as="t" hint-placeholder-count="20">
+<sc-if value="{{t.isGroup}}"><div class="grp" role="rowheader">{{t.group}}</div></sc-if>
+<sc-if value="{{t.isTok}}">
+<div role="cell"><code>{{t.name}}</code></div>
+<div role="cell"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="0.5" y="0.5" width="27" height="27" rx="6" fill="{{t.dark}}" stroke="#6b7384"></rect></svg><span class="stack" style="gap: 0"><code>{{t.dark}}</code><span class="ratio">{{t.rd}}</span></span></div>
+<div role="cell"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="0.5" y="0.5" width="27" height="27" rx="6" fill="{{t.light}}" stroke="#7a8394"></rect></svg><span class="stack" style="gap: 0"><code>{{t.light}}</code><span class="ratio">{{t.rl}}</span></span></div>
+</sc-if>
+</sc-for>
+</div>
+</section>
+
+<div class="grid2">
+<section class="stack">
+<h2>Type</h2>
+<p class="t2 small">System fonts only — nothing to download, nothing from another origin. Sans: <code>ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif</code>. Mono (commands, paths, invokeAs): <code>ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace</code>. Sizes are rem so browser zoom and user font size apply.</p>
+<div class="stack" style="gap: 12px">
+<div class="row" style="justify-content: space-between"><span class="ts1" style="font-weight: 650">Page title 36</span><code class="ratio">--fs-36 · 2.25rem / 1.25 · h1 desktop</code></div>
+<div class="row" style="justify-content: space-between"><span class="ts2" style="font-weight: 650">Title 28</span><code class="ratio">--fs-28 · h1 mobile</code></div>
+<div class="row" style="justify-content: space-between"><span class="ts3" style="font-weight: 650">Section 22</span><code class="ratio">--fs-22 · h2, card name</code></div>
+<div class="row" style="justify-content: space-between"><span class="ts4" style="font-weight: 600">Lead 18</span><code class="ratio">--fs-18 · lead, search input</code></div>
+<div class="row" style="justify-content: space-between"><span class="ts5">Body 16 — Markdown body text</span><code class="ratio">--fs-16 · 1.55</code></div>
+<div class="row" style="justify-content: space-between"><span class="ts6">UI 14 — chips, tables, card text</span><code class="ratio">--fs-14</code></div>
+<div class="row" style="justify-content: space-between"><span class="ts7" style="font-weight: 700; text-transform: uppercase; letter-spacing: .07em">Label 12 — badges, group titles</span><code class="ratio">--fs-12</code></div>
+<div class="row" style="justify-content: space-between"><code style="font-size: .875rem; color: var(--code)">claude plugin install spec-driven@humen-dev</code><code class="ratio">--mono 14</code></div>
+</div>
+</section>
+
+<section class="stack">
+<h2>Spacing, radius, targets</h2>
+<p class="t2 small">4-px base. Touch targets ≥ 44 px (chips 40 px tall with 8 px gaps). Labels get room for +30 % length: buttons and chips size to content and wrap, never fixed widths.</p>
+<div class="stack" style="gap: 6px">
+<sc-for list="{{space}}" as="s"><div class="row" style="gap: 12px"><code style="width: 64px">{{s.name}}</code><svg width="{{s.px}}" height="14" aria-hidden="true"><rect width="{{s.px}}" height="14" rx="3" fill="#8c9eff"></rect></svg><span class="ratio">{{s.px}} px · {{s.use}}</span></div></sc-for>
+</div>
+<div class="row" style="gap: 16px; margin-top: 8px">
+<div class="stack" style="gap: 4px; align-items: center"><div style="width: 56px; height: 40px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface)"></div><code class="ratio">--r-sm 6</code></div>
+<div class="stack" style="gap: 4px; align-items: center"><div style="width: 56px; height: 40px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface)"></div><code class="ratio">--r-md 10</code></div>
+<div class="stack" style="gap: 4px; align-items: center"><div style="width: 56px; height: 40px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface)"></div><code class="ratio">--r-lg 14</code></div>
+<div class="stack" style="gap: 4px; align-items: center"><div style="width: 56px; height: 40px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); outline: 2px solid var(--focus); outline-offset: 2px"></div><code class="ratio">focus ring 2 + 2</code></div>
+</div>
+<h3 style="font-size: 1.125rem; margin-top: 16px">Breakpoints &amp; motion</h3>
+<ul class="t2 small" style="margin: 0; padding-left: 18px">
+<li>Mobile 320–767 px · desktop ≥ 768 px. Content max-width 1200 px, gutters 16 / 24 px. No horizontal page scroll; only command boxes and Markdown tables scroll inside themselves.</li>
+<li><code>prefers-reduced-motion</code>: all transitions and the skeleton pulse are off. State never depends on motion.</li>
+<li>Theme: <code>data-theme</code> on the root, default <code>dark</code> regardless of OS; the choice is stored in <code>localStorage</code> (guarded with try/catch).</li>
+</ul>
+</section>
+</div>
+
+<section class="stack">
+<h2>Icons <span class="muted small">{{iconCount}} inline SVGs · 24 × 24 · 2 px stroke · currentColor · no text in icons</span></h2>
+<div class="icons">
+<sc-for list="{{icons}}" as="i" hint-placeholder-count="24"><div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px"><path d="{{i.d}}"></path></svg>{{i.name}}</div></sc-for>
+</div>
+<p class="t2 small">Each icon is one <code>path</code> string, so the set ships as a single <code>icons.ts</code> map (≈ 3 KB) rendered by one <code>&lt;Icon name&gt;</code> component — no icon font, nothing fetched. Every icon sits next to visible text, except the search clear button, which has a visible tooltip and an accessible name.</p>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":3000}}'>
+var ICONS = {
+  logo: 'M4 4h7v7H4zM13 13h7v7h-7zM13 4h7v7M4 13v7h7', search: 'M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13zM20 20l-4.8-4.8', x: 'M6 6l12 12M18 6L6 18',
+  sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  moon: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z', menu: 'M4 7h16M4 12h16M4 17h16', filter: 'M4 6h16M7 12h10M10 18h4', copy: 'M9 9h10v10H9zM5 15V5h10',
+  check: 'M5 12.5l4.5 4.5L19 7.5', ext: 'M14 5h5v5M19 5l-8 8M18 14v5H5V6h5', chevD: 'M6 9l6 6 6-6', chevR: 'M9 6l6 6-6 6', plus: 'M12 5v14M5 12h14', minus: 'M5 12h14',
+  arrowR: 'M5 12h14M13 6l6 6-6 6', arrowL: 'M19 12H5M11 6l-6 6 6 6', dot: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z', warn: 'M12 3.5l9 16H3zM12 10v4M12 17v.5',
+  err: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7.5v5.5M12 16.5v.5', info: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 11v5.5M12 7.5v.5',
+  pkg: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9', skill: 'M6 4h11a1 1 0 0 1 1 1v15H8a2 2 0 0 1-2-2zM6 18a2 2 0 0 1 2-2h10M10 8h5',
+  agent: 'M7 8h10a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3zM12 4v4M9 13v1.5M15 13v1.5', hook: 'M15 3v10a5 5 0 0 1-10 0v-1M5 12l-2 2.5M5 12l2.5 2M15 3h-3',
+  command: 'M4 4h16v16H4zM14.5 8l-5 8', mcp: 'M9 3v5M15 3v5M7 8h10v3a5 5 0 0 1-10 0zM12 16v5', file: 'M6 3h8l4 4v14H6zM14 3v4h4', refresh: 'M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6',
+  code: 'M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12', list: 'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01', clock: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7v5l3 2',
+  compass: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM15.5 8.5l-2 5-5 2 2-5z'
+};
+var G = function (g) { return { isGroup: true, group: g }; };
+var T = function (name, dark, light, rd, rl) { return { isTok: true, name: name, dark: dark, light: light, rd: rd || '', rl: rl || '' }; };
+var TOKENS = [
+  G('Surfaces'),
+  T('--bg', '#0e1014', '#f6f7f9', 'page background', 'page background'),
+  T('--surface', '#171a21', '#ffffff', 'raised · cards, panels', 'raised · cards, panels'),
+  T('--sunken', '#090b0e', '#eceef2', 'sunken · code boxes, table heads', 'sunken · code boxes, table heads'),
+  T('--overlay', '#171a21', '#ffffff', 'mobile filter sheet, menu (+ scrim rgba(4,5,8,.72))', 'mobile filter sheet, menu (+ scrim rgba(20,23,31,.45))'),
+  G('Text'),
+  T('--text', '#e9ecf2', '#14171f', '16.1 on bg · 14.7 on surface', '16.7 on bg · 17.9 on surface'),
+  T('--text-2', '#b9c0cc', '#3c4351', '10.4 bg · 9.5 surface', '9.3 bg · 9.9 surface'),
+  T('--muted', '#939bab', '#596171', '6.8 bg · 6.2 surface · 7.1 sunken', '5.8 bg · 6.2 surface · 5.4 sunken'),
+  T('--on-accent', '#0b0d12', '#ffffff', '7.8 on accent · 9.8 hover · 6.2 pressed', '6.4 on accent · 8.0 hover · 10.1 pressed'),
+  T('--link', '#8fb4ff', '#2a49cf', '9.2 bg · 8.4 surface', '6.6 bg · 7.1 surface'),
+  T('--link-visited', '#c9a8ff', '#6a3bbf', '9.5 bg · 8.7 surface', '6.6 bg · 7.0 surface'),
+  G('Lines'),
+  T('--border', '#6b7384', '#7a8394', '4.0 bg · 3.7 surface (≥ 3 boundary)', '3.6 bg · 3.8 surface · 3.3 sunken'),
+  T('--divider', '#2a2f3a', '#dde1e8', 'decorative only — never the sole boundary of a control', 'decorative only'),
+  T('--focus', '#5cc8ff', '#0a5fd1', '10.1 bg · 9.3 surface (ring sits on page bg, 2 px offset)', '5.5 bg · 5.9 surface'),
+  G('Accent'),
+  T('--accent', '#8c9eff', '#3550d6', 'primary action · 7.7 vs bg', 'primary action · 6.0 vs bg'),
+  T('--accent-hover', '#a5b4ff', '#2b43bb', 'hover', 'hover'),
+  T('--accent-pressed', '#7589f5', '#22379b', 'pressed / selected chip', 'pressed / selected chip'),
+  G('Kind colours (text + border on --kind-bg; always with label + icon)'),
+  T('--kind-bg', '#1f2430', '#eef0f5', 'badge fill', 'badge fill'),
+  T('--k-plugin', '#9aa8ff', '#3550d6', '7.0 on kind-bg', '5.6 on kind-bg'),
+  T('--k-skill', '#5ed3a3', '#0b7650', '8.4', '4.9'),
+  T('--k-agent', '#f2a65e', '#9c4b08', '7.7', '5.4'),
+  T('--k-hook', '#ec92d4', '#9e2f86', '7.1', '5.7'),
+  T('--k-command', '#6ccbe8', '#0a6a8a', '8.4 · reserved, none yet', '5.4 · reserved'),
+  T('--k-mcp', '#d2bd6c', '#7a6410', '8.3 · reserved, none yet', '5.0 · reserved'),
+  G('Status (text/icon on its own background)'),
+  T('--warn / --warn-bg', '#f3bd4f', '#875700', '9.1 on #2b2210 · Runs code, missing dependency', '5.6 on #fff3d4'),
+  T('--ok / --ok-bg', '#5ed3a3', '#0b7650', '8.6 on #10261d · “Copied”', '5.0 on #e3f6ec'),
+  T('--err / --err-bg', '#ff8f85', '#b1261c', '7.8 on #2d1513 · catalog error', '5.6 on #fde8e6'),
+  T('--info / --info-bg', '#8fb4ff', '#2a49cf', '8.1 on #141d2e · neutral notices', '6.1 on #e8eefd'),
+  G('Change types (with + / → / • icon and text)'),
+  T('--c-added', '#5ed3a3', '#0b7650', '9.4 on surface', '5.6 on surface'),
+  T('--c-version', '#9aa8ff', '#3550d6', '7.8', '6.4'),
+  T('--c-change', '#b9c0cc', '#3c4351', '9.5', '9.9'),
+  G('Highlight & code'),
+  T('--mark', '#5c4a10', '#ffe27a', 'mark bg · text on it 7.3', 'mark bg · text on it 14.0'),
+  T('--code / --code-bg', '#d9def0', '#1d2130', '14.7 on #090b0e', '13.8 on #eceef2')
+];
+var SPACE = [['--s1', 4, 'icon gaps'], ['--s2', 8, 'chip gaps, inline'], ['--s3', 12, 'card inner rhythm'], ['--s4', 16, 'mobile gutter, stacks'], ['--s5', 24, 'card padding, desktop gutter'], ['--s6', 32, 'column gap'], ['--s7', 48, 'hero top, page sections'], ['--s8', 64, 'footer offset']];
+class Component extends DCLogic {
+  renderVals() {
+    var icons = Object.keys(ICONS).map(function (k) { return { name: k, d: ICONS[k] }; });
+    return { tokens: TOKENS, space: SPACE.map(function (s) { return { name: s[0], px: s[1], use: s[2] }; }), icons: icons, iconCount: icons.length };
+  }
+}
+</script>
+</body>
+</html>

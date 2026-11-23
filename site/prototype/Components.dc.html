@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Catalog component states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./catalog.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+.cs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));min-height:3400px}
+.cs > .app{min-height:0;padding:40px 32px;display:flex;flex-direction:column;gap:28px}
+.cs h2{font-size:1.125rem}
+.cs .lbl{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:4px}
+.cs .cell{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.cs .is-focus{outline:2px solid var(--focus);outline-offset:2px}
+.cs .chip.is-hover{background:var(--kind-bg);border-color:var(--text-2)}
+.cs .btn.is-hover{background:var(--kind-bg);border-color:var(--text-2)}
+.cs .btn.primary.is-hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.cs .btn.primary.is-active{background:var(--accent-pressed);border-color:var(--accent-pressed)}
+.cs .tip.show{opacity:1}
+.cs .ph-row{color:var(--muted);font-style:italic}
+</style>
+</helmet>
+<div class="cs">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="2">
+<div class="app" data-theme="{{t.theme}}">
+<header class="stack" style="gap: 4px"><p class="label-sm">{{t.label}}</p><h1 style="font-size: 1.75rem">Component states</h1><p class="t2 small">Same classes and tokens as the prototype. Hover / focus / pressed are forced here so every state is visible.</p></header>
+
+<section class="stack" style="gap: 10px"><h2>Buttons</h2>
+<div class="row" style="gap: 12px; align-items: flex-start">
+<div class="cell"><button type="button" class="btn primary">Retry</button><span class="lbl">default</span></div>
+<div class="cell"><button type="button" class="btn primary is-hover">Retry</button><span class="lbl">hover</span></div>
+<div class="cell"><button type="button" class="btn primary is-active">Retry</button><span class="lbl">pressed</span></div>
+<div class="cell"><button type="button" class="btn primary is-focus">Retry</button><span class="lbl">focus</span></div>
+<div class="cell"><button type="button" class="btn primary" disabled="{{ true }}">Retry</button><span class="lbl">disabled</span></div>
+</div>
+<div class="row" style="gap: 12px; align-items: flex-start">
+<div class="cell"><button type="button" class="btn">Clear filters</button><span class="lbl">secondary</span></div>
+<div class="cell"><button type="button" class="btn is-hover">Clear filters</button><span class="lbl">hover</span></div>
+<div class="cell"><button type="button" class="btn is-focus">Clear filters</button><span class="lbl">focus</span></div>
+<div class="cell"><button type="button" class="btn ghost" aria-pressed="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.moon}}"></path></svg>Light theme</button><span class="lbl">theme toggle · off</span></div>
+<div class="cell"><button type="button" class="btn ghost is-focus" aria-pressed="true"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sun}}"></path></svg>Light theme</button><span class="lbl">pressed + focus</span></div>
+</div>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Filter chips · Kind / Category</h2>
+<div class="row" style="gap: 12px; align-items: flex-start">
+<div class="cell"><button type="button" class="chip" aria-pressed="false"><span class="kdot" data-kind="skill"></span>Skill<span class="n">12</span></button><span class="lbl">default</span></div>
+<div class="cell"><button type="button" class="chip is-hover" aria-pressed="false"><span class="kdot" data-kind="agent"></span>Agent<span class="n">6</span></button><span class="lbl">hover</span></div>
+<div class="cell"><button type="button" class="chip" aria-pressed="true"><svg class="ico sm tick" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg><span class="kdot" data-kind="skill"></span>Skill<span class="n">12</span></button><span class="lbl">selected</span></div>
+<div class="cell"><button type="button" class="chip is-focus" aria-pressed="false">backend<span class="n">5</span></button><span class="lbl">focus</span></div>
+<div class="cell"><button type="button" class="chip" aria-pressed="false" disabled="{{ true }}"><span class="kdot" data-kind="hook"></span>Hook<span class="n">0</span></button><span class="lbl">disabled · count 0</span></div>
+</div>
+<div class="row" style="gap: 12px; align-items: flex-start">
+<div class="cell"><button type="button" class="btn ftoggle" style="display: inline-flex"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.filter}}"></path></svg>Filters<span class="count-pill on">2</span></button><span class="lbl">filter toggle (&lt; 768 px) · 2 active</span></div>
+<div class="cell"><div class="row"><a class="tag" href="#">backend</a><a class="tag" href="#">django</a><a class="tag is-focus" href="#">read-only</a></div><span class="lbl">tag chips · default, focus</span></div>
+</div>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Kind badges · Runs code</h2>
+<div class="row">
+<span class="badge" data-kind="plugin"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.pkg}}"></path></svg>plugin</span>
+<span class="badge" data-kind="skill"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.skill}}"></path></svg>skill</span>
+<span class="badge" data-kind="agent"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.agent}}"></path></svg>agent</span>
+<span class="badge" data-kind="hook"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.hook}}"></path></svg>hook</span>
+<span class="badge" data-kind="command"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.command}}"></path></svg>command</span>
+<span class="badge" data-kind="mcp"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.mcp}}"></path></svg>MCP server</span>
+</div>
+<div class="row">
+<span class="badge" data-kind="skill"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.skill}}"></path></svg>skill · plugin</span>
+<span class="badge" data-kind="agent"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.agent}}"></path></svg>agent · plugin</span>
+<span class="cat-label">User-invoked only</span><span class="cat-label">workflow</span>
+</div>
+<span class="runs"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Runs code<span class="reasons">· hooks · scripts · agent with shell access</span></span>
+<span class="runs lg"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Runs code<span class="reasons">· agent with shell access</span></span>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Command box</h2>
+<div class="cell" style="align-items: stretch"><div class="cmd" data-state="idle"><code class="cmd-text" tabindex="0">claude plugin install spec-driven@humen-dev</code><button type="button" class="cmd-copy"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.copy}}"></path></svg><span>Copy</span></button></div><span class="lbl">idle</span></div>
+<div class="cell" style="align-items: stretch"><div class="cmd" data-state="ok"><code class="cmd-text" tabindex="0">claude plugin marketplace add humen-dev/agent-plugins</code><button type="button" class="cmd-copy"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg><span>Copied</span></button></div><span class="lbl">“Copied” · 2 s, announced politely</span></div>
+<div class="cell" style="align-items: stretch"><div class="cmd" data-state="fail"><code class="cmd-text is-focus" tabindex="0" style="background: var(--mark)">claude plugin install django-safe-migration@humen-dev</code><button type="button" class="cmd-copy"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.copy}}"></path></svg><span>Copy</span></button></div><p class="cmd-hint"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg>Copy didn’t work. The text is selected — press Ctrl/Cmd+C</p><span class="lbl">copy failed · text selected</span></div>
+<div class="cell" style="align-items: stretch; max-width: 300px"><div class="cmd"><code class="cmd-text" tabindex="0">claude plugin install django-celery-expert@humen-dev</code><button type="button" class="cmd-copy is-focus"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.copy}}"></path></svg><span>Copy</span></button></div><span class="lbl">narrow: scrolls inside the box · copy focused</span></div>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Search box</h2>
+<div class="search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg><input type="search" aria-label="Search (empty)" placeholder="e.g. a skill for safe Django migrations" value=""><span class="kbd-hint"><kbd>/</kbd> to search · <kbd>Esc</kbd> to clear</span></div>
+<div class="search" style="border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg><input type="search" aria-label="Search (filled)" value="I need a skill for safe migrations"><button type="button" class="icon-btn has-tip is-focus" aria-label="Clear search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg><span class="tip show" aria-hidden="true">Clear search (Esc)</span></button></div>
+<p class="count-line" style="margin: 0">1 result, best match first</p>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Change rows · day header</h2>
+<h3 class="day-h" style="font-size: .875rem">2026-11-19</h3>
+<ol class="chg-list">
+<li class="chg"><span class="ctype" data-type="version"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.arrowR}}"></path></svg><span class="v">1.2.0 → 1.3.0</span></span><a href="#" style="font-family: var(--mono); font-size: .875rem">spec-driven</a><span class="subj">feat(plan-verifier): wave 1 — U1, U2, U3, U4</span><a class="sha" href="#">55e81ba</a></li>
+<li class="chg"><span class="ctype" data-type="added"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>added<span class="v">1.0.0</span></span><a href="#" style="font-family: var(--mono); font-size: .875rem">research-tools</a><span class="subj">research-tools: add researcher agent</span><a class="sha" href="#">f24f1e8</a></li>
+<li class="chg"><span class="ctype" data-type="change"><svg class="ico sm" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.dot}}"></path></svg>change</span><span class="old">spec-creator</span><span class="subj">spec-creator: add specify skill</span><a class="sha" href="#">bf51c41</a></li>
+</ol>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Notices</h2>
+<div class="notice warn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.warn}}"></path></svg><div><p class="notice-title">[dependency] ^1.0.0 — not in this marketplace</p><p>[plugin] needs it. Install it from its own marketplace; it is not in the commands below.</p><p class="lbl">placeholder names — no real case in the catalog yet</p></div></div>
+<div class="notice info"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.info}}"></path></svg><div><p class="notice-title">“spec-creator” was removed from the shared selection</p><p>It is no longer in this marketplace. The rest of the shared link was kept.</p></div></div>
+<div class="notice ok"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg><div><p class="notice-title">Copied</p></div></div>
+<div class="notice err"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.err}}"></path></svg><div><p class="notice-title">The catalog didn’t load</p></div></div>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Install set controls</h2>
+<ul class="cb-list">
+<li class="cb-row"><input type="checkbox" id="{{t.theme}}-c1"><label for="{{t.theme}}-c1"><span class="nm">codebase-onboarding</span><span class="cat-label">workflow</span></label></li>
+<li class="cb-row"><input type="checkbox" id="{{t.theme}}-c2" checked="{{ true }}"><label for="{{t.theme}}-c2"><span class="nm">django-reviewer</span><span class="cat-label">backend</span><span class="runs">Runs code</span></label></li>
+<li class="cb-row"><input type="checkbox" id="{{t.theme}}-c3" checked="{{ true }}" disabled="{{ true }}"><label for="{{t.theme}}-c3"><span class="nm">django-expert</span><span class="cat-label">backend</span><span class="auto-label">added for django-reviewer</span></label></li>
+<li class="cb-row"><input type="checkbox" id="{{t.theme}}-c4" class="is-focus"><label for="{{t.theme}}-c4"><span class="nm">spec-driven</span><span class="cat-label">workflow</span></label><span class="lbl">focus</span></li>
+</ul>
+<div class="row" style="gap: 16px"><div class="seg" role="group" aria-label="Scope"><button type="button" aria-pressed="true">User</button><button type="button" aria-pressed="false">Project</button></div><div class="seg" role="group" aria-label="Scope, focused"><button type="button" aria-pressed="false">User</button><button type="button" aria-pressed="true" class="is-focus">Project</button></div></div>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Collapsible · breadcrumb · facts</h2>
+<details class="coll"><summary><svg class="ico sm chev" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.chevR}}"></path></svg>THIRD_PARTY_NOTICES.md <span class="sub">plugins/django-reviewer/THIRD_PARTY_NOTICES.md</span></summary><div class="coll-body"><p class="small t2">Notice body (Markdown)</p></div></details>
+<details class="coll" open="{{ true }}"><summary><svg class="ico sm chev" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.chevR}}"></path></svg>PostgreSQL Locking Reference <span class="sub">references/postgres-locks.md</span></summary><div class="coll-body"><p class="small muted">Open: the file renders here as Markdown.</p></div></details>
+<nav class="crumbs" aria-label="Breadcrumb example"><ol><li><a href="#">spec-driven</a></li><li><a href="#">skills</a></li><li><span aria-current="page">plan</span></li></ol></nav>
+<dl class="facts"><dt>Invocation</dt><dd>User-invoked only</dd><dt>Argument hint</dt><dd><code>&lt;spec path&gt; | SPEC-NN | &lt;request&gt; | gap &lt;plan path&gt; &lt;SPEC-NN AC-k | EC-k | NFR-k | UT-k rows, one per line&gt;</code></dd><dt>Tools</dt><dd><span class="muted">not declared: inherits the session's tools</span></dd></dl>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>MCP servers table <span class="muted small">hidden when empty · no real servers yet</span></h2>
+<div class="tbl-wrap"><div class="tbl t-mcp" role="table" aria-label="MCP servers (design only)">
+<div class="tr head" role="row"><div class="th" role="columnheader">Server</div><div class="th" role="columnheader">Type</div><div class="th" role="columnheader">Command or URL</div></div>
+<div class="tr ph-row" role="row"><div class="td" role="cell" data-label="Server">[server name]</div><div class="td" role="cell" data-label="Type">[stdio | http]</div><div class="td" role="cell" data-label="Command"><code>[command, verbatim]</code></div></div>
+</div></div>
+<div class="tbl-wrap"><div class="tbl t-agents" role="table" aria-label="Agent without a tools list (design only)">
+<div class="tr head" role="row"><div class="th" role="columnheader">Agent</div><div class="th" role="columnheader">Model</div><div class="th" role="columnheader">Tools</div><div class="th" role="columnheader">Disallowed tools</div></div>
+<div class="tr" role="row"><div class="td ph-row" role="cell" data-label="Agent">[agent]</div><div class="td" role="cell" data-label="Model"><code>inherit</code></div><div class="td" role="cell" data-label="Tools"><span class="muted">not declared: inherits the session's tools</span></div><div class="td" role="cell" data-label="Disallowed">—</div></div>
+</div></div>
+<p class="plain-sentence">This plugin ships no hooks, MCP servers or scripts.</p>
+</section>
+
+<section class="stack" style="gap: 10px"><h2>Loading · empty · error · not found</h2>
+<div class="skel" aria-hidden="true"><i class="b"></i><i class="h"></i><i class="s"></i><i></i><i class="c"></i></div>
+<div class="state-panel"><svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg><h3 style="font-size: 1.125rem">Nothing matched “kubernetes helm chart”</h3><div class="row"><a class="tag" href="#">backend</a><a class="tag" href="#">django</a><a class="tag" href="#">python</a><a class="tag" href="#">read-only</a><a class="tag" href="#">agent</a></div><div class="row"><button type="button" class="btn">Clear filters</button><a class="btn primary" href="#">Request it</a></div></div>
+<div class="state-panel err-p"><svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.err}}"></path></svg><h3 style="font-size: 1.125rem">The catalog didn’t load</h3><button type="button" class="btn primary">Retry</button></div>
+<div class="state-panel"><svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.compass}}"></path></svg><h3 style="font-size: 1.125rem">Page not found</h3><a class="btn primary" href="#">Back to search</a></div>
+</section>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":3400}}'>
+var ICONS = {
+  sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  moon: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z', search: 'M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13zM20 20l-4.8-4.8', x: 'M6 6l12 12M18 6L6 18',
+  filter: 'M4 6h16M7 12h10M10 18h4', copy: 'M9 9h10v10H9zM5 15V5h10', check: 'M5 12.5l4.5 4.5L19 7.5', chevR: 'M9 6l6 6-6 6', plus: 'M12 5v14M5 12h14',
+  arrowR: 'M5 12h14M13 6l6 6-6 6', dot: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z', warn: 'M12 3.5l9 16H3zM12 10v4M12 17v.5',
+  err: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7.5v5.5M12 16.5v.5', info: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 11v5.5M12 7.5v.5',
+  pkg: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9', skill: 'M6 4h11a1 1 0 0 1 1 1v15H8a2 2 0 0 1-2-2zM6 18a2 2 0 0 1 2-2h10M10 8h5',
+  agent: 'M7 8h10a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3zM12 4v4M9 13v1.5M15 13v1.5', hook: 'M15 3v10a5 5 0 0 1-10 0v-1M5 12l-2 2.5M5 12l2.5 2M15 3h-3',
+  command: 'M4 4h16v16H4zM14.5 8l-5 8', mcp: 'M9 3v5M15 3v5M7 8h10v3a5 5 0 0 1-10 0zM12 16v5', compass: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM15.5 8.5l-2 5-5 2 2-5z'
+};
+class Component extends DCLogic {
+  renderVals() {
+    return { ic: ICONS, themes: [{ theme: 'dark', label: 'Dark · default' }, { theme: 'light', label: 'Light · toggle' }] };
+  }
+}
+</script>
+</body>
+</html>
