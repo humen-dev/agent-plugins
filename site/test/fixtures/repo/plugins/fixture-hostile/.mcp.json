@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "url-only": { "url": "https://example.com/sse" }
+  }
+}

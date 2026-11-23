@@ -1,0 +1,16 @@
+{
+  "description": "Top-level hooks description.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/scripts/guard.sh", "timeout": 5 }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [{ "type": "command", "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/guard.sh --post" }]
+      }
+    ]
+  }
+}

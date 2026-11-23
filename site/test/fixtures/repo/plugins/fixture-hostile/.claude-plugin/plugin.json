@@ -1,0 +1,7 @@
+{
+  "name": "fixture-hostile",
+  "version": "0.0.1",
+  "author": { "name": "Hostile", "url": "javascript:alert(2)" },
+  "homepage": "javascript:alert(1)",
+  "repository": "data:text/html,<script>alert(3)</script>"
+}

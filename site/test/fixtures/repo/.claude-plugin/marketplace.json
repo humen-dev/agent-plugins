@@ -1,0 +1,44 @@
+{
+  "name": "fixture-market",
+  "description": "Fixture marketplace for the catalog generator tests.",
+  "owner": { "name": "Fixture Owner" },
+  "metadata": { "version": "2.0.0" },
+  "plugins": [
+    {
+      "name": "fixture-full",
+      "source": "./plugins/fixture-full",
+      "description": "Entry description of the full plugin.",
+      "category": "tools",
+      "tags": ["Alpha", "beta"]
+    },
+    {
+      "name": "fixture-minimal",
+      "source": "./plugins/fixture-minimal",
+      "description": "Minimal plugin."
+    },
+    {
+      "name": "fixture-inline",
+      "source": "./plugins/fixture-inline",
+      "description": "Hooks and MCP servers defined inline in plugin.json."
+    },
+    {
+      "name": "fixture-paths",
+      "source": "./plugins/fixture-paths",
+      "description": "Hooks and MCP servers referenced by path."
+    },
+    {
+      "name": "fixture-hostile",
+      "source": "./plugins/fixture-hostile",
+      "description": "Hostile and malformed sources."
+    },
+    {
+      "name": "fixture-external",
+      "source": {
+        "source": "github",
+        "repo": "example/external",
+        "sha": "0123456789abcdef0123456789abcdef01234567"
+      },
+      "description": "External plugin, skipped by the generator."
+    }
+  ]
+}
