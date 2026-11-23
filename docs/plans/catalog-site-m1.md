@@ -416,6 +416,7 @@ Serialized files: `.claude/sdd.json`, `site/package.json`, `site/package-lock.js
 - **yaml@2 rejection detection** relies on warning code `TAG_RESOLVE_FAILED` and the `toJS` alias-limit throw (https://eemeli.org/yaml/); a library change shows as a failing UT-10b test.
 - **Annotation injection** from hostile diagnostic text: §3.4 escaping, tested in U1.
 - **Real-repo tests depend on history** (34c247a): a shallow local clone fails them with the AC-9 message, which is the intended signal.
+- **Plain-text summaries:** `summary` has tags and every `<`/`>` stripped, but it is still untrusted text; M2 must render descriptions and summaries as text nodes, never via `innerHTML` (UT-3).
 - **CODEOWNERS** (`CODEOWNERS:6-8`) requires owner review of fixture `hooks/`, `.mcp.json` and `.github/`.
 
 ## 9. Out of scope

@@ -128,6 +128,19 @@ describe('plugins (X-1, X-2, X-9..X-11)', () => {
     expect(s.length).toBeLessThanOrEqual(300);
     expect(s.endsWith('word…')).toBe(true);
   });
+
+  // Each input as-is, and behind text so a paragraph starting with `<` (skipped as HTML by X-9) still hits the stripper.
+  it.each(['Hello <script', '<<script>script>x', 'a <b>bold</b> c'].flatMap((s) => [s, `text ${s}`]))(
+    'summary is plain text without < or > for %j',
+    (input) => {
+      const r = { readJson: () => null, readText: () => `# T\n\n${input}\n`, list: () => [] };
+      const q = extractCatalogParts({ ...r, readJson: (/** @type {string} */ p) => (p === MKT
+        ? { name: 'm', plugins: [{ name: 'p', source: './plugins/p', description: 'd' }] } : null) }, createDiagnostics(), {
+        root, repoUrl: REPO_URL, commit: 'c', marketplaceName: 'm',
+      });
+      expect(q.plugins[0].summary).not.toMatch(/[<>]/);
+    },
+  );
 });
 
 describe('artifacts (X-3..X-8)', () => {

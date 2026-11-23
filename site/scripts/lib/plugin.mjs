@@ -70,6 +70,7 @@ function summarize(md, fallback) {
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '') // unclosed or nested tags must not leave a tag start behind
     .replace(/[`*_~]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
