@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.mjs"]
+}
