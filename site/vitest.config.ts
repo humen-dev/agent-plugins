@@ -4,6 +4,5 @@ export default defineConfig({
   test: {
     include: ['test/**/*.test.mjs'],
     exclude: ['test/fixtures/**', 'node_modules/**'],
-    passWithNoTests: true,
   },
 });

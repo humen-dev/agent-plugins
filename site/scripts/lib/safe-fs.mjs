@@ -15,6 +15,7 @@ const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
  */
 export function createReader(root, diag) {
   const rootAbs = resolve(root);
+  const realRoot = realpathSync(rootAbs);
 
   /** @param {string} rel */
   const abs = (rel) => resolve(rootAbs, rel);
@@ -50,7 +51,8 @@ export function createReader(root, diag) {
     } catch {
       return null;
     }
-    if (!real.startsWith(realWithin + sep)) {
+    // A symlinked plugin folder must not move `within` itself outside the repo.
+    if (!realWithin.startsWith(realRoot + sep) || !real.startsWith(realWithin + sep)) {
       return diag.warn(rel, 'file: outside the plugin folder, skipped'), null;
     }
     if (st.size > MAX_BYTES) return diag.warn(rel, 'file: larger than 1 MB, skipped'), null;

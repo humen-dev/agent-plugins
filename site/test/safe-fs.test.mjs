@@ -10,9 +10,14 @@ const W = 'plugins/p';
 let root;
 let linkOk = true;
 let dirLinkOk = true;
+let pluginLinkOk = true;
+/** @type {string} */
+let outside;
 
 beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), 'safefs-'));
+  outside = mkdtempSync(join(tmpdir(), 'safefs-out-'));
+  writeFileSync(join(outside, 'x.md'), 'OUTSIDE');
   mkdirSync(join(root, W, 'sub'), { recursive: true });
   mkdirSync(join(root, W, 'node_modules'), { recursive: true });
   writeFileSync(join(root, 'secret.txt'), 'TOPSECRET');
@@ -34,8 +39,16 @@ beforeAll(() => {
   } catch {
     dirLinkOk = false;
   }
+  try {
+    symlinkSync(outside, join(root, 'plugins', 'q'), 'junction');
+  } catch {
+    pluginLinkOk = false;
+  }
 });
-afterAll(() => rmSync(root, { recursive: true, force: true }));
+afterAll(() => {
+  rmSync(root, { recursive: true, force: true });
+  rmSync(outside, { recursive: true, force: true });
+});
 
 const setup = () => {
   const diag = createDiagnostics();
@@ -62,6 +75,15 @@ describe('safe-fs', () => {
     const { diag, r } = setup();
     expect(r.readText(`${W}/dirlink/secret.txt`, W)).toBeNull();
     expect(diag.list().map((d) => d.message)).toEqual(['file: outside the plugin folder, skipped']);
+  });
+
+  it('symlinked plugin folder outside the repo: null, one warning, content never read (UT-7)', (ctx) => {
+    if (!pluginLinkOk) ctx.skip('directory link failed (EPERM)');
+    const { diag, r } = setup();
+    expect(r.readText('plugins/q/x.md', 'plugins/q')).toBeNull();
+    expect(diag.list()).toEqual([
+      { level: 'warning', path: 'plugins/q/x.md', message: 'file: outside the plugin folder, skipped' },
+    ]);
   });
 
   it('oversized and non-UTF-8 files: null, one warning each (UT-8)', () => {
