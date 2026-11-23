@@ -109,7 +109,7 @@ flowchart LR
   V --> B
   G --> B
   D --> PAGES[humen-dev.github.io/agent-plugins/]
-  PAGES --> BR[Browser: the site loads index.html, JS, catalog.json]
+  PAGES --> BR[Browser: the site loads index.html, JS, hashed catalog chunk]
 ```
 
 - **The generator** runs only at build time, in the pipeline (and locally for
@@ -119,17 +119,18 @@ flowchart LR
   a warning in `diagnostics`. It is the only component that reads the
   repository.
 - **The site** is a Vite + React + TypeScript single-page app with hash
-  routing. It fetches `catalog.json` from its own origin. It builds the search
-  index in memory (MiniSearch) and renders every page from that one file. It
-  never calls the GitHub API or reads repository files.
+  routing. It loads the catalog with a dynamic `import()`, so Vite emits it as
+  a content-hashed chunk served from the site's own origin, and HTML, JS and
+  catalog always come from the same build. It builds the search index in
+  memory (MiniSearch) and renders every page from that catalog. It never calls
+  the GitHub API or reads repository files.
 - **The pipeline** is one new workflow, "Site", with three jobs that show as
   separate checks: "Site: tests", "Site: build" and "Site: deploy" (see
   CI/CD). On a pull request only tests and build run. On a push to `main`,
   deploy also runs.
 - **Code location**: everything new sits under `site/` (app, generator, tests,
   fixtures, its own `package.json` and lockfile), plus the new workflow and an
-  issue form. Two existing files change: `marketplace.json` gets a `renames`
-  entry (AC-73), and the docs change (AC-57a..AC-58b).
+  issue form. Of the existing files, only the docs change (AC-57a..AC-58b).
 - **Routes** (hash):
 
   | Route | Page |
@@ -155,7 +156,6 @@ interface Markdown { path: string; source: string; }
 interface Person { name: string; url: string | null; } // e-mail is never copied
 
 interface Catalog {
-  schemaVersion: 1;
   marketplace: {
     name: string;              // "humen-dev"
     description: string;
@@ -198,7 +198,7 @@ interface Plugin {
   updated: string | null;      // committer date of the last non-merge commit touching path
   artifactIds: string[];       // sorted
   runs: RunProfile;
-  recentChanges: Change[];     // ≤ 10, newest first; includes changes whose renamedTo is this plugin
+  recentChanges: Change[];     // ≤ 10, newest first
 }
 
 interface ArtifactBase {
@@ -272,7 +272,6 @@ interface Change {
   date: string;                // committer date ISO 8601
   subject: string;             // first line of the commit message, verbatim
   plugin: string;              // the plugin folder name at that commit (an old name before a rename)
-  renamedTo: string | null;    // current name when `renames` maps `plugin` to a plugin in the catalog
   type: 'added' | 'version' | 'change';
   version: { from: string | null; to: string } | null; // set for 'added' (from = null) and 'version'
   url: string;                 // <repoUrl>/commit/<sha>
@@ -282,7 +281,7 @@ interface Change {
 ## Extraction rules
 
 The generator applies these rules. Each rule is covered by a fixture test
-(AC-1..AC-12, AC-65a..AC-73).
+(AC-1..AC-12, AC-65a..AC-72).
 
 | ID | Source | Rule |
 |---|---|---|
@@ -298,10 +297,10 @@ The generator applies these rules. Each rule is covered by a fixture test
 | X-10 | `README.md` `## What it runs` | Each `### heading` and its text become `whatItRuns[]`, verbatim. A missing section gives `[]`. |
 | X-11 | `THIRD_PARTY_NOTICES.md` | `thirdPartyNotices`, verbatim. |
 | X-12 | scripts | Every file in the plugin folder with extension `.mjs .js .cjs .ts .sh .bash .py .ps1`, except `*.test.*` and anything under `evals/`. |
-| X-13 | git history | `updated`, `recentChanges` and `changes` come from `git log --no-merges` on HEAD. (1) A commit **touches** plugin P when it changes a path under `plugins/P/`. A commit that touches several plugins gives one candidate per plugin. (2) The commit **adds** P when it is the first commit in which P is an exact `plugins[].name` value of `marketplace.json`. A substring in a description does not count. (3) The commit is a **version** change for P when the `version` in `plugins/P/.claude-plugin/plugin.json` differs from the parent's value (missing counts as `null`). (4) Each candidate becomes one `Change`, typed by precedence **added > version > change**. Type `added` sets `version` to `{from: null, to: <version at that commit>}`, or `null` when there is none. Type `version` sets `{from, to}`. Type `change` sets `version: null`. (5) `plugin` is the folder name P at that commit. `renamedTo` is `renames[P]` from `marketplace.json` at HEAD when that value is a plugin in the catalog, else `null`. |
+| X-13 | git history | `updated`, `recentChanges` and `changes` come from `git log --no-merges` on HEAD. (1) A commit is a **candidate** for plugin P when it changes a path under `plugins/P/`, or when it adds P (2). A commit can be a candidate for two or more plugins, one per plugin. (2) The commit **adds** P when it is the first commit in which P is an exact `plugins[].name` value of `marketplace.json`. A substring in a description does not count. (3) The commit is a **version** change for P only when `plugins/P/.claude-plugin/plugin.json` exists at both the parent and the commit, and its `version` differs. A deleted or moved plugin folder is a `change`. (4) Each candidate becomes one `Change`, typed by precedence **added > version > change**. Type `added` sets `version` to `{from: null, to: <version at that commit>}`, or `null` when there is none. Type `version` sets `{from, to}`. Type `change` sets `version: null`. (5) `plugin` is the folder name P at that commit. `renames` is not read. |
 | X-14 | Ignored | `evals/`, `templates/`, `node_modules/`, dot-files other than the ones named above, binary files. The generator itself reads nothing outside `.claude-plugin/` and `plugins/` except git metadata. The validator subprocess (X-17 step 1) is exempt: it reads what `scripts/validate-marketplace.mjs` reads, including `scripts/`. |
 | X-15 | Ordering | Arrays are sorted as the model comments state. Object keys are emitted in model order. JSON is UTF-8 with LF and 2-space indent. |
-| X-16 | Frontmatter parsing | Frontmatter is parsed as Claude Code reads it: lenient, not strict YAML. First, YAML is tried (core schema, no custom tags, alias limit 100). If YAML fails with a **syntax error**, each top-level `key: value` line is read by splitting at the first `: `, with no diagnostic. That makes an unquoted `: ` in a value valid. If YAML **rejects** the frontmatter for a custom tag or the alias limit, the same line reader is used, and one warning is added (UT-10b). Folded and literal blocks (`>`, `\|`) and `- item` lists are read by both parsers. A key that neither parser can read gets one warning (X-17), and only that key is dropped. |
+| X-16 | Frontmatter parsing | Frontmatter is parsed as Claude Code reads it: lenient, not strict YAML. First, YAML is tried (core schema, no custom tags, alias limit 100). If YAML fails with a **syntax error**, each top-level `key: value` line is read by splitting at the first `: `, with no diagnostic. That makes an unquoted `: ` in a value valid. If YAML **rejects** the frontmatter for a custom tag or the alias limit, the same line reader is used, and one warning is added (UT-10b). The line reader skips blank lines and `#` comment lines, including those inside a list. It types `true`/`false`, integers and floats as the YAML core schema does, and every other value as a string. Folded and literal blocks (`>`, `\|`) and `- item` lists are read by both parsers. A key that neither parser can read gets one warning (X-17), and only that key is dropped. |
 | X-17 | Diagnostics | Order: (1) run `scripts/validate-marketplace.mjs`. Its errors fail the generator (AC-8a, AC-8b). Its warnings are copied into `diagnostics`. (2) Every other source problem becomes one warning in `diagnostics` and skips only the affected item or field. Examples: agent or command frontmatter that cannot be read, a missing description, a hook entry of unknown shape, a file over 1 MB or not UTF-8, a symlink, a path outside the plugin folder, a README without the expected heading, rejected YAML (X-16). Each diagnostic is also printed as a GitHub `::warning file=<path>::<message>` line. |
 
 ## Search
@@ -322,8 +321,8 @@ against the index built from the real catalog. If one fails, the boosts or the
 synonym table are tuned in M2. The spec keeps the starting values, and
 changing the golden list needs the owner's approval.
 
-**Query pipeline**, in order. Steps 1–5 apply the same way to query text,
-indexed text, and the synonym table's keys and values.
+**Query pipeline**, in order. Steps 1–3 and 5 apply the same way to query
+text, indexed text, and the synonym table's keys and values.
 
 1. **Normalise**: lower-case, Unicode NFKD, combining marks stripped.
 2. **Tokenise**: split on every character that is not a letter, digit, `-`
@@ -333,21 +332,29 @@ indexed text, and the synonym table's keys and values.
    by can could do does for from get help how i if in into is it its me
    my need of on or our please some something that the these this those to tool
    use using want was we what which who will with would you your`.
-4. **Kind words**: `plugin`, `plugins`, `skill`, `skills`, `agent`, `agents`,
-   `subagent`, `subagents`, `command`, `commands`, `hook`, `hooks`, `mcp`,
-   `server` and `servers` are removed from the query terms and recorded as
-   kind hints. In indexed text they stay ordinary words.
+4. **Kind words** are removed from the query terms and recorded as kind hints.
+   In indexed text they stay ordinary words. This step applies only to the
+   query.
+
+   | Words | Kind |
+   |---|---|
+   | `plugin`, `plugins` | plugin |
+   | `skill`, `skills` | skill |
+   | `agent`, `agents`, `subagent`, `subagents` | agent |
+   | `command`, `commands` | command |
+   | `hook`, `hooks` | hook |
+   | `mcp`, `server`, `servers` | mcp |
 5. **Stem**: for tokens of 5+ chars, strip one suffix in this order:
    `ies`→`y`, `ing`, `ed`, `es`, `s`.
 6. **Synonyms**: one curated table. When a query token equals a key after steps
-   1–5, every token of each value is added at weight 0.5. A multi-word value
+   1–3 and 5, every token of each value is added at weight 0.5. A multi-word value
    expands to its tokens. Initial table: migration ↔ schema change, alter
    table · review ↔ audit, reviewer, code review · spec ↔ specification,
    requirement, sdd · plan ↔ planning · test ↔ testing · async ↔ background
    task, celery, queue · api ↔ rest, drf, endpoint · onboarding ↔ codebase
    overview, explain codebase · research ↔ investigate, find · security ↔
    vulnerability, auth, authorization · performance ↔ slow, optimize · diagram
-   ↔ mermaid · guard ↔ hook. The table is symmetric: each side expands to the
+   ↔ mermaid · guard ↔ block, restrict. The table is symmetric: each side expands to the
    other.
 7. **Match**: prefix match for terms of 3+ chars. Fuzzy (edit distance ≤ 1) for
    terms of 5+ chars. Terms combine with OR.
@@ -363,7 +370,9 @@ selects only `plugin` (AC-18b).
 
 **Results UX**:
 
-- With no query, the home page lists every plugin card, sorted by name.
+- With no query and no filter, the home page lists every plugin card, sorted
+  by name. With no query and active filters, it lists every item that passes
+  the filters, sorted by name.
 - Results update 120 ms after the last keystroke.
 - The query and filters live in the hash (`#/?q=…&kind=skill,agent&cat=backend`),
   so a URL reproduces the view.
@@ -421,7 +430,7 @@ Shown on every plugin page as its own section. Values are copied from
 | P0 | Artifact page | breadcrumb (plugin › kind › name); kind badge; description; invokeAs; facts table from typed fields; "All frontmatter" table; install command of its plugin; body rendered; supporting files, each as a collapsible section; source link. Hook and MCP pages show their typed fields in place of a body. Preloaded skills link to their artifact pages. |
 | P0 | What it runs | on the plugin page, as the Security profile section above |
 | P1 | Install-set builder | selection (checkbox per plugin, persisted in `localStorage` and in `?p=`); dependencies auto-added and marked "added for X"; scope switch: user or project; output A: CLI lines (`addCommand`, then one `claude plugin install <p>@humen-dev` per plugin, each line with `--scope project` when scope is project); output B: `.claude/settings.json` snippet (AC-40); a copy button for each output |
-| P1 | What's new | `changes` grouped by day, newest first. Each row has a type badge (added, version from→to, change), plugin (a link, or plain text for a name not in the catalog), subject, and a commit link. A plugin filter is available. |
+| P1 | What's new | `changes` grouped by day, newest first. Each row has a type badge (added, version from→to, change), plugin (a link, or plain text for a name not in the catalog, e.g. a name from before a rename), subject, and a commit link. A plugin filter is available. |
 | P1 | Request a skill | links in the header, the footer and the empty result. They open the repo's issue form `plugin-request` with the title and the "what" field prefilled. |
 | P0 | Global UI | header (site name, search link, Install set (n), What's new, Request, GitHub link, theme toggle); footer (marketplace name, marketplace version as text, "built from <short sha> on <date>" linking to the commit, repo link) |
 
@@ -462,13 +471,13 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 |---|---|---|---|---|---|
 | AC-1 | Ubiquitous | The generator shall emit a `catalog.json` that passes a JSON-schema check derived from the Catalog types. | US-10 | Must | unit — schema validation of the fixture output and of the real-repo output |
 | AC-2 | Ubiquitous | The generator shall create exactly one Plugin per `plugins[]` entry of `marketplace.json`, with the fields that rules X-1, X-2 and X-9..X-11 define. | US-3 | Must | unit — fixture repo with every field present, and one with every optional field absent |
-| AC-3 | Ubiquitous | The generator shall create one artifact per source item that rules X-3..X-8 define. | US-1 | Must | unit — fixture plugin with each kind, in both the inline-in-plugin.json and the separate-file form |
+| AC-3 | Ubiquitous | The generator shall create one artifact per source item that rules X-3..X-8 define. | US-1 | Must | unit — fixture plugin with each kind, in both the inline-in-plugin.json and the separate-file form; real case: `plugins/spec-driven/agents/spec-creator.md` (line-reader fallback, comment lines in `skills:`) gives exactly 3 `preloadedSkills` and `maxTurns` as a number where present |
 | AC-4 | Ubiquitous | The generator shall set each artifact's `invokeAs` to the value rule X-6 defines for its kind. | US-6 | Must | unit — table test per kind |
 | AC-5 | Ubiquitous | The generator shall derive `updated`, `recentChanges` and `changes` from git history by rule X-13. | US-8 | Must | unit — fixture git repo built in the test from scripted commits with known dates |
 | AC-6a | Event-driven | WHEN the generator runs on the real checkout, the generator shall emit a plugin set equal to the `plugins[].name` values of `.claude-plugin/marketplace.json`. | US-10 | Must | unit — invariant test on the real checkout |
-| AC-6b | Event-driven | WHEN the generator runs on the real checkout, the generator shall emit, per plugin and kind, as many artifacts as rules X-3..X-8 count in its source: SKILL.md files, agent files, command files, inner hook objects and MCP server keys. | US-10 | Must | unit — invariant test; spec-driven gives 7 skills, 4 agents, 2 hooks |
+| AC-6b | Event-driven | WHEN the generator runs on the real checkout, the generator shall emit, per plugin and kind, as many artifacts as rules X-3..X-8 count in its source: SKILL.md files, agent files, command files, inner hook objects and MCP server keys. | US-10 | Must | unit — invariant test; expected counts are computed from the source files in the test, never hard-coded |
 | AC-7a | Ubiquitous | The pipeline shall deploy only a site built from the catalog that the generator produced from the checkout of the deployed commit. | US-10 | Must | inspection — "Site: build" generates, then builds, then uploads in one job |
-| AC-7b | Unwanted behaviour | IF the built site output contains the string `fixture-`, THEN the pipeline shall fail "Site: build". | US-10 | Must | CI — a step greps `site/dist/`; a PR that imports a fixture fails |
+| AC-7b | Unwanted behaviour | IF a `plugins[].name` or an artifact `plugin` in the built catalog starts with `fixture-`, THEN the pipeline shall fail "Site: build". | US-10 | Must | CI — a step reads the generated catalog; a branch that builds from fixtures fails |
 | AC-8a | Unwanted behaviour | IF `scripts/validate-marketplace.mjs`, run as the generator's first step, reports one or more errors, THEN the generator shall exit non-zero with the validator's output on stderr. | US-10 | Must | unit — fixture with a validator error (missing `plugin.json`); a fixture with only validator warnings exits 0 |
 | AC-8b | Unwanted behaviour | IF the validator reports one or more errors, THEN the generator shall leave no `catalog.json` at the output path. | US-10 | Must | unit — output path absent after the failing run |
 | AC-9 | Unwanted behaviour | IF the checkout is a shallow clone, THEN the generator shall exit non-zero with the stderr message `full git history required (shallow clone)`. | US-8 | Must | unit — shallow fixture clone. This is an environment check, not a source problem, so X-17 does not apply. |
@@ -480,10 +489,8 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 | AC-65c | Unwanted behaviour | IF a source problem is not a validator error, THEN the generator shall omit from the catalog only the item or field that the problem affects. | US-10 | Must | unit — sibling items of the fixture are present |
 | AC-65d | Unwanted behaviour | IF the only problems are not validator errors, THEN the generator shall exit 0. | US-10 | Must | unit — exit code |
 | AC-66 | Event-driven | WHEN a frontmatter value contains an unquoted `: `, the generator shall read the value as the text after the first `: ` of that line, with no diagnostic. | US-1 | Must | unit — `description: Use when: X` gives `Use when: X` and no warning |
-| AC-71 | Event-driven | WHEN one commit qualifies as more than one change type for one plugin, the generator shall emit one Change of the highest type in the order added > version > change. | US-8 | Must | unit — fixture commit that adds a plugin with a plugin.json; real case 34c247a gives `added` for spec-driven |
+| AC-71 | Event-driven | WHEN one commit qualifies as more than one change type for one plugin, the generator shall emit one Change of the highest type in the order added > version > change. | US-8 | Must | unit — fixture commit that adds a plugin with a plugin.json; real case 34c247a gives `added` for spec-driven and `change` (not `version`) for spec-creator, whose plugin.json it deletes |
 | AC-72 | Event-driven | WHEN the generator emits a Change of type `added` for a commit whose `plugin.json` has a version, the generator shall set its `version` to `{from: null, to: <that version>}`. | US-8 | Must | unit |
-| AC-68 | Optional feature | WHERE the HEAD `marketplace.json` `renames` maps an old name to a plugin in the catalog, the generator shall set `renamedTo` to that plugin on every Change whose `plugin` is the old name. | US-8 | Must | unit — fixture with renames; the same fixture without renames gives `renamedTo: null` |
-| AC-73 | Optional feature | WHERE `scripts/validate-marketplace.mjs` and `claude plugin validate . --strict` both pass with a top-level `renames` object, the repository shall map `spec-creator` to `spec-driven` in `.claude-plugin/marketplace.json` `renames`. | US-8 | Should | CI — both validators pass on the M1 PR; otherwise the known data gap in Assumptions applies |
 
 ### Search and filters
 
@@ -515,7 +522,8 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 | AC-64b | Event-driven | WHEN the user clicks "clear filters", the site shall remove every filter while keeping the query. | US-2 | Must | e2e |
 | AC-25a | Event-driven | WHEN the user presses `/` while focus is outside a text field, the site shall move focus to the search box. | US-1 | Should | e2e |
 | AC-25b | Event-driven | WHEN the user presses `Esc` in the search box, the site shall clear the query. | US-1 | Should | e2e |
-| AC-26 | State-driven | WHILE the query is empty, the site shall list every plugin card sorted by name. | US-1 | Must | e2e |
+| AC-26a | State-driven | WHILE the query is empty and no filter is active, the site shall list every plugin card sorted by name. | US-1 | Must | e2e |
+| AC-26b | State-driven | WHILE the query is empty and one or more filters are active, the site shall list every item that passes the filters, sorted by name. | US-2 | Must | e2e — `#/?kind=skill` lists every skill |
 
 ### Plugin page, artifact page, what it runs
 
@@ -524,15 +532,15 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 | AC-27a | Event-driven | WHEN `#/plugins/<name>` opens, the site shall show each Plugin-page element of the Pages table whose data is present. | US-3 | Must | e2e on real plugins, one element at a time: django-reviewer (notices, homepage, dependencies); spec-driven (What it runs, hooks). Component test on fixture plugin `fixture-full` for all elements together. |
 | AC-27b | Event-driven | WHEN `#/plugins/<name>` opens, the site shall omit each Plugin-page element whose data is null or empty. | US-3 | Must | e2e — codebase-onboarding shows no notices section |
 | AC-28 | Ubiquitous | The site shall list on each plugin page every artifact of that plugin, each as a link to its artifact page. | US-3 | Must | e2e — link count equals `artifactIds.length` |
-| AC-29a | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per hook with event, matcher, type, verbatim command, timeout and description. | US-5 | Must | e2e — spec-driven shows 2 hook rows with the hooks.json commands |
+| AC-29a | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per hook with event, matcher, type, verbatim command, timeout and description. | US-5 | Must | e2e — for each plugin, the row count and commands equal its hooks in the catalog |
 | AC-29b | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per MCP server with transport, command + args or URL, and env var names. | US-5 | Must | component test — fixture MCP server |
-| AC-29c | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per script with its source link and the hooks that reference it. | US-5 | Must | e2e — spec-driven scripts list `write-guard.mjs` → write-guard |
-| AC-29d | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per agent with model, tools and disallowed tools. | US-5 | Must | e2e — spec-driven shows 4 agent rows |
-| AC-30 | State-driven | WHILE a plugin has no hooks, MCP servers or scripts, the site shall show in its What-it-runs section the one sentence that says the plugin runs no code. | US-5 | Must | e2e — research-tools |
+| AC-29c | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per script with its source link and the hooks that reference it. | US-5 | Must | e2e — for each plugin, rows and referencing hooks equal `runs.scripts` in the catalog |
+| AC-29d | Ubiquitous | The site shall show in each plugin's What-it-runs section a row per agent with model, tools and disallowed tools. | US-5 | Must | e2e — for each plugin, the row count equals its agents in the catalog |
+| AC-30 | State-driven | WHILE a plugin has no hooks, MCP servers or scripts, the site shall show in its What-it-runs section the one sentence that says the plugin runs no code. | US-5 | Must | e2e — every plugin whose catalog `runs.runsCode` is false |
 | AC-31 | Ubiquitous | The site shall show the tools of an agent whose `tools` is null as "not declared: inherits the session's tools". | US-5 | Must | component test |
 | AC-32a | Ubiquitous | The site shall render the README "What it runs" text under the label "Author's description". | US-5 | Must | component test |
 | AC-32b | Ubiquitous | The site shall take every non-catalog text of the What-it-runs section from `en.ts` keys under `runs.`, none of which contains the words "safe", "secure", "trusted" or "no network". | US-5 | Must | unit — scan of the `runs.` keys |
-| AC-33 | Ubiquitous | The site shall show a "Runs code" badge on a plugin's cards and page header exactly when that plugin's `runs.runsCode` is true. | US-5 | Must | unit + e2e — spec-driven has it, research-tools does not |
+| AC-33 | Ubiquitous | The site shall show a "Runs code" badge on a plugin's cards and page header exactly when that plugin's `runs.runsCode` is true. | US-5 | Must | unit + e2e — badge presence equals `runs.runsCode` for every plugin |
 | AC-34a | Event-driven | WHEN `#/plugins/<p>/<kind>/<name>` opens, the site shall show the Artifact-page elements of the Pages table for that artifact. | US-4 | Must | e2e — one artifact per kind present |
 | AC-34b | Event-driven | WHEN an artifact page opens, the site shall list every frontmatter key of the artifact in the "All frontmatter" table. | US-4 | Must | e2e — key count equals `Object.keys(frontmatter)` |
 | AC-35 | Ubiquitous | The site shall link each source reference to `<repoUrl>/blob/<build.commit>/<path>` for a file and `<repoUrl>/tree/<build.commit>/<path>` for a folder. | US-4 | Must | unit — URL builder; e2e — link href |
@@ -545,7 +553,7 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 | AC-36b | Event-driven | WHEN a clipboard write succeeds, the site shall show "Copied" on that button for 2 s. | US-6 | Must | component test with fake timers |
 | AC-37a | Unwanted behaviour | IF the clipboard write fails, THEN the site shall select the text of that command box. | US-6 | Should | component test — rejected clipboard mock |
 | AC-37b | Unwanted behaviour | IF the clipboard write fails, THEN the site shall show the hint "press Ctrl/Cmd+C". | US-6 | Should | component test |
-| AC-38a | Event-driven | WHEN the user adds a plugin to the install set, the site shall also add each of its dependencies that is in the catalog, marked "added for <plugin>". | US-7 | Must | e2e — adding django-reviewer gives 4 plugins |
+| AC-38a | Event-driven | WHEN the user adds a plugin to the install set, the site shall also add each of its dependencies that is in the catalog, marked "added for <plugin>". | US-7 | Must | e2e — for a plugin with dependencies, the set size equals 1 + its dependencies with `inCatalog: true` |
 | AC-38b | Unwanted behaviour | IF an added plugin has a dependency that is not in the catalog, THEN the site shall show a warning naming that dependency. | US-7 | Must | component test — fixture dependency |
 | AC-39a | Ubiquitous | The site shall generate the install-set CLI output as `addCommand` followed by one `claude plugin install <p>@<marketplace>` line per selected plugin, sorted by name. | US-7 | Must | unit — snapshot of the generated text |
 | AC-39b | State-driven | WHILE the scope switch is set to project, the site shall append ` --scope project` to every line of the CLI output. | US-7 | Must | unit — both scopes |
@@ -559,10 +567,9 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 | ID | Pattern | Requirement | Story | Priority | Verify by |
 |---|---|---|---|---|---|
 | AC-42 | Event-driven | WHEN `#/new` opens, the site shall list `catalog.changes` grouped by day, newest first, each row with a type badge, plugin, subject as plain text and a commit link. | US-8 | Must | e2e |
-| AC-43 | Event-driven | WHEN the user selects a plugin in the `#/new` filter, the site shall list only the changes whose `plugin` or `renamedTo` is that plugin. | US-8 | Could | e2e |
+| AC-43 | Event-driven | WHEN the user selects a plugin in the `#/new` filter, the site shall list only the changes whose `plugin` is that plugin. | US-8 | Could | e2e |
 | AC-44 | Ubiquitous | The site shall show each plugin's `recentChanges` on its page, with each version change written as "<from> → <to>". | US-8 | Must | e2e — spec-driven |
 | AC-69 | Ubiquitous | The site shall render as plain text, without a link, the plugin name of every Change whose `plugin` is not in the catalog. | US-8 | Must | component test — Change with `plugin: "spec-creator"` |
-| AC-70 | Ubiquitous | The site shall include in a plugin's recent changes every Change whose `renamedTo` is that plugin. | US-8 | Must | unit — fixture with renames |
 | AC-45 | Ubiquitous | The site shall point every request link to `<repoUrl>/issues/new?template=plugin-request.yml`, with `title` and the `what` field set to the first 200 chars of the current query, or empty when there is no query. | US-9 | Must | unit — URL builder; e2e — href |
 | AC-46 | Ubiquitous | The repository shall contain the issue form `.github/ISSUE_TEMPLATE/plugin-request.yml` with fields `what` (required), `use-case` and `kind`. | US-9 | Must | inspection |
 
@@ -572,24 +579,25 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 |---|---|---|---|---|---|
 | AC-47 | Event-driven | WHEN a route of the Routes table is opened by direct load, reload or browser back/forward, the site shall render the page that the table assigns to it. | US-1 | Must | e2e — each route, each navigation type, page heading asserted |
 | AC-48 | Event-driven | WHEN a route names an unknown page, plugin or artifact, the site shall show the not-found state with a link to search. | US-3 | Must | e2e |
-| AC-49 | State-driven | WHILE `catalog.json` is loading, the site shall show skeleton cards. | US-1 | Should | e2e — throttled network |
-| AC-50a | Unwanted behaviour | IF `catalog.json` fails to load or to parse, THEN the site shall show an error message with a Retry button. | US-1 | Must | e2e — route intercepted with 500, and with invalid JSON |
-| AC-50b | Event-driven | WHEN the user clicks Retry, the site shall request `catalog.json` again. | US-1 | Must | e2e — second request observed |
+| AC-49 | State-driven | WHILE the catalog chunk is loading, the site shall show skeleton cards. | US-1 | Should | e2e — throttled network |
+| AC-50a | Unwanted behaviour | IF the catalog chunk fails to load, THEN the site shall show an error message with a Retry button. | US-1 | Must | e2e — the chunk request intercepted with 500 |
+| AC-50b | Event-driven | WHEN the user clicks Retry, the site shall reload the page. | US-1 | Must | e2e — a new navigation is observed |
 | AC-51 | Ubiquitous | The site shall show a footer with the marketplace name, the marketplace version as text, and "built from <7-char sha> on <date>" linking to the commit. | US-10 | Must | e2e |
 
 ### Pipeline and docs
 
 | ID | Pattern | Requirement | Story | Priority | Verify by |
 |---|---|---|---|---|---|
-| AC-67 | Ubiquitous | The pipeline shall consist of one workflow named "Site" (`.github/workflows/site.yml`) with the jobs "Site: tests", "Site: build" and "Site: deploy", each reported as its own check. | US-10 | Must | inspection + CI — the PR checks list shows "Site: tests" and "Site: build" |
-| AC-52 | Event-driven | WHEN a commit is pushed to `main` that touches `plugins/**`, `.claude-plugin/**`, `site/**`, `scripts/validate-marketplace.mjs` or `.github/workflows/site.yml`, the pipeline shall deploy the site built from that commit to GitHub Pages. | US-10 | Must | CI — merge a change; the live footer shows that sha |
+| AC-67a | Ubiquitous | The pipeline shall consist of one workflow named "Site" (`.github/workflows/site.yml`) with the jobs "Site: tests" and "Site: build", each reported as its own check. | US-10 | Must | inspection + CI — the PR checks list shows both |
+| AC-67b | Ubiquitous | The pipeline shall have a third job, "Site: deploy", reported as its own check. | US-10 | Must | inspection + CI — a run on `main` shows it |
+| AC-52 | Event-driven | WHEN the last pending run for `main` finishes, the pipeline shall have deployed to GitHub Pages the site built from the newest commit pushed to `main` that touches `plugins/**`, `.claude-plugin/**`, `site/**`, `scripts/validate-marketplace.mjs` or `.github/workflows/site.yml`. | US-10 | Must | CI — merge a change; the live footer shows the newest sha within 15 min of that run's end (intermediate commits may be skipped, AC-56) |
 | AC-53a | Event-driven | WHEN a pull request touches those paths, the pipeline shall run "Site: tests" and "Site: build". | US-10 | Must | CI — PR run |
 | AC-53b | Event-driven | WHEN a pull request touches those paths, the pipeline shall skip "Site: deploy". | US-10 | Must | CI — PR run shows deploy skipped |
 | AC-53c | Event-driven | WHEN a pull request touches those paths, the pipeline shall upload no Pages artifact. | US-10 | Must | CI — PR run lists no `github-pages` artifact |
 | AC-54 | Unwanted behaviour | IF "Site: tests" or "Site: build" fails, THEN the pipeline shall skip "Site: deploy". | US-10 | Must | CI — failing PR on main-like branch; inspection: deploy `needs: [tests, build]` |
 | AC-55a | Event-driven | WHEN a user starts the workflow manually (`workflow_dispatch`), the pipeline shall run "Site: tests" and "Site: build". | US-10 | Should | inspection + one manual run |
 | AC-55b | Event-driven | WHEN a run is for a ref other than `refs/heads/main`, the pipeline shall skip "Site: deploy". | US-10 | Should | inspection — job `if` |
-| AC-56 | State-driven | WHILE a run for `main` is in progress, the pipeline shall hold every later run for `main` in the workflow-level concurrency group `pages` (`cancel-in-progress: false`) until the running one finishes. | US-10 | Must | inspection + EC-17 manual check |
+| AC-56 | State-driven | WHILE a run for `main` is in progress, the pipeline shall keep at most one newer run for `main` pending, cancelling any older pending one (workflow-level group `pages`, `cancel-in-progress: false`). | US-10 | Must | inspection; manual — three quick pushes: the middle run is cancelled, then AC-52 holds |
 | AC-57a | Ubiquitous | The repository shall keep no statement in `README.md` and `docs/SECURITY.md` that the repository is private. | US-6 | Must | inspection — grep `private` |
 | AC-57b | Ubiquitous | The repository shall keep no `gh auth setup-git` step in the README install instructions. | US-6 | Must | inspection — grep `setup-git` |
 | AC-57c | Ubiquitous | The repository shall link `https://humen-dev.github.io/agent-plugins/` from the README. | US-6 | Must | inspection |
@@ -613,8 +621,7 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 
 | ID | Case | Expected behaviour | Verify by |
 |---|---|---|---|
-| EC-1a | Query is only stop words and kind words ("I need a skill") | IF no search term remains after the pipeline and the query has a kind hint, THEN the site shall list every item of the hinted kinds, sorted by name. | unit |
-| EC-1b | Query is only stop words ("I need a") | IF no search term and no kind hint remain, THEN the site shall list every plugin card, sorted by name. | unit |
+| EC-1 | Query is only stop words and kind words ("I need a", "I need a skill") | IF no search term remains after the pipeline, THEN the site shall treat the query as empty, with its kind hints as active kind filters (AC-26a, AC-26b). | unit — "I need a" lists plugins; "I need a skill" lists every skill |
 | EC-2a | Query longer than 200 chars | IF the query is longer than 200 chars, THEN the site shall search with its first 200 chars. | unit |
 | EC-2b | Query with regex or HTML characters | The site shall treat every character of the query as literal text. | unit — `<script>`, `.*`, `((` give no error and no markup |
 | EC-3a | Long name or description on a card | IF a card's name or description exceeds its box, THEN the site shall cut it with an ellipsis. | e2e at 320 px |
@@ -624,15 +631,14 @@ Testing Library), e2e (Playwright on Chromium against the built site), CI
 | EC-6 | Stored or URL selection names a removed plugin | IF the install selection names a plugin not in the catalog, THEN the site shall drop that name with a one-line notice. | e2e |
 | EC-7 | `localStorage` unavailable (privacy mode) | IF `localStorage` throws, THEN the site shall keep the theme and the selection in memory for the session without showing an error. | component — throwing storage mock |
 | EC-8 | Two hooks reference the same script | WHEN two hooks reference the same script, the generator shall list both hook ids in that script's `referencedBy`. | unit |
-| EC-9 | Commit touching several plugins | WHEN a commit touches several plugins, the generator shall emit one Change per touched plugin. | unit |
-| EC-10 | Commits from before a rename (display: AC-69; link to the new plugin: AC-68) | WHEN a commit touches only `plugins/<old>/` of a plugin no longer in `marketplace.json`, the generator shall emit its Change with `plugin: "<old>"`. | unit — fixture; real case: commits before 34c247a under `plugins/spec-creator/` |
+| EC-9 | Commit touching two or more plugins | WHEN a commit touches two or more plugins, the generator shall emit one Change per touched plugin. | unit |
+| EC-10 | Commits from before a rename (display: AC-69) | WHEN a commit touches only `plugins/<old>/` of a plugin no longer in `marketplace.json`, the generator shall emit its Change with `plugin: "<old>"`. | unit — fixture; real case: commits before 34c247a under `plugins/spec-creator/` |
 | EC-11 | Catalog has no commands or MCP servers (today) | → AC-22: no chip, no empty sections. | component |
 | EC-12 | Clipboard API missing (HTTP, old browser) | → AC-37a, AC-37b. | component |
 | EC-13 | Markdown with Mermaid or other fenced code | IF a code block has language `mermaid`, THEN the site shall show it as a code block. | component |
 | EC-14 | Relative link inside Markdown (`references/x.md`) | IF a Markdown link is relative, THEN the site shall link it to `<repoUrl>/blob/<build.commit>/<path resolved against the file's repo path>`. | unit |
 | EC-15 | Image in Markdown | IF Markdown contains an image, THEN the site shall render a link, with the alt text, to the image URL in place of the image. | component — no image request in the network log |
 | EC-16 | JavaScript disabled | IF JavaScript is disabled, THEN the site shall show the `<noscript>` message with links to the repository and the README. | inspection |
-| EC-17 | Out-of-order runs on `main` | IF a second and a third push to `main` arrive while a run for `main` is in progress, THEN the pipeline shall deploy the newest commit last. | inspection of workflow concurrency; manual — three quick pushes, then the live footer shows the newest sha |
 
 ## Module interactions
 
@@ -647,14 +653,21 @@ sequenceDiagram
   participant S as the site
   Dev->>GH: merge PR adding plugins/foo
   GH->>CI: push event (paths match; concurrency group "pages")
-  CI->>Gen: node generate (full history checkout)
-  Gen->>Gen: scripts/validate-marketplace.mjs
-  Gen-->>CI: catalog.json + diagnostics / exit 1 on validator error
-  CI->>CI: Site: tests (lint, typecheck, unit, e2e) ‖ Site: build (vite build, budgets)
+  par Site: tests
+    CI->>Gen: generate (in-process and for e2e)
+    Gen->>Gen: scripts/validate-marketplace.mjs
+    Gen-->>CI: catalog + diagnostics / exit 1 on validator error
+    CI->>CI: lint, typecheck, unit, e2e
+  and Site: build
+    CI->>Gen: generate
+    Gen->>Gen: scripts/validate-marketplace.mjs
+    Gen-->>CI: catalog + diagnostics / exit 1 on validator error
+    CI->>CI: vite build, fixture check, budgets
+  end
   CI->>Pages: Site: deploy (main only, needs both)
   U->>S: open humen-dev.github.io/agent-plugins/#/?q=…
-  S->>Pages: GET catalog.json (same origin)
-  Pages-->>S: 200 JSON / error → AC-50a
+  S->>Pages: import() hashed catalog chunk (same origin)
+  Pages-->>S: 200 / error → AC-50a
   S->>S: build index, search, render
   U->>GH: request link → issues/new (prefilled)
 ```
@@ -663,7 +676,7 @@ sequenceDiagram
 |---|---|---|---|---|
 | pipeline → generator | CLI `node site/scripts/generate.mjs --out <file>` (new) | checkout + git | repository at HEAD | non-zero exit stops the job (AC-8a, AC-54); warnings never stop it (AC-65d) |
 | generator → validator | `node scripts/validate-marketplace.mjs` (existing), exit code + stdout/stderr | error/warning lines | the validator | exit ≠ 0 → generator fails (AC-8a) |
-| site → Pages | `GET ./catalog.json` (new) | Catalog | the generator output of the deployed commit | error state + Retry (AC-50a, AC-50b) |
+| site → Pages | dynamic `import()` of the content-hashed catalog chunk (new) | Catalog | the generator output of the deployed commit | error state + Retry (AC-50a, AC-50b) |
 | site → GitHub | outbound links only (blob, commit, issues/new) | none sent except a prefilled query in the issue URL | — | none (plain links) |
 
 ## Data and state
@@ -673,14 +686,14 @@ sequenceDiagram
   and install selection (`catalog.installSet`: JSON array of plugin names). Both
   are validated on read (UT-6). Clearing site data resets them.
 - **Catalog**: rebuilt from scratch on each deployment, from full git history.
-  There is no migration between versions. `schemaVersion` changes only with the
-  site code in the same commit.
+  It is bundled as a content-hashed chunk of the same build as the code that
+  reads it, so there is no version mismatch and no migration.
 
 ## Compatibility and rollout
 
-- Plugins, the existing validators and the existing `validate.yml` are
-  unchanged. `marketplace.json` gains only a `renames` entry (AC-73). Users who
-  never open the site see no change.
+- Plugins, `marketplace.json`, the existing validators and the existing
+  `validate.yml` are unchanged by this spec. Users who never open the site see
+  no change.
 - The site URL is `https://humen-dev.github.io/agent-plugins/`. Vite `base` is
   `/agent-plugins/`.
 - **Rollout**: in M1–M4, `site.yml` has no "Site: deploy" job and uploads no
@@ -692,28 +705,31 @@ sequenceDiagram
 
 | ID | Category | Requirement | Verify by |
 |---|---|---|---|
-| NFR-1a | Performance | IF the site's initial JavaScript exceeds 120 KB gzip, THEN the pipeline shall fail "Site: build". | CI — size-check step |
-| NFR-1b | Performance | IF `catalog.json` exceeds 300 KB gzip, THEN the pipeline shall fail "Site: build". | CI — size-check step; real content is about 158 KB gzip on 2026-11-23 |
+| NFR-1a | Performance | IF the site's initial JavaScript, without the catalog chunk, exceeds 120 KB gzip, THEN the pipeline shall fail "Site: build". | CI — size-check step |
+| NFR-1b | Performance | IF the catalog chunk exceeds 300 KB gzip, THEN the pipeline shall fail "Site: build". | CI — size-check step; real content is about 158 KB gzip on 2026-11-23 |
 | NFR-2 | Performance | The pipeline shall publish, on every "Site: build" run, a Lighthouse mobile report for the home page with the Performance score and LCP, without failing on the result. | CI — report present; the step has `continue-on-error: true`. Target, not gate: Performance ≥ 90, LCP ≤ 2.5 s. |
 | NFR-4 | Performance | WHEN the generator runs on the real repository on `ubuntu-latest`, the generator shall finish within 30 s. | CI step timing |
 | NFR-5 | A11y | The site shall show 0 serious and 0 critical axe-core (WCAG 2.2 AA) violations on the home, plugin, artifact, install and new routes, in both themes at 375 px and 1280 px (20 checks). | e2e + @axe-core/playwright |
 | NFR-6a | A11y | The site shall render text with a contrast ratio of at least 4.5:1, and large text and UI boundaries with at least 3:1, in both themes. | axe colour-contrast rule + unit test over the theme tokens |
 | NFR-6b | A11y | The site shall draw a focus indicator with at least 3:1 contrast against its background on every focused interactive element. | e2e — tab through each route; computed outline checked |
-| NFR-7a | A11y | The site shall let a keyboard-only user search, open a plugin page, copy an install command and build an install set. | e2e — the whole flow driven by keyboard events only |
-| NFR-7b | A11y | WHEN the number of results changes, the site shall announce the new count through a polite live region. | e2e — live region text |
+| NFR-7a | A11y | The site shall let a keyboard-only user run a search. | e2e — keyboard events only |
+| NFR-7b | A11y | The site shall let a keyboard-only user open a plugin page from a result. | e2e — keyboard events only |
+| NFR-7c | A11y | The site shall let a keyboard-only user copy an install command. | e2e — keyboard events only |
+| NFR-7d | A11y | The site shall let a keyboard-only user build an install set. | e2e — keyboard events only |
+| NFR-7e | A11y | WHEN the number of results changes, the site shall announce the new count through a polite live region. | e2e — live region text |
 | NFR-8 | A11y | WHILE `prefers-reduced-motion: reduce` is set, the site shall set every CSS transition and animation duration to 0. | e2e with emulated media — computed durations |
 | NFR-9 | Compatibility | The site shall complete the smoke flow (search, plugin page, theme toggle, copy) on Chromium, and on the current Firefox and Safari desktop releases. | e2e on Chromium in CI; manual M-4 on Firefox and Safari desktop |
 | NFR-10a | Determinism | WHEN the generator runs twice on the same commit, the generator shall write byte-identical `catalog.json` files. | unit — run twice, compare bytes |
 | NFR-10b | Determinism | WHEN the generator runs on the same commit with different `LANG` and `TZ` values, the generator shall write byte-identical `catalog.json` files. | unit — run with `LANG=de_DE.UTF-8 TZ=Asia/Tokyo` and with `LANG=C TZ=UTC` |
 | NFR-11 | Determinism | WHEN the site gets the same `catalog.json` and query, the site shall return the same ordered results. | unit |
 | NFR-12 | Security | The site shall load every route under the CSP meta tag `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'` with 0 CSP violations in the console. | e2e — console listener on every route |
-| NFR-13 | Security | The site shall send no request to any origin other than its own. | e2e — network log on every route |
+| NFR-13 | Security | The site shall send no request to any origin other than its own, except a navigation the user starts by clicking a link. | e2e — network log on every route, without clicks on outbound links |
 | NFR-14 | Security | The site shall set `rel="noopener noreferrer"` on every link to another origin. | unit over rendered output |
 | NFR-15a | Security | The pipeline shall grant only `contents: read` to "Site: tests" and "Site: build". | inspection |
 | NFR-15b | Security | The pipeline shall grant only `pages: write` and `id-token: write` to "Site: deploy". | inspection |
 | NFR-15c | Security | The pipeline shall run "Site: deploy" in the `github-pages` environment. | inspection |
 | NFR-16a | Security | The pipeline shall install the site's npm dependencies with `npm ci` from the committed lockfile. | inspection |
-| NFR-16b | Security | WHEN `npm audit --omit=dev --audit-level=high` reports a finding, the pipeline shall show it as a warning annotation without failing the run. | CI — the audit step has `continue-on-error: true` |
+| NFR-16b | Security | WHEN `npm audit --omit=dev --audit-level=high` reports a finding, the pipeline shall print a `::warning::` annotation with the audit summary without failing the run. | CI — a run with a known-vulnerable test lockfile shows the annotation and passes |
 | NFR-17 | Reliability | IF a pipeline run fails, THEN the pipeline shall leave the deployed site at its previous commit. | → AC-54; CI — live footer sha unchanged after a failing run |
 | NFR-18 | Maintainability | IF `tsc --noEmit` or ESLint reports an error, THEN the pipeline shall fail "Site: tests". | CI |
 
@@ -727,7 +743,7 @@ sequenceDiagram
 | git commit subjects | git history | untrusted |
 | URL hash (`q`, `kind`, `cat`, `p`) | anyone who crafts a link | untrusted |
 | `localStorage` values | the user's browser, possibly stale or edited | untrusted |
-| catalog.json | the generator on the deployed commit | trusted for shape (schema-checked at build) |
+| catalog | the generator on the deployed commit | trusted for shape: the same commit's output is schema-checked in "Site: tests" (AC-1), and generation is deterministic (NFR-10a) |
 
 ## Untrusted inputs
 
@@ -743,7 +759,7 @@ sequenceDiagram
 | UT-7 | `source`, `hooks`, `mcpServers` paths, symlinks in plugin folders | path escape | IF a path resolves outside the plugin folder or a file is a symlink, THEN the generator shall skip it without reading it. | unit fixture — the target's content is absent from the output; warning by AC-65a; a `..` path is a validator error (AC-8a) |
 | UT-8 | Large or binary files | oversized payload | IF a text source file exceeds 1 MB or is not valid UTF-8, THEN the generator shall skip it. | unit fixture; warning by AC-65a |
 | UT-9a | Repo files | secret leakage | The generator shall read file contents only from the paths rules X-1..X-14 allow. | unit (validator subprocess exempt by X-14) — fixture `.env` and `secrets.txt` are absent from the output |
-| UT-9b | Environment | secret leakage | The generator shall read no environment variable other than `GITHUB_REPOSITORY`. | unit — run with a sentinel env var; its value is absent from the output |
+| UT-9b | Environment | secret leakage | The generator shall copy no environment value other than `GITHUB_REPOSITORY` into the catalog or its stdout. | unit — run with a sentinel env var; its value is absent from catalog and stdout |
 | UT-10a | YAML frontmatter | parser abuse (custom tags, alias bombs) | IF frontmatter uses a custom tag or exceeds the alias limit of 100, THEN the generator shall read that file with the line reader of X-16 within 1 s. | unit — billion-laughs fixture: finishes ≤ 1 s, output bounded |
 | UT-10b | YAML frontmatter | parser abuse | IF YAML rejects frontmatter for a custom tag or the alias limit, THEN the generator shall add the warning `frontmatter: YAML rejected (<reason>); read line by line` for that file. | unit — same fixture: diagnostic present |
 
@@ -766,11 +782,14 @@ sequenceDiagram
 - **Plugin folders**: every marketplace `source` is `./plugins/<name>`. This is
   true for all 8 entries today. X-13 maps history paths to plugins by folder
   name.
-- **Known rename**: `spec-creator` was renamed to `spec-driven` in 34c247a
-  (2026-11-10), with no `renames` entry. M1 adds `"renames": {"spec-creator":
-  "spec-driven"}` if both validators accept it (AC-73). **Known data gap
-  otherwise**: commits from before 34c247a show under the plain-text name
-  "spec-creator" and do not appear in spec-driven's recent changes.
+- **Known data gap (rename)**: `spec-creator` was renamed to `spec-driven` in
+  34c247a (2026-11-10), with no `renames` entry, and this spec adds none.
+  Commits from before 34c247a show under the plain-text name "spec-creator"
+  (AC-69) and do not appear in spec-driven's recent changes.
+- **M5 prerequisite (plugin READMEs)**: all 8 plugin READMEs say "The
+  marketplace is private". A separate PR, outside this spec, fixes them
+  (including the version bumps `scripts/check-version-bump.mjs` requires)
+  before M5 launches. Otherwise the public site would render that text.
 - **Visual design**: manual check M-2 needs the design from the design handoff
   (`docs/design/`, Phase 3). It cannot run before that exists.
 - **Pipeline runtime**: Node 22 on `ubuntu-latest`, as in the existing
@@ -786,12 +805,17 @@ sequenceDiagram
   - `fixture-full`, with every plugin-page element;
   - missing fields;
   - hostile content (UT-1..UT-10b);
-  - renames, multi-plugin commits and an added-plus-version commit;
+  - a plugin rename, multi-plugin commits, an added-plus-version commit and a
+    deleted plugin folder;
   - a shallow clone.
-- **Real-repo invariant tests** run the generator in-process on the checkout.
-  They need no earlier generate step. They cover AC-6a, AC-6b, NFR-10a and
-  NFR-10b. They never use a snapshot of real content, so adding a plugin needs
-  no test update.
+- **Real-repo tests** run the generator in-process on the checkout. They need
+  no earlier generate step. They cover AC-6a, AC-6b, NFR-10a and NFR-10b, plus
+  two named real cases: 34c247a (AC-71) and `spec-creator.md` (AC-3).
+- **No hard-coded real counts**: every expected count in unit and e2e tests is
+  computed in the test from the source files or the generated catalog. Adding
+  a plugin needs no test update. The exceptions are the golden queries
+  (AC-14) and the named real cases, which change only when those plugins
+  change.
 - **Search unit tests**: pipeline steps, ranking, ties and collapse on a
   fixture catalog. The golden queries (AC-14) run on a catalog generated
   in-process from the real checkout.
@@ -825,9 +849,11 @@ One workflow, `.github/workflows/site.yml`, named **Site**.
 - `workflow_dispatch`.
 
 **Workflow-level concurrency**: runs for `refs/heads/main` share the group
-`pages`, with `cancel-in-progress: false`. A later run for `main` waits until
-the running one finishes, so deployments never overlap or run out of order
-(AC-56, EC-17). Other refs use a group per run, so pull requests never wait.
+`pages`, with `cancel-in-progress: false`. The running run finishes. At most
+one newer run waits; a still newer push cancels the waiting one. So the last
+deployment is always built from the newest commit, and intermediate commits
+may be skipped (AC-52, AC-56). Other refs use a group per run, so pull
+requests never wait.
 
 Its three jobs show as separate checks.
 
@@ -842,8 +868,9 @@ Its three jobs show as separate checks.
    the generator in-process on the checkout.
 6. Generate the catalog and build the site for e2e.
 7. Install Playwright Chromium, then run e2e and axe (NFR-5).
-8. `npm audit --omit=dev --audit-level=high`, as a warning only
-   (`continue-on-error`).
+8. `npm audit --omit=dev --audit-level=high`. Findings are printed as a
+   `::warning::` annotation with the summary, and the step never fails the job
+   (NFR-16b).
 
 **"Site: build"** (`contents: read`):
 
@@ -875,11 +902,11 @@ Every AC, EC, NFR and UT row belongs to exactly one milestone.
 
 | M | Scope | Done when |
 |---|---|---|
-| M1 | Data model, generator (validator first, lenient frontmatter, diagnostics, history and renames), fixtures, `renames` entry, "Site" workflow with "Site: tests" and "Site: build" | AC-1..AC-5, AC-6a, AC-6b, AC-8a, AC-8b, AC-9..AC-12, AC-53a, AC-55a, AC-65a..AC-65d, AC-66, AC-67, AC-68, AC-71, AC-72, AC-73, EC-8, EC-9, EC-10, UT-2b, UT-7, UT-8, UT-9a, UT-9b, UT-10a, UT-10b, NFR-4, NFR-10a, NFR-10b, NFR-15a, NFR-16a, NFR-16b, NFR-18 |
-| M2 | App shell, theme + `theme-init.js`, `en.ts` + translations test, CSP, search page, cards, filters, states, golden-query tuning | AC-7b, AC-13..AC-15, AC-16a..AC-16f, AC-17, AC-18a, AC-18b, AC-19a..AC-19c, AC-20, AC-21a, AC-21b, AC-22, AC-23a, AC-23b, AC-24, AC-25a, AC-25b, AC-26, AC-47..AC-49, AC-50a, AC-50b, AC-51, AC-59, AC-60a..AC-60c, AC-61, AC-62a, AC-62b, AC-63, AC-64a, AC-64b, EC-1a, EC-1b, EC-2a, EC-2b, EC-3a, EC-11, UT-3, UT-4, NFR-11, NFR-12, NFR-13, NFR-14 |
+| M1 | Data model, generator (validator first, lenient frontmatter, diagnostics, history), fixtures, "Site" workflow with "Site: tests" and "Site: build" | AC-1..AC-5, AC-6a, AC-6b, AC-8a, AC-8b, AC-9..AC-12, AC-53a, AC-55a, AC-65a..AC-65d, AC-66, AC-67a, AC-71, AC-72, EC-8, EC-9, EC-10, UT-2b, UT-7, UT-8, UT-9a, UT-9b, UT-10a, UT-10b, NFR-4, NFR-10a, NFR-10b, NFR-15a, NFR-16a, NFR-16b, NFR-18 |
+| M2 | App shell, theme + `theme-init.js`, `en.ts` + translations test, CSP, catalog chunk, search page, cards, filters, states, golden-query tuning | AC-7b, AC-13..AC-15, AC-16a..AC-16f, AC-17, AC-18a, AC-18b, AC-19a..AC-19c, AC-20, AC-21a, AC-21b, AC-22, AC-23a, AC-23b, AC-24, AC-25a, AC-25b, AC-26a, AC-26b, AC-47..AC-49, AC-50a, AC-50b, AC-51, AC-59, AC-60a..AC-60c, AC-61, AC-62a, AC-62b, AC-63, AC-64a, AC-64b, EC-1, EC-2a, EC-2b, EC-3a, EC-11, UT-3, UT-4, NFR-11, NFR-12, NFR-13, NFR-14 |
 | M3 | Plugin page, artifact page, What it runs, Markdown rendering | AC-27a, AC-27b, AC-28, AC-29a..AC-29d, AC-30, AC-31, AC-32a, AC-32b, AC-33, AC-34a, AC-34b, AC-35, EC-3b, EC-4, EC-5, EC-13..EC-16, UT-1, UT-2a |
-| M4 | Install-set builder, what's new, renamed-plugin display, request link and issue form | AC-36a, AC-36b, AC-37a, AC-37b, AC-38a, AC-38b, AC-39a, AC-39b, AC-40, AC-41a..AC-41c, AC-42..AC-46, AC-69, AC-70, EC-6, EC-7, EC-12, UT-5, UT-6 |
-| M5 | "Site: deploy", Pages artifact upload on main, concurrency, size budgets, axe matrix, Lighthouse report, docs updates, launch | AC-7a, AC-52, AC-53b, AC-53c, AC-54, AC-55b, AC-56, AC-57a..AC-57c, AC-58a, AC-58b, EC-17, NFR-1a, NFR-1b, NFR-2, NFR-5, NFR-6a, NFR-6b, NFR-7a, NFR-7b, NFR-8, NFR-9, NFR-15b, NFR-15c, NFR-17, M-1..M-4 |
+| M4 | Install-set builder, what's new, old-name display, request link and issue form | AC-36a, AC-36b, AC-37a, AC-37b, AC-38a, AC-38b, AC-39a, AC-39b, AC-40, AC-41a..AC-41c, AC-42..AC-46, AC-69, EC-6, EC-7, EC-12, UT-5, UT-6 |
+| M5 | "Site: deploy", Pages artifact upload on main, concurrency, size budgets, axe matrix, Lighthouse report, docs updates, launch (prerequisite: the plugin-README PR, see Assumptions) | AC-7a, AC-52, AC-53b, AC-53c, AC-54, AC-55b, AC-56, AC-57a..AC-57c, AC-58a, AC-58b, AC-67b, NFR-1a, NFR-1b, NFR-2, NFR-5, NFR-6a, NFR-6b, NFR-7a..NFR-7e, NFR-8, NFR-9, NFR-15b, NFR-15c, NFR-17, M-1..M-4 |
 
 ## Design review
 
@@ -898,6 +925,7 @@ Every AC, EC, NFR and UT row belongs to exactly one milestone.
 - `CODEOWNERS`
 - git history (commit 34c247a, the rename)
 - review round 1 (R-F-1..R-F-21, fresh read-only reviewer, 2026-11-23)
+- review round 2 (R-F-1..R-F-19, fresh read-only reviewer, 2026-11-23)
 
 The visual design will come from `docs/design/` (Phase 3).
 
@@ -911,8 +939,8 @@ The visual design will come from `docs/design/` (Phase 3).
 | F-4 | Module interaction | Merge commits give useless "Merge pull request" subjects | → X-13 `--no-merges` |
 | F-5 | Conflict | `.claude/sdd.json` had no `specsDir`; spec-driven's default is `specs/`, but this spec is in `docs/specs/` | → Q-2, answered: `"specsDir": "docs/specs/"` added |
 | F-6 | Gap | Third-party (Vinta) content is shown publicly | MIT licence, credited in notices → AC-27a shows notices |
-| F-7 | Corner case | Real rename spec-creator → spec-driven has no `renames` entry (R-F-5, R-F-6) | → X-13, AC-68..AC-73, EC-10, Assumptions |
-| F-8 | Module interaction | Overlapping runs on `main` could deploy an older commit last (R-F-9) | → AC-56, EC-17 |
+| F-7 | Corner case | Real rename spec-creator → spec-driven has no `renames` entry, and 34c247a deletes spec-creator's plugin.json (round 1 R-F-5, R-F-6; round 2 R-F-2, R-F-10) | → X-13, AC-69, AC-71, AC-72, EC-10; known data gap in Assumptions |
+| F-8 | Module interaction | Overlapping runs on `main` could deploy an older commit last (round 1 R-F-9, round 2 R-F-3) | → AC-52, AC-56 |
 
 **UX improvements**:
 
@@ -927,28 +955,29 @@ The visual design will come from `docs/design/` (Phase 3).
 
 | Source | Requirements |
 |---|---|
-| US-1 | AC-3, AC-13..AC-15, AC-16a..AC-16f, AC-17, AC-18a, AC-19a, AC-19b, AC-20, AC-23a, AC-23b, AC-25a, AC-25b, AC-26, AC-47, AC-49, AC-50a, AC-50b, AC-62a, AC-66, EC-1a, EC-1b, EC-2a, EC-2b, EC-3a, EC-13..EC-16, UT-1, UT-2a, UT-3, UT-4, NFR-1a, NFR-1b, NFR-2, NFR-9, NFR-11, NFR-12, NFR-13, NFR-14 |
-| US-2 | AC-18b, AC-21a, AC-21b, AC-22, AC-62b, AC-64a, AC-64b, EC-11 |
+| US-1 | AC-3, AC-13..AC-15, AC-16a..AC-16f, AC-17, AC-18a, AC-19a, AC-19b, AC-20, AC-23a, AC-23b, AC-25a, AC-25b, AC-26a, AC-47, AC-49, AC-50a, AC-50b, AC-62a, AC-66, EC-1, EC-2a, EC-2b, EC-3a, EC-13..EC-16, UT-1, UT-2a, UT-3, UT-4, NFR-1a, NFR-1b, NFR-2, NFR-9, NFR-11, NFR-12, NFR-13, NFR-14 |
+| US-2 | AC-18b, AC-21a, AC-21b, AC-22, AC-26b, AC-62b, AC-64a, AC-64b, EC-11 |
 | US-3 | AC-2, AC-12, AC-27a, AC-27b, AC-28, AC-48, EC-4, EC-5, UT-2b |
 | US-4 | AC-34a, AC-34b, AC-35, EC-3b |
 | US-5 | AC-10, AC-11, AC-29a..AC-29d, AC-30, AC-31, AC-32a, AC-32b, AC-33, EC-8 |
 | US-6 | AC-4, AC-19c, AC-36a, AC-36b, AC-37a, AC-37b, AC-57a..AC-57c, EC-12 |
 | US-7 | AC-38a, AC-38b, AC-39a, AC-39b, AC-40, AC-41a..AC-41c, EC-6, EC-7, UT-6 |
-| US-8 | AC-5, AC-9, AC-42..AC-44, AC-68..AC-73, EC-9, EC-10 |
+| US-8 | AC-5, AC-9, AC-42..AC-44, AC-69, AC-71, AC-72, EC-9, EC-10 |
 | US-9 | AC-24, AC-45, AC-46, UT-5 |
-| US-10 | AC-1, AC-6a, AC-6b, AC-7a, AC-7b, AC-8a, AC-8b, AC-51, AC-52, AC-53a..AC-53c, AC-54, AC-55a, AC-55b, AC-56, AC-58a, AC-58b, AC-65a..AC-65d, AC-67, EC-17, UT-7, UT-8, UT-9a, UT-9b, UT-10a, UT-10b, NFR-4, NFR-10a, NFR-10b, NFR-15a..NFR-15c, NFR-16a, NFR-16b, NFR-17, NFR-18 |
-| US-11 | AC-59, AC-60a..AC-60c, AC-61, AC-63, NFR-5, NFR-6a, NFR-6b, NFR-7a, NFR-7b, NFR-8 |
+| US-10 | AC-1, AC-6a, AC-6b, AC-7a, AC-7b, AC-8a, AC-8b, AC-51, AC-52, AC-53a..AC-53c, AC-54, AC-55a, AC-55b, AC-56, AC-58a, AC-58b, AC-65a..AC-65d, AC-67a, AC-67b, UT-7, UT-8, UT-9a, UT-9b, UT-10a, UT-10b, NFR-4, NFR-10a, NFR-10b, NFR-15a..NFR-15c, NFR-16a, NFR-16b, NFR-17, NFR-18 |
+| US-11 | AC-59, AC-60a..AC-60c, AC-61, AC-63, NFR-5, NFR-6a, NFR-6b, NFR-7a..NFR-7e, NFR-8 |
 | F-1 | AC-18a, AC-18b |
 | F-2 | AC-22, EC-11 |
 | F-3 | AC-9 |
 | F-4 | X-13 |
 | F-5 | Q-2 (answered: `specsDir` added to `.claude/sdd.json`) |
 | F-6 | AC-27a |
-| F-7 | X-13, AC-68..AC-73, EC-10 |
-| F-8 | AC-56, EC-17 |
+| F-7 | X-13, AC-69, AC-71, AC-72, EC-10 |
+| F-8 | AC-52, AC-56 |
 | UX-1..UX-3 | AC-33, AC-20, AC-23a, AC-23b, AC-41b, AC-41c |
-| Owner review 2026-11-23 (changes 1–7) | AC-8a, AC-8b, AC-24, AC-26, AC-52..AC-55b, AC-63, AC-64a, AC-64b, AC-65a..AC-65d, AC-66, AC-67, X-16, X-17, UT-7, UT-8, UT-10a, UT-10b, NFR-2, NFR-5, NFR-9, NFR-15a..NFR-15c, NFR-16a, NFR-16b |
-| Review round 1 (R-F-1..R-F-21) | R-F-1 → AC-27a, AC-27b · R-F-2 → Problem · R-F-3 → Milestones · R-F-4 → this table · R-F-5 → X-13, AC-71, AC-72 · R-F-6 → AC-68..AC-70, AC-73, EC-10 · R-F-7 → Search index · R-F-8 → Query pipeline, AC-16a..AC-16f · R-F-9 → AC-56, EC-17 · R-F-10 → NFR-16b, Assumptions · R-F-11 → NFR-9 · R-F-12 → AC-63 · R-F-13 → X-16, UT-10a, UT-10b · R-F-14 → all EARS tables · R-F-15 → Assumptions · R-F-16 → Milestones, Testing · R-F-17 → AC-62a · R-F-18 → AC-6b · R-F-19 → X-14, UT-9a · R-F-20 → Compatibility and rollout · R-F-21 → Assumptions, M-2 |
+| Owner review 2026-11-23 (changes 1–7) | AC-8a, AC-8b, AC-24, AC-26a, AC-52..AC-55b, AC-63, AC-64a, AC-64b, AC-65a..AC-65d, AC-66, AC-67a, AC-67b, X-16, X-17, UT-7, UT-8, UT-10a, UT-10b, NFR-2, NFR-5, NFR-9, NFR-15a..NFR-15c, NFR-16a, NFR-16b |
+| Review round 1 (R-F-1..R-F-21) | R-F-1 → AC-27a, AC-27b · R-F-2 → Problem · R-F-3 → Milestones · R-F-4 → this table · R-F-5 → X-13, AC-71, AC-72 · R-F-6 → AC-69, EC-10 (renames part dropped in round 2) · R-F-7 → Search index · R-F-8 → Query pipeline, AC-16a..AC-16f · R-F-9 → AC-56 · R-F-10 → NFR-16b, Assumptions · R-F-11 → NFR-9 · R-F-12 → AC-63 · R-F-13 → X-16, UT-10a, UT-10b · R-F-14 → all EARS tables · R-F-15 → Assumptions · R-F-16 → Milestones, Testing · R-F-17 → AC-62a · R-F-18 → AC-6b · R-F-19 → X-14, UT-9a · R-F-20 → Compatibility and rollout · R-F-21 → Assumptions, M-2 |
+| Review round 2 (R-F-1..R-F-19) | R-F-1 → AC-7b · R-F-2 → X-13, AC-71 · R-F-3 → AC-52, AC-56 (EC-17 removed) · R-F-4 → AC-67a, AC-67b · R-F-5 → AC-26a, AC-26b, EC-1 · R-F-6 → X-16, AC-3 · R-F-7 → Assumptions (M5 prerequisite) · R-F-8 → Testing, Verify-by columns · R-F-9 → Architecture, AC-49..AC-50b, NFR-1a, NFR-1b (schemaVersion removed) · R-F-10 → AC-68, AC-70, AC-73 removed; Assumptions · R-F-11 → kind-word table · R-F-12 → synonym table · R-F-13 → X-13 · R-F-14 → UT-9b · R-F-15 → Inputs and provenance · R-F-16 → Module interactions · R-F-17 → NFR-16b · R-F-18 → EC-9, NFR-7a..NFR-7e · R-F-19 → NFR-13 |
 
 ## Open questions
 
@@ -973,6 +1002,7 @@ The visual design will come from `docs/design/` (Phase 3).
 | 2026-11-23 | created (draft) | Claude (main session) |
 | 2026-11-23 | Owner review, changes 1–7: "Site" workflow with three jobs; validator-first generator with lenient frontmatter and diagnostics; external `theme-init.js`; `en.ts` with an AST test; CI scoped down (Chromium only, axe matrix, Lighthouse non-blocking, NFR-3 removed, audit as a warning); AC-24/AC-64 empty state; Q-2..Q-4 answered. | Claude (main session) |
 | 2026-11-23 | Review round 1, all 21 findings, with the owner's decisions. Split every multi-response row into suffixed IDs (a, b, c…) with one `shall` each, using the declared system names, including the new "the repository". Replaced blacklisted words. Fixed the skill count (12). Per-element plugin-page checks plus `fixture-full`. X-13 precedence, exact-name "added" and rename handling (`Change.renamedTo`, AC-68..AC-73, EC-10). Inherited tags at boost 1, golden queries tuned in M2. Inline stop words, synonyms normalised like the query, `n+1` dropped, multi-word synonyms expand to tokens. Workflow-level concurrency (AC-56, EC-17). Dependabot listed as verified, not a gate. NFR-9 narrowed. AC-63 exceptions. UT-10a/UT-10b warning aligned with X-16. Assumptions verified. AC-7 split across M2/M5. In-process real-catalog tests. 1920 px viewport. AC-6b counts hook objects. Validator exempt in X-14. Rollout defined. M-2 depends on the design. | Claude (main session) |
+| 2026-11-23 | Review round 2, all 19 findings, fixed by simplifying. Removed: `renames` handling (`Change.renamedTo`, AC-68, AC-70, AC-73), `schemaVersion`, EC-17; EC-1a/EC-1b merged into EC-1. Catalog loaded by dynamic `import()` as a content-hashed chunk (Retry reloads the page). Fixture check reads the catalog, not `dist/`. `version` type only when plugin.json exists at parent and commit; marketplace-only `added` commits count. AC-52/AC-56 allow skipped intermediate commits. AC-67 split across M1/M5; AC-26 split for active filters. Line reader skips comments and types scalars. Counts derived in tests. Kind-word table; `guard ↔ block, restrict`. UT-9b, NFR-13, NFR-16b and the provenance row reworded. NFR-7 split. Plugin-README "private" text is an M5 prerequisite outside this spec. | Claude (main session) |
 
 ## Self-check
 
