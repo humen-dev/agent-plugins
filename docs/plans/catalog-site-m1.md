@@ -90,7 +90,7 @@ on exit != 0: no file at --out (AC-8b, Decision 7)
  *  @returns {Promise<{ catalog: Catalog, json: string }>}  json = serialised catalog, LF, 2-space, trailing \n
  *  @throws {GeneratorError} { message: string, exitCode: 1 } */
 export async function generate(opts);
-export class GeneratorError extends Error { exitCode; }
+export { GeneratorError } from './lib/errors.mjs'; // re-export; the class lives in lib/errors.mjs (§3.3)
 // CLI main runs only when import.meta.url === pathToFileURL(process.argv[1]).href
 ```
 Order inside `generate()`: (1) validator (§3.3 `runValidator`), (2) shallow check, (3) read sources, (4) history, (5) assemble.
@@ -116,6 +116,9 @@ export function createReader(root: string, diag); // → {
 // readText: lstat first; symlink → warning, null (content never read); realpath outside `within` → warning, null;
 // size > 1 048 576 bytes → warning, null; TextDecoder('utf-8', { fatal: true }) fails → warning, null.
 // Throws if relPath is outside '.claude-plugin/' and 'plugins/' (programming error, X-14).
+
+// errors.mjs (U2)
+export class GeneratorError extends Error { exitCode; } // constructor(message, exitCode = 1)
 
 // history.mjs (U2) — X-13, Decision 8
 export function assertFullHistory(root: string): void;   // throws GeneratorError(`full git history required (shallow clone)`)
@@ -262,7 +265,7 @@ export function cleanup(dir: string): void;
 | Module | root |
 | Wave | 2 |
 | Depends on | U0, U1 |
-| Owns (create/modify) | `site/scripts/lib/history.mjs`, `site/test/helpers/fixture-repo.mjs`, `site/test/history.test.mjs` |
+| Owns (create/modify) | `site/scripts/lib/errors.mjs`, `site/scripts/lib/history.mjs`, `site/test/helpers/fixture-repo.mjs`, `site/test/history.test.mjs` |
 | Must not touch | U1 files (consume only) |
 | Consumes | §3.1, §3.3 `diagnostics.mjs` |
 | Produces | §3.3 `history.mjs`, §3.7 |
