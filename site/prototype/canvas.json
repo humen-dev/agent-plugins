@@ -1,0 +1,20 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-23T11:57:00Z"},
+  "title": "humen-dev plugin catalog",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 2800, "title": "Prototype · desktop 1280", "expand": "fill", "is_interactive": true},
+    "Mobile.dc.html": {"x": 1360, "y": 0, "w": 375, "h": 3600, "title": "Prototype · mobile 375", "is_interactive": true},
+    "Markdown.dc.html": {"x": 1815, "y": 0, "w": 720, "h": 900, "title": "Markdown block (child component)"},
+    "Foundations.dc.html": {"x": 0, "y": 4020, "w": 1280, "h": 3000, "title": "Foundations · tokens, contrast, type, spacing, icons"},
+    "Components.dc.html": {"x": 1360, "y": 4020, "w": 1280, "h": 3400, "title": "Components · all states, both themes"}
+  },
+  "order": ["Main.dc.html", "Mobile.dc.html", "Markdown.dc.html", "Foundations.dc.html", "Components.dc.html"],
+  "notes": {
+    "t1": {"x": 0, "y": -300, "text": "Catalog prototype — one app, every route and state (desktop 1280 · mobile 375)", "kind": "title1", "maxW": 2535},
+    "t2": {"x": 0, "y": 3720, "text": "Foundations & component states", "kind": "title1", "maxW": 2640}
+  },
+  "designSystems": []
+}

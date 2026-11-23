@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Markdown block</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./catalog.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow-wrap: anywhere; padding: var(--md-pad, 24px); background: var(--md-bg, #0e1014); color: var(--text, #e9ecf2); font-family: var(--font, ui-sans-serif, system-ui, sans-serif); font-size: 15px; line-height: 1.6">
+<sc-for list="{{blocks}}" as="b" hint-placeholder-count="4">
+<sc-if value="{{b.h}}" hint-placeholder-val="{{ false }}">
+<div role="heading" aria-level="{{b.level}}" class="{{b.cls}}"><sc-for list="{{b.segs}}" as="s"><sc-if value="{{s.txt}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.b}}"><strong>{{s.t}}</strong></sc-if><sc-if value="{{s.c}}"><code style="font-family: var(--mono, ui-monospace, monospace); font-size: .88em; color: var(--code, #d9def0); background: var(--code-bg, #090b0e); border: 1px solid var(--divider, #2a2f3a); border-radius: 4px; padding: 0 4px">{{s.t}}</code></sc-if><sc-if value="{{s.a}}"><a href="{{s.href}}" target="_blank" rel="noopener noreferrer" style="color: var(--link, #8fb4ff)">{{s.t}}<sc-if value="{{s.gh}}"><svg viewBox="0 0 24 24" aria-hidden="true" style="width: 12px; height: 12px; margin-left: 3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg><span class="sr-only"> (opens on GitHub)</span></sc-if><sc-if value="{{s.ext}}"><span class="sr-only"> (external link)</span></sc-if></a></sc-if></sc-for></div>
+</sc-if>
+<sc-if value="{{b.p}}" hint-placeholder-val="{{ true }}">
+<p style="margin: 0; color: var(--text-2, #b9c0cc)"><sc-for list="{{b.segs}}" as="s"><sc-if value="{{s.txt}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.b}}"><strong style="color: var(--text, #e9ecf2)">{{s.t}}</strong></sc-if><sc-if value="{{s.c}}"><code style="font-family: var(--mono, ui-monospace, monospace); font-size: .88em; color: var(--code, #d9def0); background: var(--code-bg, #090b0e); border: 1px solid var(--divider, #2a2f3a); border-radius: 4px; padding: 0 4px">{{s.t}}</code></sc-if><sc-if value="{{s.a}}"><a href="{{s.href}}" target="_blank" rel="noopener noreferrer" style="color: var(--link, #8fb4ff)">{{s.t}}<sc-if value="{{s.gh}}"><svg viewBox="0 0 24 24" aria-hidden="true" style="width: 12px; height: 12px; margin-left: 3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg><span class="sr-only"> (opens on GitHub)</span></sc-if><sc-if value="{{s.ext}}"><span class="sr-only"> (external link)</span></sc-if></a></sc-if></sc-for></p>
+</sc-if>
+<sc-if value="{{b.ul}}" hint-placeholder-val="{{ false }}">
+<ul style="margin: 0; padding-left: 22px; color: var(--text-2, #b9c0cc); display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{b.items}}" as="it"><li><sc-for list="{{it.segs}}" as="s"><sc-if value="{{s.txt}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.b}}"><strong style="color: var(--text, #e9ecf2)">{{s.t}}</strong></sc-if><sc-if value="{{s.c}}"><code style="font-family: var(--mono, ui-monospace, monospace); font-size: .88em; color: var(--code, #d9def0); background: var(--code-bg, #090b0e); border: 1px solid var(--divider, #2a2f3a); border-radius: 4px; padding: 0 4px">{{s.t}}</code></sc-if><sc-if value="{{s.a}}"><a href="{{s.href}}" target="_blank" rel="noopener noreferrer" style="color: var(--link, #8fb4ff)">{{s.t}}<sc-if value="{{s.gh}}"><svg viewBox="0 0 24 24" aria-hidden="true" style="width: 12px; height: 12px; margin-left: 3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg><span class="sr-only"> (opens on GitHub)</span></sc-if></a></sc-if></sc-for></li></sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{b.ol}}" hint-placeholder-val="{{ false }}">
+<ol style="margin: 0; padding-left: 24px; color: var(--text-2, #b9c0cc); display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{b.items}}" as="it"><li><sc-for list="{{it.segs}}" as="s"><sc-if value="{{s.txt}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.b}}"><strong style="color: var(--text, #e9ecf2)">{{s.t}}</strong></sc-if><sc-if value="{{s.c}}"><code style="font-family: var(--mono, ui-monospace, monospace); font-size: .88em; color: var(--code, #d9def0); background: var(--code-bg, #090b0e); border: 1px solid var(--divider, #2a2f3a); border-radius: 4px; padding: 0 4px">{{s.t}}</code></sc-if><sc-if value="{{s.a}}"><a href="{{s.href}}" target="_blank" rel="noopener noreferrer" style="color: var(--link, #8fb4ff)">{{s.t}}</a></sc-if></sc-for></li></sc-for>
+</ol>
+</sc-if>
+<sc-if value="{{b.code}}" hint-placeholder-val="{{ false }}">
+<figure style="margin: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<sc-if value="{{b.hasLang}}"><figcaption style="font-size: 12px; color: var(--muted, #939bab); font-family: var(--mono, ui-monospace, monospace)">{{b.caption}}</figcaption></sc-if>
+<pre tabindex="0" aria-label="{{b.caption}}" style="margin: 0; padding: 12px 14px; overflow-x: auto; background: var(--code-bg, #090b0e); border: 1px solid var(--divider, #2a2f3a); border-radius: 8px; font-family: var(--mono, ui-monospace, monospace); font-size: 13px; line-height: 1.6; color: var(--code, #d9def0)"><code>{{b.text}}</code></pre>
+</figure>
+</sc-if>
+<sc-if value="{{b.table}}" hint-placeholder-val="{{ false }}">
+<div tabindex="0" role="region" aria-label="Table" style="overflow-x: auto; border: 1px solid var(--divider, #2a2f3a); border-radius: 8px">
+<div role="table" aria-label="Table" style="min-width: 480px; font-size: 14px">
+<sc-if value="{{b.hasHead}}"><div role="row" class="{{b.rowCls}}"><sc-for list="{{b.head}}" as="c"><div role="columnheader" class="md-th"><sc-for list="{{c.segs}}" as="s"><span>{{s.t}}</span></sc-for></div></sc-for></div></sc-if>
+<sc-for list="{{b.rows}}" as="r"><div role="row" class="{{b.rowCls}}"><sc-for list="{{r.cells}}" as="c"><div role="cell" class="md-td"><sc-for list="{{c.segs}}" as="s"><sc-if value="{{s.txt}}"><span>{{s.t}}</span></sc-if><sc-if value="{{s.b}}"><strong style="color: var(--text, #e9ecf2)">{{s.t}}</strong></sc-if><sc-if value="{{s.c}}"><code style="font-family: var(--mono, ui-monospace, monospace); font-size: .88em; color: var(--code, #d9def0)">{{s.t}}</code></sc-if><sc-if value="{{s.a}}"><a href="{{s.href}}" target="_blank" rel="noopener noreferrer" style="color: var(--link, #8fb4ff)">{{s.t}}<sc-if value="{{s.gh}}"><svg viewBox="0 0 24 24" aria-hidden="true" style="width: 12px; height: 12px; margin-left: 3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"></path></svg><span class="sr-only"> (opens on GitHub)</span></sc-if></a></sc-if></sc-for></div></sc-for></div></sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{b.hr}}" hint-placeholder-val="{{ false }}"><hr style="border: 0; border-top: 1px solid var(--divider, #2a2f3a); margin: 4px 0"></sc-if>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"md":{"editor":null,"tsType":"string"},"base":{"editor":null,"tsType":"string"},"$preview":{"width":720,"height":900}}'>
+var MD_SAMPLE = "# Django Migration — Zero Downtime\n\n## Project Configuration\n\nRead the active host's project instruction file (for example, `AGENTS.md` or\n`CLAUDE.md`) for the values below. If they are not set, use the defaults shown.\n\n| Key | Default | Notes |\n|---|---|---|\n| **Django version** | unknown | Affects `db_default` availability — only Django 5.0+ supports it |\n| **Deploy strategy** | rolling deploy | Rolling deploy is the most restrictive; blue/green or maintenance-window deploys allow more operations |\n| **Runtime guard** | none | If a guard is configured (e.g. …";
+var MD_SAMPLE_BASE = "https://github.com/humen-dev/agent-plugins/blob/4a1ea6bb30ffec0fc8c953d73583fc979baba5ce/plugins/django-safe-migration/skills/django-safe-migration";
+function mdText(t) { return { t: t, txt: true }; }
+function mdLink(t, href, base) {
+  var h = (href || '').trim();
+  if (/^(javascript|data|vbscript):/i.test(h)) return mdText(t);
+  if (!/^(https?:|#|mailto:)/i.test(h)) h = base ? base.replace(/\/$/, '') + '/' + h.replace(/^\.\//, '') : '#';
+  var gh = /^https:\/\/github\.com\//i.test(h);
+  return { t: t, a: true, href: h, gh: gh, ext: /^https?:/i.test(h) && !gh };
+}
+function mdInline(s, base) {
+  var out = [], re = /(`[^`]+`)|(\*\*[^*]+\*\*)|(!\[[^\]]*\]\([^)]*\))|(\[[^\]]+\]\([^)]*\))|(<https?:\/\/[^>]+>)/g, i = 0, m;
+  while ((m = re.exec(s))) {
+    if (m.index > i) out.push(mdText(s.slice(i, m.index)));
+    var x = m[0];
+    if (m[1]) out.push({ t: x.slice(1, -1), c: true });
+    else if (m[2]) out.push({ t: x.slice(2, -2), b: true });
+    else if (m[3] || m[4]) {
+      var mm = x.match(/^!?\[([^\]]*)\]\(([^)\s]*)/), img = x.charAt(0) === '!';
+      out.push(mdLink(img ? ((mm[1] || 'image') + ' (image, not loaded)') : mm[1], mm[2], base));
+    } else if (m[5]) { var u = x.slice(1, -1); out.push(mdLink(u, u, base)); }
+    i = re.lastIndex;
+  }
+  if (i < s.length) out.push(mdText(s.slice(i)));
+  return out;
+}
+function mdParse(md, base) {
+  var L = (md || '').replace(/\r/g, '').split('\n'), B = [], i = 0;
+  var itemRe = /^(\s*)([-*+]|\d+\.)\s+(.*)$/;
+  while (i < L.length) {
+    var l = L[i];
+    if (/^\s*$/.test(l)) { i++; continue; }
+    var f = l.match(/^\s*```\s*([\w-]*)/);
+    if (f) {
+      var lang = f[1], buf = []; i++;
+      while (i < L.length && !/^\s*```/.test(L[i])) { buf.push(L[i]); i++; }
+      i++;
+      B.push({ code: true, text: buf.join('\n') || ' ', hasLang: !!lang, caption: lang === 'mermaid' ? 'Mermaid diagram (shown as code)' : (lang ? lang : 'Code') });
+      continue;
+    }
+    var h = l.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { var lv = Math.min(3, h[1].length); B.push({ h: true, level: lv + 2, cls: 'md-h md-h' + lv, segs: mdInline(h[2], base) }); i++; continue; }
+    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(l)) { B.push({ hr: true }); i++; continue; }
+    if (/^\s*\|/.test(l)) {
+      var rows = [];
+      while (i < L.length && /^\s*\|/.test(L[i])) { rows.push(L[i]); i++; }
+      var cells = function (r) { return r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(function (c) { return c.trim(); }); };
+      var head = cells(rows[0]);
+      var body = rows.slice(1).filter(function (r) { return !/^\s*\|?\s*:?-{2,}/.test(r); });
+      B.push({ table: true, hasHead: head.some(function (c) { return !!c; }), rowCls: 'md-tr md-cols-' + Math.max(1, Math.min(6, head.length)),
+        head: head.map(function (c) { return { segs: mdInline(c, base) }; }),
+        rows: body.map(function (r) { return { cells: cells(r).map(function (c) { return { segs: mdInline(c, base) }; }) }; }) });
+      continue;
+    }
+    var li = l.match(itemRe);
+    if (li) {
+      var ordered = /\d/.test(li[2]), items = [];
+      while (i < L.length) {
+        var m2 = L[i].match(itemRe);
+        if (m2) { items.push(m2[3]); i++; }
+        else if (/^\s{2,}\S/.test(L[i]) && items.length) { items[items.length - 1] += ' ' + L[i].trim(); i++; }
+        else break;
+      }
+      B.push({ ul: !ordered, ol: ordered, items: items.map(function (t) { return { segs: mdInline(t, base) }; }) });
+      continue;
+    }
+    var pb = [l.trim()]; i++;
+    while (i < L.length && !/^\s*$/.test(L[i]) && !/^(#{1,6}\s|\s*```|\s*\||\s*([-*+]|\d+\.)\s)/.test(L[i])) { pb.push(L[i].trim()); i++; }
+    B.push({ p: true, segs: mdInline(pb.join(' '), base) });
+  }
+  return B;
+}
+class Component extends DCLogic {
+  renderVals() {
+    var md = this.props.md ?? MD_SAMPLE;
+    var base = this.props.base ?? MD_SAMPLE_BASE;
+    if (this._md !== md || this._base !== base) { this._md = md; this._base = base; this._blocks = mdParse(md, base); }
+    return { blocks: this._blocks };
+  }
+}
+</script>
+</body>
+</html>
