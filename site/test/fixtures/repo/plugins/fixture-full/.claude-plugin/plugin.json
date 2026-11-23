@@ -1,0 +1,11 @@
+{
+  "name": "fixture-full",
+  "version": "1.2.0",
+  "description": "Plugin.json description (unused, the entry has one).",
+  "author": { "name": "Full Author", "email": "author@example.com", "url": "https://example.com/author" },
+  "license": "MIT",
+  "homepage": "https://example.com/home",
+  "repository": "https://github.com/example/full",
+  "keywords": ["Beta", "gamma"],
+  "dependencies": ["fixture-minimal", { "name": "outside-dep", "version": "^1.0.0" }]
+}

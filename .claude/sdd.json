@@ -1,5 +1,5 @@
 {
   "specsDir": "docs/specs/",
   "plansDir": "docs/plans/",
-  "checkCommand": "node scripts/validate-marketplace.mjs && node --test 'plugins/**/*.test.mjs'"
+  "checkCommand": "node scripts/validate-marketplace.mjs && node --test 'plugins/**/*.test.mjs' && npm --prefix site run check"
 }

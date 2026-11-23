@@ -1,0 +1,12 @@
+{
+  "name": "fixture-inline",
+  "version": "1.0.0",
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Write", "hooks": [{ "type": "command", "command": "echo checking" }] }
+    ]
+  },
+  "mcpServers": {
+    "inline-server": { "type": "http", "url": "https://example.com/mcp" }
+  }
+}

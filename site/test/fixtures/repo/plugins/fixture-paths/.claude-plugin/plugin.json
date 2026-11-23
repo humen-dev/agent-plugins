@@ -1,0 +1,6 @@
+{
+  "name": "fixture-paths",
+  "version": "1.0.0",
+  "hooks": "./config/hooks.json",
+  "mcpServers": "./config/mcp.json"
+}

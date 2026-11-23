@@ -1,0 +1,86 @@
+name: Site
+
+on:
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - '.claude-plugin/**'
+      - 'site/**'
+      - 'scripts/validate-marketplace.mjs'
+      - '.github/workflows/site.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+      - '.claude-plugin/**'
+      - 'site/**'
+      - 'scripts/validate-marketplace.mjs'
+      - '.github/workflows/site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: 'Site: tests'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: site
+
+      - name: Lint
+        run: npm run lint
+        working-directory: site
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: site
+
+      - name: Vitest
+        run: npm test
+        working-directory: site
+
+      - name: Audit (warning only)
+        working-directory: site
+        run: |
+          if ! out="$(npm audit --omit=dev --audit-level=high 2>&1)"; then
+            s="$(printf '%s' "$out" | tail -n 5)"; s="${s//'%'/'%25'}"; s="${s//$'\r'/'%0D'}"; s="${s//$'\n'/'%0A'}"
+            echo "::warning::npm audit: ${s}"
+          fi
+
+  build:
+    name: 'Site: build'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: site
+
+      - name: Generate catalog
+        run: node site/scripts/generate.mjs --out site/src/generated/catalog.json

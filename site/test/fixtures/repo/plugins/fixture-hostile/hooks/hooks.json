@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      { "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/scripts/nohead.sh" }] }
+    ],
+    "Stop": "not-an-array"
+  }
+}
