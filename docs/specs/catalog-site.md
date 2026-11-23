@@ -1,9 +1,9 @@
 # Spec: Marketplace catalog site
 
 Spec ID: SPEC-01
-Status: draft
+Status: approved
 Created: 2026-11-23
-Approved: none
+Approved: 2026-11-23
 Modules: root
 System names: the generator (Node script that builds the catalog from the repo) · the site (static browser app on GitHub Pages) · the pipeline (the "Site" GitHub Actions workflow that tests, builds and deploys) · the repository (docs, manifests and config files this work changes)
 Supersedes: none
@@ -1020,6 +1020,7 @@ The visual design will come from `docs/design/` (Phase 3).
 | 2026-11-23 | Review round 1, all 21 findings, with the owner's decisions. Split every multi-response row into suffixed IDs (a, b, c…) with one `shall` each, using the declared system names, including the new "the repository". Replaced blacklisted words. Fixed the skill count (12). Per-element plugin-page checks plus `fixture-full`. X-13 precedence, exact-name "added" and rename handling (`Change.renamedTo`, AC-68..AC-73, EC-10). Inherited tags at boost 1, golden queries tuned in M2. Inline stop words, synonyms normalised like the query, `n+1` dropped, multi-word synonyms expand to tokens. Workflow-level concurrency (AC-56, EC-17). Dependabot listed as verified, not a gate. NFR-9 narrowed. AC-63 exceptions. UT-10a/UT-10b warning aligned with X-16. Assumptions verified. AC-7 split across M2/M5. In-process real-catalog tests. 1920 px viewport. AC-6b counts hook objects. Validator exempt in X-14. Rollout defined. M-2 depends on the design. | Claude (main session) |
 | 2026-11-23 | Review round 2, all 19 findings, fixed by simplifying. Removed: `renames` handling (`Change.renamedTo`, AC-68, AC-70, AC-73), `schemaVersion`, EC-17; EC-1a/EC-1b merged into EC-1. Catalog loaded by dynamic `import()` as a content-hashed chunk (Retry reloads the page). Fixture check reads the catalog, not `dist/`. `version` type only when plugin.json exists at parent and commit; marketplace-only `added` commits count. AC-52/AC-56 allow skipped intermediate commits. AC-67 split across M1/M5; AC-26 split for active filters. Line reader skips comments and types scalars. Counts derived in tests. Kind-word table; `guard ↔ block, restrict`. UT-9b, NFR-13, NFR-16b and the provenance row reworded. NFR-7 split. Plugin-README "private" text is an M5 prerequisite outside this spec. | Claude (main session) |
 | 2026-11-23 | Review round 3 (last), with the owner's decisions. `runsCode` also counts shell-capable agents, skills and commands (X-18, `reasons`, `shellArtifacts`, EC-18); the badge and What-it-runs name the reasons; AC-30 states only what was measured. Deploy only after passing runs, from the newest push head (AC-52). Non-relative sources skipped with a warning. Standard faceting. Committer-date + sha order. Validator warnings mapped to `.claude-plugin/marketplace.json`. Script label "not named in a hook command". Non-http(s) images as alt text (EC-15a/EC-15b). `?p=` selections stored only after an edit. UTC `YYYY-MM-DD` dates. Duplicate names warned and skipped. Transitive dependencies. MCP url-only transport null. Kind hints become chips. Issue-form prefill verified. Pipeline → Pages hop added. `docs/specs/README.md` index created. R-F-21 rejected; R-F-22 file name kept; R-F-23 accepted. | Claude (main session) |
+| 2026-11-23 | Status draft → approved on the owner's explicit instruction (`/spec-driven:specify approve SPEC-01`). | Claude (spec-creator) |
 
 ## Self-check
 
