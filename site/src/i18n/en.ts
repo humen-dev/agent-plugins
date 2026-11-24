@@ -36,6 +36,7 @@ export const en = {
     clearTip: 'Clear search (Esc)',
     hintSearch: ' to search · ',
     hintClear: ' to clear',
+    keyEsc: 'Esc',
     count: { one: '{n} result', other: '{n} results' },
     bestFirst: ', best match first',
     sortedByName: ', sorted by name',

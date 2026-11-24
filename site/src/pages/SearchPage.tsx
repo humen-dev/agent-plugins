@@ -112,7 +112,7 @@ export function SearchPage({ catalog, onQuery, focusOnMount = false }: Props) {
               <Icon name="x" /><span className="tip" aria-hidden="true">{t('search.clearTip')}</span>
             </button>
           )}
-          <span className="kbd-hint" id={`${uid}-kh`}><kbd>/</kbd>{t('search.hintSearch')}<kbd>Esc</kbd>{t('search.hintClear')}</span>
+          <span className="kbd-hint" id={`${uid}-kh`}><kbd>/</kbd>{t('search.hintSearch')}<kbd>{t('search.keyEsc')}</kbd>{t('search.hintClear')}</span>
         </div>
         <p className="count-line" id={`${uid}-cnt`} role="status" aria-live="polite">{count}</p>
       </section>
