@@ -65,8 +65,7 @@ claude plugin marketplace add humen-dev/agent-plugins
 claude plugin install research-tools@humen-dev
 ```
 
-The marketplace is private; see the [root README](../../README.md#install) for
-git credential setup.
+See the [root README](../../README.md#install) for full install instructions.
 
 ## Requirements and dependencies
 

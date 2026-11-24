@@ -1,6 +1,6 @@
 {
   "name": "django-reviewer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Read-only Django/Python code review subagent (Opus) that preloads the django-expert, django-celery-expert and cdrf-expert skills and reports findings on clarity, conventions, ORM/DRF anti-patterns, N+1 queries, and authorization/validation gaps. Never edits files.",
   "author": {
     "name": "Vinta Software",
