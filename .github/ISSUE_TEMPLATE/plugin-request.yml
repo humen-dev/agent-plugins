@@ -1,0 +1,24 @@
+name: Plugin request
+description: Ask for a skill, agent, command, hook, MCP server or plugin the catalog does not have.
+labels: [plugin-request]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include secrets, tokens, passwords or private code."
+  - type: input
+    id: what
+    attributes:
+      label: What do you need?
+      description: The task or tool you looked for.
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What you want to do with it.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [Skill, Agent, Command, Hook, MCP server, Plugin, Not sure]

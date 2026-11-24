@@ -16,6 +16,14 @@ describe('requestUrl', () => {
     expect(requestUrl(repo, '  ')).toBe(`${repo}/issues/new?template=plugin-request.yml&title=&what=`);
   });
 
+  it('percent-encodes # ? = & and keeps one title and one what', () => {
+    const url = requestUrl(repo, 'a#b?c=d&e');
+    const p = new URL(url).searchParams;
+    expect(p.getAll('title')).toEqual(['a#b?c=d&e']);
+    expect(p.getAll('what')).toEqual(['a#b?c=d&e']);
+    for (const enc of ['%23', '%3F', '%3D', '%26']) expect(url).toContain(enc);
+  });
+
   it('drops everything after 200 chars', () => {
     const p = new URL(requestUrl(repo, 'a'.repeat(201))).searchParams;
     expect(p.get('title')).toBe('a'.repeat(200));
