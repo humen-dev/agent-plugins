@@ -45,13 +45,14 @@ Binding sources:
 2. **Router unchanged.** Each page reads its own param from `location.hash` and writes it with `history.replaceState`, as `SearchPage.tsx:38` does. Rejected: params in `Route`. `routeId` (`App.tsx:39-46`) would change on every checkbox edit and move focus to `<main>`.
 3. **Selection semantics (AC-41a..AC-41c).**
    - `#/install` with a `p` param (even an empty one) previews that selection in memory: the stored value stays unchanged and the header count shows the preview.
+   - The preview lives only while `#/install` is mounted: leaving the page drops it (`clearPreview`), so the header count and the plugin-page button fall back to the stored selection, and a later edit elsewhere never persists a shared link the user did not edit (owner fix round).
    - The first edit, on any page, persists the edited selection.
    - The hash is written only while the route is `install` (`#/install`, or `#/install?p=<sorted names>`).
    - Scope is in memory only, defaults to `user`, and is not in the hash. An incoming `scope=` is ignored (C-2).
    - Storage is read on start and validated per UT-6. It is rewritten only on an edit.
 4. **EC-6 notice (C-3, Recommendation 1 with the owner's addition).**
    - `parseP` reads `URLSearchParams.get('p')`, keeps its first 2 000 chars, splits on `,`, trims, drops empties and keeps the first 200 entries.
-   - `ignored` = the entries after the 200th inside the kept 2 000 chars, plus 1 when the value was longer than 2 000 chars (the cut tail counts as one ignored entry).
+   - `ignored` = the entries after the 200th inside the kept 2 000 chars, plus 1 when the value was longer than 2 000 chars (the cut tail counts as one ignored entry). When the cut lands inside an entry (char 2 001 is not `,`), that partial last entry is dropped before the 200 cap and counted into the same +1, so a truncated name never matches a real plugin (owner fix round).
    - Names not in the catalog (stored or URL) are dropped.
    - When `dropped.length + ignored > 0`, `#/install` shows one `role="status"` notice of one sentence. It names the first 5 dropped names, each `cut(name, 40)`, as text nodes, then "and N more", where N = (dropped − shown) + ignored.
    - The notice disappears after the first edit, as in the design (`Main.dc.html:790`).
@@ -118,6 +119,7 @@ export interface InstallStore {
   get(): string[];                 // preview ?? in-memory edit ?? readStored(...)
   edit(next: readonly string[]): void; // clears preview; writes STORAGE_KEY; IF setItem throws THEN keep in memory, no error (EC-7)
   preview(names: readonly string[]): void; // AC-41c: in memory only, storage untouched
+  clearPreview(): void;            // drop the preview only (storage untouched); InstallPage calls it on unmount
   reset(): void;                   // drop preview and memory, re-read storage (tests)
   subscribe(fn: () => void): () => void;
 }
@@ -449,3 +451,4 @@ Serialized files:
 - SF-15: the Routes table (`:141-142`) lacks `#/new?plugin=<name>`, which M3 links to (`PluginPage.tsx:192`) and AC-43 uses. Add it, with unknown values ignored.
 - SF-16: AC-69 (`:580`). State the "(old name)" suffix shown after a plain-text plugin name, or drop it from the design.
 - SF-17: Pages table `:440`. State that the scope switch is not persisted and defaults to user (C-2).
+- SF-18: `.github/workflows/site.yml` path filters do not include `.github/ISSUE_TEMPLATE/**`, so a PR that changes only `plugin-request.yml` never runs `site/test/issue-form.test.mjs`. AC-53a fixes the five paths, so M4 does not add it; the spec should decide whether AC-53a gains this path.
