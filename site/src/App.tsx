@@ -1,8 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Catalog } from './catalog/types.ts';
 import { t } from './i18n/en.ts';
+import { resolveSet } from './install/resolve.ts';
+import { useInstallSelection } from './install/store.ts';
 import { ArtifactPage } from './pages/ArtifactPage.tsx';
-import { Placeholder } from './pages/Placeholders.tsx';
+import { InstallPage } from './pages/InstallPage.tsx';
+import { NewPage } from './pages/NewPage.tsx';
 import { PluginPage } from './pages/PluginPage.tsx';
 import { SearchPage } from './pages/SearchPage.tsx';
 import { parseHash } from './router.ts';
@@ -17,6 +20,7 @@ export function App({ load, reload = () => location.reload() }: { load: () => Pr
   const main = useRef<HTMLElement>(null);
   const [state, setState] = useState<Load>({ status: 'loading' });
   const [hash, setHash] = useState(() => location.hash);
+  const selection = useInstallSelection();
 
   useEffect(() => {
     let live = true;
@@ -75,13 +79,14 @@ export function App({ load, reload = () => location.reload() }: { load: () => Pr
     const plugin = state.catalog.plugins.find((p) => p.name === route.plugin);
     const artifact = state.catalog.artifacts.find((a) => a.plugin === route.plugin && a.kind === route.kind && a.name === route.artifact);
     body = plugin && artifact ? <ArtifactPage catalog={state.catalog} plugin={plugin} artifact={artifact} /> : <NotFound url={hash} />;
-  } else body = <Placeholder route={route} />;
+  } else if (route.name === 'install') body = <InstallPage catalog={state.catalog} />;
+  else body = <NewPage catalog={state.catalog} />;
 
   return (
     <div className="app">
       <a className="skip" href={`#${mainId}`} onClick={(e) => { e.preventDefault(); main.current?.focus(); }}>{t('app.skip')}</a>
       <p className="sr-only" aria-live="polite">{state.status === 'loading' ? t('states.loadingResults') : ''}</p>
-      <Header route={route.name} repoUrl={state.status === 'ready' ? state.catalog.marketplace.repoUrl : null} query={committed} />
+      <Header route={route.name} repoUrl={state.status === 'ready' ? state.catalog.marketplace.repoUrl : null} query={committed} installCount={state.status === 'ready' ? resolveSet(state.catalog, selection).final.length : undefined} />
       <main id={mainId} className="main" tabIndex={-1} ref={main}>{body}</main>
       {state.status === 'ready' && <Footer catalog={state.catalog} query={committed} />}
     </div>
