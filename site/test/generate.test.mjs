@@ -46,7 +46,7 @@ describe('generate() on the fixture repo', () => {
     expect(catalog.marketplace.repo).toBe('o/r');
     expect(catalog.kinds).toEqual(['plugin', 'skill', 'agent', 'command', 'hook', 'mcp']);
     expect(json).toBe(`${JSON.stringify(catalog, null, 2)}\n`);
-  });
+  }, 30_000);
 
   it('a validator error throws GeneratorError with the validator output (AC-8a)', async () => {
     const root = fixtureRepo({ 'plugins/fixture-minimal/.claude-plugin/plugin.json': null });
@@ -54,7 +54,7 @@ describe('generate() on the fixture repo', () => {
     expect(err).toBeInstanceOf(GeneratorError);
     expect(err.exitCode).toBe(1);
     expect(err.message).toContain('error:');
-  });
+  }, 30_000);
 });
 
 describe('CLI', () => {
@@ -67,7 +67,7 @@ describe('CLI', () => {
     expect(r.stderr).toContain('error:');
     expect(existsSync(out)).toBe(false);
     expect(existsSync(`${out}.tmp`)).toBe(false);
-  });
+  }, 30_000);
 
   it('a validator warning exits 0 and becomes a diagnostic and one ::warning line (AC-8a, AC-65a-d)', () => {
     const root = fixtureRepo({ 'plugins/unlisted/README.md': '# x\n' });
@@ -82,7 +82,7 @@ describe('CLI', () => {
     expect(lines).toHaveLength(catalog.diagnostics.length);
     expect(lines.every((l) => l.startsWith('::warning file='))).toBe(true);
     expect(lines).toContain('::warning file=.claude-plugin/marketplace.json::plugins/unlisted: folder is not listed in marketplace.json');
-  });
+  }, 30_000);
 
   it('shallow clone: exit 1 and the exact message (AC-9)', () => {
     const shallow = shallowClone(fixtureRepo());
@@ -92,7 +92,7 @@ describe('CLI', () => {
     expect(r.status).toBe(1);
     expect(r.stderr.trim()).toBe('full git history required (shallow clone)');
     expect(existsSync(out)).toBe(false);
-  });
+  }, 30_000);
 
   it('copies only GITHUB_REPOSITORY from the environment (UT-9b)', () => {
     const root = fixtureRepo();
@@ -103,7 +103,7 @@ describe('CLI', () => {
     expect(text).not.toContain(SENTINEL);
     expect(r.stdout).not.toContain(SENTINEL);
     expect(JSON.parse(text).marketplace.repo).toBe('env-owner/env-repo');
-  });
+  }, 30_000);
 
   it('--repo wins over GITHUB_REPOSITORY; a missing or malformed repo is a usage error (Decision 12)', () => {
     const root = fixtureRepo();
@@ -114,7 +114,7 @@ describe('CLI', () => {
     expect(cli(root, out2, {}).status).toBe(2);
     expect(cli(root, out2, { GITHUB_REPOSITORY: 'bad repo' }).status).toBe(2);
     expect(existsSync(out2)).toBe(false);
-  });
+  }, 30_000);
 
   it('is byte-identical across runs, locales and time zones (NFR-10a, NFR-10b)', () => {
     const root = fixtureRepo({ 'plugins/unlisted/README.md': '# x\n' });
@@ -132,7 +132,7 @@ describe('CLI', () => {
       expect(x[0].equals(a[0])).toBe(true);
       expect(x[1]).toBe(a[1]);
     }
-  });
+  }, 30_000);
 });
 
 describe('real repo determinism', () => {

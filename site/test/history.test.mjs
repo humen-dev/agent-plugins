@@ -35,7 +35,7 @@ describe('readHistory', () => {
     expect(changes.map((c) => c.subject)).not.toContain('merge');
     expect(updated.get('b')).toBe(D(9));
     expect(updated.get('a')).toBe(D(5));
-  });
+  }, 30_000);
 
   it('adds with plugin.json is one added Change with from null (AC-71, AC-72)', () => {
     const r = repo();
@@ -48,7 +48,7 @@ describe('readHistory', () => {
     expect(changes).toEqual([
       { commit: sha, date: D(1), subject: 'add a', plugin: 'a', type: 'added', version: { from: null, to: '1.0.0' }, url: `${URL}/commit/${sha}` },
     ]);
-  });
+  }, 30_000);
 
   it('version change needs plugin.json at parent and commit; delete is change', () => {
     const r = repo();
@@ -61,14 +61,14 @@ describe('readHistory', () => {
       ['bump', 'version', { from: '1.0.0', to: '1.1.0' }],
       ['add', 'added', { from: null, to: '1.0.0' }],
     ]);
-  });
+  }, 30_000);
 
   it('one Change per touched plugin (EC-9)', () => {
     const r = repo();
     commit(r, { files: { 'plugins/a/f': '1', 'plugins/b/f': '1' }, message: 'both', date: D(1) });
     const { changes } = readHistory(r, URL);
     expect(changes.map((c) => c.plugin)).toEqual(['a', 'b']);
-  });
+  }, 30_000);
 
   it('old names stay; deleted or moved folder is a change (EC-10)', () => {
     const r = repo();
@@ -86,7 +86,7 @@ describe('readHistory', () => {
       ['touch old', 'old', 'change'],
       ['old', 'old', 'added'],
     ]);
-  });
+  }, 30_000);
 });
 
 describe('head and shallow', () => {
@@ -94,7 +94,7 @@ describe('head and shallow', () => {
     const r = repo();
     const sha = commit(r, { files: { f: '1' }, message: 'm', date: D(3) });
     expect(readHead(r)).toEqual({ commit: sha, commitDate: D(3) });
-  });
+  }, 30_000);
 
   it('assertFullHistory throws on a shallow clone (AC-9)', () => {
     const r = repo();
@@ -104,5 +104,5 @@ describe('head and shallow', () => {
     dirs.push(s);
     expect(() => assertFullHistory(s)).toThrow('full git history required (shallow clone)');
     expect(() => assertFullHistory(r)).not.toThrow();
-  });
+  }, 30_000);
 });

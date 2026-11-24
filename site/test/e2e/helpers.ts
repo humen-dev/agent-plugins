@@ -1,0 +1,38 @@
+import { readFileSync } from 'node:fs';
+import type { Page } from '@playwright/test';
+import type { Catalog } from '../../src/catalog/types.ts';
+import { en } from '../../src/i18n/en.ts';
+import { createSearch, type SearchState } from '../../src/search/search.ts';
+
+/** The real generated catalog: expectations come from it, never from hard-coded counts. */
+export const catalog = JSON.parse(readFileSync(new URL('../../src/generated/catalog.json', import.meta.url), 'utf8')) as Catalog;
+
+const search = createSearch(catalog);
+export const expected = (s: Partial<SearchState>) => search.run({ q: '', kinds: [], cats: [], ...s });
+export const keysOf = (s: Partial<SearchState>) => expected(s).cards.map((c) => c.key);
+
+export const plugin0 = catalog.plugins[0];
+export const artifact0 = catalog.artifacts[0];
+
+export interface RouteCase { name: string; hash: string; h1: string }
+export const ROUTES: RouteCase[] = [
+  { name: 'home', hash: '#/', h1: en.search.heading },
+  { name: 'plugin', hash: `#/plugins/${encodeURIComponent(plugin0.name)}`, h1: plugin0.name },
+  {
+    name: 'artifact',
+    hash: `#/plugins/${encodeURIComponent(artifact0.plugin)}/${artifact0.kind}/${encodeURIComponent(artifact0.name)}`,
+    h1: artifact0.name,
+  },
+  { name: 'install', hash: '#/install', h1: en.pages.installTitle },
+  { name: 'new', hash: '#/new', h1: en.pages.newTitle },
+  { name: 'unknown', hash: '#/no/such/route', h1: en.states.notFoundTitle },
+];
+
+export const VIEWPORTS = [320, 375, 768, 1280, 1920];
+
+/** Card keys in DOM order; a card's `aria-labelledby` is `card-<key>`. */
+export const cardKeys = (page: Page) =>
+  page.getByRole('article').evaluateAll((els) => els.map((e) => (e.getAttribute('aria-labelledby') ?? '').replace(/^card-/, '')));
+
+export const cardNames = (page: Page) =>
+  page.getByRole('article').getByRole('heading', { level: 3 }).evaluateAll((els) => els.map((e) => e.textContent ?? ''));

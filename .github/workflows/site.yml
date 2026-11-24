@@ -54,6 +54,29 @@ jobs:
         run: npm test
         working-directory: site
 
+      - name: Generate catalog
+        run: node site/scripts/generate.mjs --out site/src/generated/catalog.json
+
+      - name: Build site
+        run: npm run build
+        working-directory: site
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: site
+
+      - name: E2E
+        run: npm run e2e
+        working-directory: site
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: site/playwright-report/
+          retention-days: 7
+
       - name: Audit (warning only)
         working-directory: site
         run: |
@@ -84,3 +107,10 @@ jobs:
 
       - name: Generate catalog
         run: node site/scripts/generate.mjs --out site/src/generated/catalog.json
+
+      - name: Build site
+        run: npm run build
+        working-directory: site
+
+      - name: Fixture check
+        run: node site/scripts/check-fixtures.mjs site/src/generated/catalog.json
