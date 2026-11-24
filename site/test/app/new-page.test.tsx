@@ -46,6 +46,11 @@ describe('NewPage', () => {
     expect(c.querySelectorAll('.chg').length).toBe(5);
     expect(location.hash).toBe('#/new');
     expect(c.querySelector('[role="status"]')?.textContent).toBe('5 changes on 4 days');
+    // design wrappers (Main.dc.html: .fgroup labelled "Plugin", p.count-line)
+    const group = c.querySelector('.fgroup[role="group"]')!;
+    expect(c.querySelector(`#${CSS.escape(group.getAttribute('aria-labelledby')!)}`)?.textContent).toBe('Plugin');
+    expect(group.querySelectorAll('.chips button.chip').length).toBeGreaterThan(1);
+    expect(c.querySelector('p.count-line[role="status"]')).not.toBeNull();
   });
 
   it('shows a name outside the catalog as text with a suffix (AC-69)', () => {

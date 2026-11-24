@@ -118,6 +118,7 @@ export const en = {
   new: {
     lead: 'Every change to a plugin in this marketplace, newest first. Days are in UTC.',
     allPlugins: 'All plugins',
+    pluginGroup: 'Plugin',
     changes: { one: '{n} change', other: '{n} changes' },
     days: { one: '{n} day', other: '{n} days' },
     countLine: '{changes} on {days}',

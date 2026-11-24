@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { Catalog, Change } from '../catalog/types.ts';
 import { utcDay } from '../format.ts';
 import { t } from '../i18n/en.ts';
@@ -8,6 +8,7 @@ import { Icon } from '../ui/Icon.tsx';
 const newHash = (plugin: string | null) => (plugin === null ? '#/new' : `#/new?plugin=${encodeURIComponent(plugin)}`);
 
 export function NewPage({ catalog }: { catalog: Catalog }) {
+  const uid = useId();
   const names = catalog.plugins.map((p) => p.name).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   // `?plugin=` filters only for a catalog plugin; anything else shows all (AC-43).
   const read = () => {
@@ -49,11 +50,14 @@ export function NewPage({ catalog }: { catalog: Catalog }) {
         <h1>{t('pages.newTitle')}</h1>
         <p className="lead">{t('new.lead')}</p>
       </header>
-      <div className="chips">
-        {chip('', t('new.allPlugins'), null, catalog.changes.length)}
-        {names.map((n) => chip(`p:${n}`, n, n, count(n)))}
+      <div className="fgroup" role="group" aria-labelledby={`np-${uid}`}>
+        <span className="fgroup-title" id={`np-${uid}`}>{t('new.pluginGroup')}</span>
+        <div className="chips">
+          {chip('', t('new.allPlugins'), null, catalog.changes.length)}
+          {names.map((n) => chip(`p:${n}`, n, n, count(n)))}
+        </div>
       </div>
-      <p className="small muted" role="status">
+      <p className="count-line" role="status" aria-live="polite">
         {t('new.countLine', { changes: t('new.changes', { n: shown.length }), days: t('new.days', { n: days.length }) })}
       </p>
       {days.map((d) => (
