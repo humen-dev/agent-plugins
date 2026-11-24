@@ -1,0 +1,37 @@
+/* Design tokens (site/prototype/catalog.css:5-40). theme-init.js sets data-theme on <html>; dark is the default. */
+:root, :root[data-theme="dark"] {
+  /* surfaces */
+  --bg: #0e1014; --surface: #171a21; --sunken: #090b0e; --overlay: #171a21; --scrim: rgba(4,5,8,.72);
+  /* text */
+  --text: #e9ecf2; --text-2: #b9c0cc; --muted: #939bab; --on-accent: #0b0d12; --link: #8fb4ff; --link-visited: #c9a8ff;
+  /* lines */
+  --border: #6b7384; --divider: #2a2f3a; --focus: #5cc8ff;
+  /* accent */
+  --accent: #8c9eff; --accent-hover: #a5b4ff; --accent-pressed: #7589f5;
+  /* kinds */
+  --kind-bg: #1f2430; --k-plugin: #9aa8ff; --k-skill: #5ed3a3; --k-agent: #f2a65e; --k-hook: #ec92d4; --k-command: #6ccbe8; --k-mcp: #d2bd6c;
+  /* status */
+  --warn: #f3bd4f; --warn-bg: #2b2210; --ok: #5ed3a3; --ok-bg: #10261d; --err: #ff8f85; --err-bg: #2d1513; --info: #8fb4ff; --info-bg: #141d2e;
+  /* change types */
+  --c-added: #5ed3a3; --c-version: #9aa8ff; --c-change: #b9c0cc;
+  /* highlight + code */
+  --mark: #5c4a10; --code: #d9def0; --code-bg: #090b0e;
+  /* type + space + shape */
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --fs-12: .75rem; --fs-14: .875rem; --fs-16: 1rem; --fs-18: 1.125rem; --fs-22: 1.375rem; --fs-28: 1.75rem; --fs-36: 2.25rem;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f6f7f9; --surface: #ffffff; --sunken: #eceef2; --overlay: #ffffff; --scrim: rgba(20,23,31,.45);
+  --text: #14171f; --text-2: #3c4351; --muted: #596171; --on-accent: #ffffff; --link: #2a49cf; --link-visited: #6a3bbf;
+  --border: #7a8394; --divider: #dde1e8; --focus: #0a5fd1;
+  --accent: #3550d6; --accent-hover: #2b43bb; --accent-pressed: #22379b;
+  --kind-bg: #eef0f5; --k-plugin: #3550d6; --k-skill: #0b7650; --k-agent: #9c4b08; --k-hook: #9e2f86; --k-command: #0a6a8a; --k-mcp: #7a6410;
+  --warn: #875700; --warn-bg: #fff3d4; --ok: #0b7650; --ok-bg: #e3f6ec; --err: #b1261c; --err-bg: #fde8e6; --info: #2a49cf; --info-bg: #e8eefd;
+  --c-added: #0b7650; --c-version: #3550d6; --c-change: #3c4351;
+  --mark: #ffe27a; --code: #1d2130; --code-bg: #eceef2;
+  color-scheme: light;
+}
