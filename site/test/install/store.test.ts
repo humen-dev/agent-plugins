@@ -30,6 +30,15 @@ describe('installStore', () => {
     expect(JSON.parse(data[STORAGE_KEY])).toEqual(['y']);
   });
 
+  it('clearPreview falls back to storage and never writes it', () => {
+    const { data, s } = memStorage({ [STORAGE_KEY]: '["a"]' });
+    const st = createInstallStore(() => s);
+    st.preview(['x']);
+    st.clearPreview();
+    expect(st.get()).toEqual(['a']);
+    expect(data[STORAGE_KEY]).toBe('["a"]');
+  });
+
   it('returns a stable reference and notifies', () => {
     const st = createInstallStore(() => memStorage().s);
     expect(st.get()).toBe(st.get());

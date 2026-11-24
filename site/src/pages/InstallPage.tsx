@@ -28,7 +28,10 @@ export function InstallPage({ catalog }: { catalog: Catalog }) {
     };
     read();
     window.addEventListener('hashchange', read);
-    return () => window.removeEventListener('hashchange', read);
+    return () => {
+      window.removeEventListener('hashchange', read);
+      installStore.clearPreview(); // leaving the page drops an unedited shared selection (Decision 3)
+    };
   }, []);
 
   const r = useMemo(() => resolveSet(catalog, selection), [catalog, selection]);

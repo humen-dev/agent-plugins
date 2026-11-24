@@ -94,6 +94,20 @@ describe('InstallPage', () => {
     expect(stored()).toBe('["c","d"]');
   });
 
+  it('leaving #/install drops an unedited ?p= preview, so an edit elsewhere keeps the stored set (Decision 3)', async () => {
+    localStorage.setItem(STORAGE_KEY, '["a"]');
+    installStore.reset();
+    history.replaceState(null, '', '#/install?p=c');
+    const { container } = render(<App load={() => Promise.resolve(fixture())} />);
+    await waitFor(() => expect(boxes(container)).toHaveLength(4));
+    expect(container.querySelector('.hdr .count-pill')?.textContent).toBe('1');
+    location.hash = '#/plugins/d';
+    await waitFor(() => expect(container.querySelector('.hdr .count-pill')?.textContent).toBe('3'));
+    expect(stored()).toBe('["a"]');
+    fireEvent.click(screen.getByRole('button', { name: /Add to install set/ }));
+    expect(JSON.parse(stored()!)).toEqual(['a', 'd']);
+  });
+
   it('names dropped names in one status line, bounded (EC-6)', () => {
     history.replaceState(null, '', '#/install?p=a,ghost');
     const c = view();

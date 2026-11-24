@@ -73,6 +73,34 @@ test('a ?p= link previews without touching storage until a tick (AC-41a, AC-41c)
   await expect.poll(() => stored(page)).toBe(JSON.stringify([b, c].sort()));
 });
 
+test('an unedited ?p= link never writes storage: away and back, reload, then an edit elsewhere (Decision 3, AC-41a)', async ({ page }) => {
+  const b = catalog.plugins[0].name;
+  const inB = closureOf([b]).final;
+  const a = catalog.plugins.find((x) => !inB.includes(x.name))!.name;
+  const c = catalog.plugins.find((x) => x.name !== a && !inB.includes(x.name) && !closureOf([a]).final.includes(x.name))!.name;
+  const mine = JSON.stringify([a]);
+  await page.goto('#/');
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [STORAGE_KEY, mine]);
+  await page.goto('about:blank');
+  await page.goto(`#/install?p=${encodeURIComponent(b)}`);
+  await expect(row(page, b).getByRole('checkbox')).toBeChecked();
+  expect(await stored(page)).toBe(mine);
+
+  await page.goto(pluginHash(c)); // away: the header falls back to the stored set
+  await expect(page.locator('.nav .count-pill')).toHaveText(String(closureOf([a]).final.length));
+  expect(await stored(page)).toBe(mine);
+  await page.goBack(); // back to the shared link: previewed again, still not stored
+  await expect(row(page, b).getByRole('checkbox')).toBeChecked();
+  expect(await stored(page)).toBe(mine);
+  await page.reload();
+  await expect(row(page, b).getByRole('checkbox')).toBeChecked();
+  expect(await stored(page)).toBe(mine);
+
+  await page.goto(pluginHash(c)); // an edit on another page builds on the stored set, not the preview
+  await page.getByRole('button', { name: en.plugin.addToSet }).click();
+  await expect.poll(() => stored(page)).toBe(JSON.stringify([a, c].sort()));
+});
+
 test('unknown names in ?p= give one notice naming them (EC-6)', async ({ page }) => {
   await page.goto(`#/install?p=${encodeURIComponent(plugin0.name)},ghost`);
   await expect(row(page, plugin0.name).getByRole('checkbox')).toBeChecked();

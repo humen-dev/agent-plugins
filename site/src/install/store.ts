@@ -14,6 +14,7 @@ export interface InstallStore {
   get(): string[];
   edit(next: readonly string[]): void;
   preview(names: readonly string[]): void;
+  clearPreview(): void;
   reset(): void;
   subscribe(fn: () => void): () => void;
 }
@@ -45,6 +46,11 @@ export function createInstallStore(storage: () => Storage | null): InstallStore 
     },
     preview(names) {
       previewed = [...names];
+      notify();
+    },
+    clearPreview() {
+      if (previewed === null) return;
+      previewed = null;
       notify();
     },
     reset() {
