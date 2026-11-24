@@ -128,6 +128,8 @@ describe('App search wiring', () => {
   it('passes the committed query to the header and footer request links', async () => {
     render(<App load={() => Promise.resolve(cat)} />);
     await screen.findByRole('contentinfo');
+    // findByRole can return before SearchPage's mount effects ran; run them now, or the late onHash() clears the debounce below.
+    await act(async () => {});
     vi.useFakeTimers(); // the 120 ms debounce runs on the fake clock, not on CPU load
     await type('zzzzqx');
     const links = screen.getAllByRole('link', { name: /Request a skill/ });
