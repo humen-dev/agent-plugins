@@ -116,3 +116,9 @@
   .chg { grid-template-columns: minmax(0, 1fr) auto; gap: 4px var(--s3); }
   .chg .subj { grid-column: 1 / -1; }
 }
+
+/* Mono, path and code-name text wraps anywhere unless it sits in a scroll container (code blocks, command boxes, Markdown tables); min-width: 0 lets it shrink as a flex item and lets its flex parent shrink too. */
+.page :is(code, .mono, .sub, .pill, .nm, .sha, h4):not(pre *, .cmd-block, .cmd-text, .md-scroll *) { overflow-wrap: anywhere; min-width: 0; }
+.page :has(> :is(code, .mono, .sub, .pill, .nm, .sha):not(pre *, .cmd-block, .cmd-text, .md-scroll *)) { min-width: 0; }
+/* The summary title is a bare text node (an anonymous flex item no selector reaches): let the row wrap and break it. */
+.coll > summary { flex-wrap: wrap; overflow-wrap: anywhere; padding-block: var(--s2); }

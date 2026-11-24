@@ -17,11 +17,11 @@ describe('UT-3 banned HTML sinks', () => {
     it(`reports ${name} under src/`, async () => {
       const [r] = await eslint.lintText(code, { filePath: join(cwd, 'src', 'snippet.tsx') });
       expect(r.messages.filter((m) => m.ruleId === 'no-restricted-syntax')).toHaveLength(1);
-    });
+    }, 30_000); // cold ESLint + typescript-eslint start-up runs in the first case
   }
 
   it('accepts plain text rendering', async () => {
     const [r] = await eslint.lintText(`export const a = (s: string) => <p>{s}</p>;`, { filePath: join(cwd, 'src', 'snippet.tsx') });
     expect(r.messages).toEqual([]);
-  });
+  }, 30_000);
 });
