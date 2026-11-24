@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import type { Catalog } from '../../src/catalog/types.ts';
 import { en } from '../../src/i18n/en.ts';
 import { createSearch, type SearchState } from '../../src/search/search.ts';
@@ -35,6 +35,23 @@ export const pluginByName = (name: string) => {
   if (!p) throw new Error(`plugin ${name} missing from catalog.json`);
   return p;
 };
+
+/** Plugin names plus their transitive `inCatalog` dependencies, and who pulled each dependency in. */
+export function closureOf(names: string[]) {
+  const final = new Set(names);
+  const addedFor: Record<string, Set<string>> = {};
+  for (const n of final) {
+    for (const d of pluginByName(n).dependencies) {
+      if (!d.inCatalog) continue;
+      if (!names.includes(d.name)) (addedFor[d.name] ??= new Set()).add(n);
+      final.add(d.name); // growing a Set during iteration visits the new entry too
+    }
+  }
+  return { final: [...final].sort(), addedFor };
+}
+
+/** Exact textContent (toHaveText would collapse the newlines of a multi-line command). */
+export const textOf = (loc: Locator) => loc.evaluate((e) => e.textContent);
 
 /** Data rows of a `.tbl` (header row excluded). */
 export const rowsOf = (page: Page, tbl: string) => page.locator(`${tbl} .tr:not(.head)`);
