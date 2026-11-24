@@ -1,6 +1,6 @@
 {
   "name": "codebase-onboarding",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Analyses an unfamiliar repository with parallel read-only agents and prints an onboarding report in chat: stack, architecture, local setup, tests, conventions, CI/CD and deployment, data, integrations, security, observability, and where to start.",
   "author": {
     "name": "humen-dev"
