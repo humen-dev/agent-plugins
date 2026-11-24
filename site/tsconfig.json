@@ -8,9 +8,10 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "target": "ES2023",
-    "lib": ["ES2023"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "types": ["node"],
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "scripts/**/*.mjs"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.mjs"]
 }
