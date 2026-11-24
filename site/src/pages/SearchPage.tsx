@@ -41,25 +41,30 @@ export function SearchPage({ catalog, onQuery, focusOnMount = false }: Props) {
   const commitQuery = (q: string) => commit(withHints({ ...curRef.current, q }));
   const setFilters = (p: Partial<SearchState>) => commit({ ...curRef.current, ...p });
 
+  // Re-derive state from the live location.hash (sanitised lists, EC-1 hints).
+  const onHash = () => {
+    const r = parseHash(location.hash);
+    if (r.name !== 'home') return;
+    clearTimeout(timer.current);
+    const s = withHints(sanitize(r, catalog));
+    curRef.current = s;
+    setCur(s);
+    setText(s.q);
+    onQuery(s.q);
+  };
+
   useEffect(() => {
-    // Normalise the hash on load (sanitised lists, EC-1 hints) and share the query with the header/footer.
-    const h = searchHash(curRef.current);
-    if (h !== (location.hash || '#/')) history.replaceState(null, '', h);
-    onQuery(curRef.current.q);
+    // The hash may have changed since the initializer ran: read it again before normalising it.
+    // Off the home route never write the hash (it would undo App's navigation).
+    if (parseHash(location.hash).name === 'home') {
+      onHash(); // also shares the query with the header/footer
+      const h = searchHash(curRef.current);
+      if (h !== (location.hash || '#/')) history.replaceState(null, '', h);
+    }
     if (focusOnMount) input.current?.focus();
   }, []);
 
   useEffect(() => {
-    const onHash = () => {
-      const r = parseHash(location.hash);
-      if (r.name !== 'home') return;
-      clearTimeout(timer.current);
-      const s = withHints(sanitize(r, catalog));
-      curRef.current = s;
-      setCur(s);
-      setText(s.q);
-      onQuery(s.q);
-    };
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
       if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -69,6 +74,8 @@ export function SearchPage({ catalog, onQuery, focusOnMount = false }: Props) {
     };
     window.addEventListener('hashchange', onHash);
     document.addEventListener('keydown', onKey);
+    // A hash change between the last commit and this attach fired no event we saw.
+    if (searchHash(curRef.current) !== (location.hash || '#/')) onHash();
     return () => {
       window.removeEventListener('hashchange', onHash);
       document.removeEventListener('keydown', onKey);

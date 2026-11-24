@@ -94,6 +94,25 @@ describe('SearchPage', () => {
     expect(location.hash).toBe('#/');
   });
 
+  it('applies a hash change that lands before the hashchange listener is attached', async () => {
+    const add = window.addEventListener.bind(window);
+    const spy = vi.spyOn(window, 'addEventListener').mockImplementation((type: string, ...rest: unknown[]) => {
+      if (type === 'hashchange') go('#/?q=zzzzqx&kind=skill');
+      (add as (...a: unknown[]) => void)(type, ...rest);
+    });
+    render(<SearchPage catalog={cat} onQuery={vi.fn()} />);
+    spy.mockRestore();
+    expect(box().value).toBe('zzzzqx');
+    expect(screen.getByRole('button', { name: /^Skill/ }).getAttribute('aria-pressed')).toBe('true');
+    expect(location.hash).toBe('#/?q=zzzzqx&kind=skill');
+  });
+
+  it('never rewrites the hash while it is off the home route', () => {
+    go('#/install');
+    render(<SearchPage catalog={cat} onQuery={vi.fn()} />);
+    expect(location.hash).toBe('#/install');
+  });
+
   it('follows a tag link (hashchange) and re-reads the query', async () => {
     render(<SearchPage catalog={cat} onQuery={vi.fn()} />);
     go('#/?q=documentation');

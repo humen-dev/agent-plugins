@@ -52,4 +52,24 @@ describe('site.yml', () => {
   it('build job runs the generator', () => {
     expect(wf.jobs.build.steps.some((s) => s.run === 'node site/scripts/generate.mjs --out site/src/generated/catalog.json')).toBe(true);
   });
+
+  it('tests job runs Vitest < Generate < Build < Install Chromium < E2E < Audit', () => {
+    const n = steps(wf.jobs.tests);
+    const order = ['Vitest', 'Generate catalog', 'Build site', 'Install Chromium', 'E2E', 'Audit (warning only)'].map((s) => n.indexOf(s));
+    expect(order).not.toContain(-1);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    const by = (name) => wf.jobs.tests.steps.find((s) => s.name === name);
+    expect(by('Build site')).toMatchObject({ run: 'npm run build', 'working-directory': 'site' });
+    expect(by('Install Chromium')).toMatchObject({ run: 'npx playwright install --with-deps chromium', 'working-directory': 'site' });
+    expect(by('E2E')).toMatchObject({ run: 'npm run e2e', 'working-directory': 'site' });
+  });
+
+  it('build job builds the site then runs the fixture check after Generate', () => {
+    const n = steps(wf.jobs.build);
+    const [g, b, f] = ['Generate catalog', 'Build site', 'Fixture check'].map((s) => n.indexOf(s));
+    expect(g).toBeGreaterThan(-1);
+    expect(b).toBeGreaterThan(g);
+    expect(f).toBeGreaterThan(b);
+    expect(wf.jobs.build.steps[f].run).toBe('node site/scripts/check-fixtures.mjs site/src/generated/catalog.json');
+  });
 });
