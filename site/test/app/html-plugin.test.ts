@@ -28,8 +28,13 @@ describe('htmlPlugin', () => {
     expect(script).toBeLessThan(out.indexOf('<link rel="stylesheet"'));
   });
 
-  it('inserts theme-init when the source has none', () => {
-    const out = transform('<head><meta charset="utf-8"><link rel="stylesheet" href="a.css"></head>');
-    expect(out.indexOf('theme-init.js')).toBeLessThan(out.indexOf('<link'));
+  it('fails the build when the exact theme-init tag is missing', () => {
+    expect(() => transform('<head><meta charset="utf-8"><link rel="stylesheet" href="a.css"></head>')).toThrow(
+      /theme-init\.js"><\/script> not found/,
+    );
+    // A variant tag (here with defer) is not the one we move, so it must not be silently accepted.
+    expect(() =>
+      transform('<head><meta charset="utf-8"><script defer src="/agent-plugins/theme-init.js"></script></head>'),
+    ).toThrow(/not found/);
   });
 });

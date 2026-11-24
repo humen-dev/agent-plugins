@@ -17,8 +17,10 @@ export function htmlPlugin(): Plugin {
       order: 'post',
       handler(html) {
         const csp = `<meta http-equiv="Content-Security-Policy" content="${CSP}">`;
+        // Move our own tag (exact string Vite emits from %BASE_URL%theme-init.js); never skip silently.
+        if (!html.includes(themeInit)) throw new Error(`catalog-html: ${themeInit} not found in index.html`);
         const out = html
-          .replace(/<script\b[^>]*theme-init\.js[^>]*><\/script>\s*/, '')
+          .replace(themeInit, '')
           .replace(/<meta\s+charset=[^>]*>/i, (m) => `${m}\n    ${csp}`);
         const link = /<link\b[^>]*rel=["']stylesheet["']/i.exec(out);
         const at = link ? link.index : out.indexOf('</head>');
