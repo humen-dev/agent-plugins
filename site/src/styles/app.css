@@ -78,7 +78,8 @@ body { margin: 0; }
 @media (max-width: 767px) {
   .wrap { padding: 0 var(--s4); }
   .nav { display: none; }
-  .menu-btn { display: inline-flex; }
+  .menu-btn { display: inline-flex; flex: none; }
+  .brand { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
   .hdr .theme-toggle.desk { display: none; }
   .mnav { display: flex; flex-direction: column; padding: var(--s2) var(--s4) var(--s4); border-bottom: 1px solid var(--divider); background: var(--overlay); }
   .mnav a, .mnav a:visited { display: flex; align-items: center; gap: var(--s2); min-height: 48px; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--divider); font-weight: 550; }

@@ -137,4 +137,22 @@ test.describe('layout', () => {
       }
     });
   }
+
+  // Font-independent reflow: CI fonts differ from local ones, so force a wide font.
+  // Own context with bypassCSP only for the injected style; every other test keeps the CSP.
+  test('no horizontal scroll at 320px on every route with a wide font', async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ baseURL, bypassCSP: true, viewport: { width: 320, height: 800 } });
+    const page = await context.newPage();
+    try {
+      for (const r of ROUTES) {
+        await page.goto(r.hash);
+        await expect(h1(page, r.h1)).toBeVisible();
+        await page.addStyleTag({ content: '* { font-family: Verdana, sans-serif !important; }' });
+        const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(over, r.name).toBeLessThanOrEqual(0);
+      }
+    } finally {
+      await context.close();
+    }
+  });
 });
