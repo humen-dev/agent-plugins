@@ -5,7 +5,7 @@ import { resolveSet } from './install/resolve.ts';
 import { useInstallSelection } from './install/store.ts';
 import { ArtifactPage } from './pages/ArtifactPage.tsx';
 import { InstallPage } from './pages/InstallPage.tsx';
-import { Placeholder } from './pages/Placeholders.tsx';
+import { NewPage } from './pages/NewPage.tsx';
 import { PluginPage } from './pages/PluginPage.tsx';
 import { SearchPage } from './pages/SearchPage.tsx';
 import { parseHash } from './router.ts';
@@ -80,7 +80,7 @@ export function App({ load, reload = () => location.reload() }: { load: () => Pr
     const artifact = state.catalog.artifacts.find((a) => a.plugin === route.plugin && a.kind === route.kind && a.name === route.artifact);
     body = plugin && artifact ? <ArtifactPage catalog={state.catalog} plugin={plugin} artifact={artifact} /> : <NotFound url={hash} />;
   } else if (route.name === 'install') body = <InstallPage catalog={state.catalog} />;
-  else body = <Placeholder route={route} />;
+  else body = <NewPage catalog={state.catalog} />;
 
   return (
     <div className="app">

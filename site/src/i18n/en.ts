@@ -115,6 +115,14 @@ export const en = {
     installTitle: 'Install set',
     newTitle: 'What’s new',
   },
+  new: {
+    lead: 'Every change to a plugin in this marketplace, newest first. Days are in UTC.',
+    allPlugins: 'All plugins',
+    changes: { one: '{n} change', other: '{n} changes' },
+    days: { one: '{n} day', other: '{n} days' },
+    countLine: '{changes} on {days}',
+    oldName: ' (old name)',
+  },
   plugin: {
     badge: 'plugin',
     version: 'Version',

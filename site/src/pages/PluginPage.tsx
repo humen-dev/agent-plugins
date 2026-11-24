@@ -1,6 +1,6 @@
 import { runsLabels } from '../catalog/runs.ts';
-import type { Artifact, Catalog, Change, Plugin } from '../catalog/types.ts';
-import { shortSha, utcDay } from '../format.ts';
+import type { Artifact, Catalog, Plugin } from '../catalog/types.ts';
+import { utcDay } from '../format.ts';
 import { t } from '../i18n/en.ts';
 import { artifactHash, pluginHash } from '../links/hash.ts';
 import { resolveSet } from '../install/resolve.ts';
@@ -11,6 +11,7 @@ import { cut } from '../search/highlight.ts';
 import { KIND_ORDER } from '../search/config.ts';
 import { kindLabel } from '../ui/Card.tsx';
 import { Collapsible } from '../ui/Collapsible.tsx';
+import { ChangeRow } from '../ui/ChangeRow.tsx';
 import { CommandBox } from '../ui/CommandBox.tsx';
 import { Icon } from '../ui/Icon.tsx';
 import { GhLink, WhatItRuns } from '../ui/WhatItRuns.tsx';
@@ -30,23 +31,6 @@ const COUNT = (k: CountKind, n: number) => {
     case 'mcp': return t('plugin.count.mcp', { n });
   }
 };
-
-function ChangeRow({ c }: { c: Change }) {
-  const v = c.version;
-  const label = c.type === 'version' ? '' : c.type === 'added' ? t('plugin.changeAdded') : t('plugin.changeChange');
-  const vText = v === null ? '' : c.type === 'version' ? `${v.from ?? ''} → ${v.to}` : v.to;
-  return (
-    <li className="chg">
-      <span className="ctype" data-type={c.type}>
-        <Icon name={c.type === 'version' ? 'refresh' : c.type === 'added' ? 'plus' : 'code'} size="sm" />
-        {label}{vText && <span className="v">{vText}</span>}
-      </span>
-      <time className="small muted mono" dateTime={c.date}>{utcDay(c.date)}</time>
-      <span className="subj">{c.subject}</span>
-      <GhLink href={c.url} note={t('plugin.commit')}><span className="sha">{shortSha(c.commit)}</span></GhLink>
-    </li>
-  );
-}
 
 export function PluginPage({ catalog, plugin: p }: { catalog: Catalog; plugin: Plugin }) {
   const byId = new Map(catalog.artifacts.map((a) => [a.id, a] as const));
@@ -195,7 +179,7 @@ export function PluginPage({ catalog, plugin: p }: { catalog: Catalog; plugin: P
                   {p.recentChanges.length === 10 ? t('plugin.changesLatest', { n: 10 }) : t('plugin.changesCount', { n: p.recentChanges.length })}
                 </span>
               </h2>
-              <ol className="chg-list">{p.recentChanges.map((c) => <ChangeRow key={c.commit} c={c} />)}</ol>
+              <ol className="chg-list">{p.recentChanges.map((c) => <ChangeRow key={c.commit} c={c} catalog={catalog} second="date" />)}</ol>
               <a href={`#/new?plugin=${encodeURIComponent(p.name)}`} className="small">{t('plugin.allChanges', { name: p.name })}</a>
             </section>
           )}
