@@ -84,6 +84,20 @@ export const en = {
     installTitle: 'Install set',
     newTitle: 'What’s new',
   },
+  md: {
+    code: 'Code',
+    mermaid: 'Mermaid diagram (shown as code)',
+    table: 'Table',
+    image: 'image',
+    opensOnGithub: ' (opens on GitHub)',
+    external: ' (external link)',
+    imageNotLoaded: ' (image, not loaded)',
+    rowsHidden: { one: '{n} row', other: '{n} rows' },
+    colsHidden: { one: '{n} column', other: '{n} columns' },
+    tableCapped: 'Not shown: {parts}.',
+    tableCappedJoin: '{a} and {b}',
+    viewFullFile: 'View the full file on GitHub',
+  },
 } as const;
 
 type Plural = { readonly one: string; readonly other: string };

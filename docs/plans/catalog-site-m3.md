@@ -78,6 +78,7 @@ Binding sources: there is no `AGENTS.md` or `CLAUDE.md` at the root or in `site/
 10. **Preloaded skills**: a value `<plugin>:<skill>` links to `#/plugins/<plugin>/skill/<skill>` when that skill is in the catalog. Otherwise it is plain text, so the page never links to a not-found page.
 11. **Design extras kept as drawn**: the "What it adds" count line, the missing-dependency notice, the Tags panel, the Links panel and "All changes for <plugin>" (`#/new?plugin=<name>`) all come from `Main.dc.html:215-360`. They show catalog data only.
 12. **Skills**: `none` for every unit (owner decision). A third-party skill outside this repo's marketplace would make the flow non-reproducible, and overbuilding is already bounded by each unit's Owns / Must not touch and by the verifier.
+13. **Table render bound (owner decision during Wave 1, SF-9)**: `MarkdownBlock` renders at most 200 body rows and 20 columns per table (the bound is per table, not per page; the column cap applies to the head and every row). The parser still parses every row. When rows or columns are hidden, one `md.*` notice under that table gives the hidden row and column counts and links to the full file at its pinned blob URL (`blobUrl(catalog, doc.path)`). The hostile 2 000 × 50 case keeps its 500 ms parse and 2000 ms render limits.
 
 ### Open questions
 None. The owner confirmed Q1 a (C-1..C-13, U-1, U-2 and E-1..E-3 as written), Q2 b (no "Add to install set" in M3) and Q4 b (single-agent) at approval.
@@ -425,3 +426,4 @@ Serialized files:
 - SF-6: EC-15a/EC-15b do not cover relative images. Add the U-2 rule: a link to the blob URL with the alt text.
 - SF-7: AC-31 covers only `tools: null`. State `tools: []` → "none" and a null `model` → "not declared" (Decision 6).
 - SF-8: AC-32b "every non-catalog text" leaves the embedded Markdown block's strings open. State that `md.*` keys fall under the same banned words (Decision 8).
+- SF-9: SPEC-01 does not state a render bound for large Markdown tables. Add the Decision 13 rule: per table, at most 200 body rows and 20 columns are rendered, with a notice giving the hidden counts and a link to the full file at its pinned blob URL.
