@@ -8,7 +8,7 @@ import { ThemeToggle } from './ThemeToggle.tsx';
 const THEME_KEY = 'catalog.theme';
 
 /** `repoUrl` is null while the catalog loads: external links wait for it (Decision 12). */
-export function Header({ route, repoUrl, query = '' }: { route: Route['name']; repoUrl: string | null; query?: string }) {
+export function Header({ route, repoUrl, query = '', installCount }: { route: Route['name']; repoUrl: string | null; query?: string; installCount?: number }) {
   const menuId = useId();
   const [menu, setMenu] = useState(false);
   const [light, setLight] = useState(() => document.documentElement.dataset.theme === 'light');
@@ -26,7 +26,14 @@ export function Header({ route, repoUrl, query = '' }: { route: Route['name']; r
   const links = (icons: boolean) => (
     <>
       <a href="#/" aria-current={cur('home')}>{icons && <Icon name="search" size="sm" />}{t('header.search')}</a>
-      <a href="#/install" aria-current={cur('install')}>{icons && <Icon name="list" size="sm" />}{t('header.install')}</a>
+      <a href="#/install" aria-current={cur('install')}>{icons && <Icon name="list" size="sm" />}{t('header.install')}
+        {installCount !== undefined && (
+          <>
+            <span className={installCount > 0 ? 'count-pill on' : 'count-pill'} aria-hidden="true">{installCount}</span>
+            <span className="sr-only">{t('header.installCountSr', { n: installCount })}</span>
+          </>
+        )}
+      </a>
       <a href="#/new" aria-current={cur('new')}>{icons && <Icon name="clock" size="sm" />}{t('header.whatsNew')}</a>
       {repoUrl !== null && (
         <>

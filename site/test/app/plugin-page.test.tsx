@@ -2,6 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { utcDay } from '../../src/format.ts';
+import { installStore } from '../../src/install/store.ts';
 import { PluginPage } from '../../src/pages/PluginPage.tsx';
 import { artifactHash } from '../../src/links/hash.ts';
 import { catalogOf, plugin } from '../search/fixture-catalog.ts';
@@ -66,6 +67,38 @@ describe('PluginPage on fixture-full (AC-27a, AC-28)', () => {
     const c = view();
     fireEvent.click(screen.getByRole('button', { name: 'See what it runs' }));
     expect(document.activeElement).toBe(c.querySelector('#what-it-runs'));
+  });
+});
+
+describe('PluginPage install-set button (SF-5, AC-41a)', () => {
+  it('cycles add, remove and added-as-dependency, writes storage and keeps the hash', () => {
+    localStorage.clear();
+    installStore.reset();
+    history.replaceState(null, '', '#/plugins/a');
+    const dep = (name: string) => ({ name, version: null, inCatalog: true });
+    const cat = catalogOf([plugin('a', { dependencies: [dep('b')] }), plugin('b')]);
+    const pageOf = (name: string) => <PluginPage catalog={cat} plugin={cat.plugins.find((p) => p.name === name)!} />;
+    const { container, rerender } = render(pageOf('a'));
+    const btn = () => container.querySelector('.side button.btn[aria-pressed]') as HTMLButtonElement;
+    expect(btn().textContent).toBe('Add to install set');
+    expect(btn().getAttribute('aria-pressed')).toBe('false');
+    expect(container.querySelector('.side a[href="#/install"]')).toBeNull();
+
+    fireEvent.click(btn());
+    expect(btn().textContent).toBe('In install set — remove');
+    expect(btn().getAttribute('aria-pressed')).toBe('true');
+    expect(localStorage.getItem('catalog.installSet')).toBe('["a"]');
+    expect(location.hash).toBe('#/plugins/a');
+    expect(container.querySelector('.side a[href="#/install"]')?.textContent).toBe('Open install set (2)');
+
+    rerender(pageOf('b'));
+    expect(btn().textContent).toBe('Added as a dependency — add directly');
+    expect(btn().getAttribute('aria-pressed')).toBe('false');
+
+    rerender(pageOf('a'));
+    fireEvent.click(btn());
+    expect(btn().textContent).toBe('Add to install set');
+    expect(localStorage.getItem('catalog.installSet')).toBe('[]');
   });
 });
 

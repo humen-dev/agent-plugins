@@ -52,6 +52,20 @@
 .cb-row .ico { color: var(--k-plugin); }
 .cb-row .nm { font-weight: 600; font-family: var(--mono); font-size: var(--fs-14); overflow-wrap: anywhere; }
 
+/* install page: ported from site/prototype/catalog.css:295-303 */
+.cb-row:hover { background: var(--kind-bg); }
+.cb-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.cb-row label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--s2); flex: 1; min-width: 0; cursor: pointer; }
+.auto-label { font-size: var(--fs-12); color: var(--info); background: var(--info-bg); border: 1px solid var(--info); border-radius: 10px; padding: 1px 8px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 3px; gap: 3px; background: var(--sunken); }
+.seg button { min-height: 38px; min-width: 96px; padding: 0 var(--s4); border: 1px solid transparent; border-radius: 4px; background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-14); font-weight: 600; cursor: pointer; }
+.seg button:hover { color: var(--text); background: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.out-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5); }
+/* Decision 8: the multi-line outputs keep their line breaks and drop the single-line prompt mark. */
+.out-cmd .cmd-text { white-space: pre; line-height: 1.7; }
+.out-cmd .cmd-text::before { content: none; }
+
 /* artifact page: ported from site/prototype/catalog.css:210-213, :232-237, :259-260, :364-367 */
 .crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; font-size: var(--fs-14); }
 .crumbs li { display: inline-flex; align-items: center; gap: 4px; color: var(--text-2); }
@@ -101,6 +115,8 @@
 .notice .ico { margin-top: 2px; }
 .notice.warn { color: var(--text); border-color: var(--warn); background: var(--warn-bg); }
 .notice.warn .ico { color: var(--warn); }
+.notice.info { color: var(--text); border-color: var(--info); background: var(--info-bg); }
+.notice.info .ico { color: var(--info); }
 .notice-title { font-weight: 700; }
 
 @media (max-width: 767px) {
@@ -115,6 +131,9 @@
   .tbl .desc { display: block; padding-top: var(--s2); }
   .chg { grid-template-columns: minmax(0, 1fr) auto; gap: 4px var(--s3); }
   .chg .subj { grid-column: 1 / -1; }
+  .out-grid { grid-template-columns: minmax(0, 1fr); }
+  .seg { display: flex; }
+  .seg button { flex: 1; min-width: 0; }
 }
 
 /* Mono, path and code-name text wraps anywhere unless it sits in a scroll container (code blocks, command boxes, Markdown tables); min-width: 0 lets it shrink as a flex item and lets its flex parent shrink too. */

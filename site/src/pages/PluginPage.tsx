@@ -3,6 +3,8 @@ import type { Artifact, Catalog, Change, Plugin } from '../catalog/types.ts';
 import { shortSha, utcDay } from '../format.ts';
 import { t } from '../i18n/en.ts';
 import { artifactHash, pluginHash } from '../links/hash.ts';
+import { resolveSet } from '../install/resolve.ts';
+import { installStore, useInstallSelection } from '../install/store.ts';
 import { treeUrl } from '../links/source-url.ts';
 import { MarkdownBlock } from '../markdown/MarkdownBlock.tsx';
 import { cut } from '../search/highlight.ts';
@@ -57,6 +59,11 @@ export function PluginPage({ catalog, plugin: p }: { catalog: Catalog; plugin: P
   const missing = p.dependencies.some((d) => !d.inCatalog);
   const authorUrl = p.author?.url && isWeb(p.author.url) ? p.author.url : null;
   const toRuns = () => document.getElementById('what-it-runs')?.focus();
+  const selection = useInstallSelection();
+  const set = resolveSet(catalog, selection);
+  const explicit = set.selected.includes(p.name);
+  const inSet = set.final.includes(p.name);
+  const toggleSet = () => installStore.edit(explicit ? set.selected.filter((x) => x !== p.name) : [...set.selected, p.name]);
 
   return (
     <div className="wrap page">
@@ -201,6 +208,10 @@ export function PluginPage({ catalog, plugin: p }: { catalog: Catalog; plugin: P
             <CommandBox text={catalog.marketplace.addCommand} label={t('plugin.addLabel')} />
             <p className="small t2">{t('plugin.stepInstall')}</p>
             <CommandBox text={p.installCommand} label={t('plugin.installBoxLabel')} />
+            <button type="button" className={explicit ? 'btn' : 'btn primary'} aria-pressed={explicit} onClick={toggleSet}>
+              <Icon name={explicit ? 'check' : 'plus'} />{explicit ? t('plugin.inSetRemove') : inSet ? t('plugin.addedAsDep') : t('plugin.addToSet')}
+            </button>
+            {inSet && <a className="small" href="#/install">{t('plugin.openSet', { n: set.final.length })}</a>}
           </div>
           <div className="panel-box">
             <h2 className="side-h">{t('plugin.links')}</h2>
