@@ -5,10 +5,14 @@ export function parseP(hash: string): ParsedP | null {
   const qi = s.indexOf('?');
   const value = new URLSearchParams(qi >= 0 ? s.slice(qi + 1) : '').get('p');
   if (value === null) return null;
-  const entries = value.slice(0, P_LIMITS.chars).split(',').map((x) => x.trim()).filter(Boolean);
+  const cut = value.length > P_LIMITS.chars;
+  const parts = value.slice(0, P_LIMITS.chars).split(',');
+  // A cut inside an entry leaves a partial name that could match a real plugin: drop it (counted in the +1 below).
+  if (cut && value[P_LIMITS.chars] !== ',') parts.pop();
+  const entries = parts.map((x) => x.trim()).filter(Boolean);
   return {
     names: entries.slice(0, P_LIMITS.entries),
-    ignored: Math.max(0, entries.length - P_LIMITS.entries) + (value.length > P_LIMITS.chars ? 1 : 0),
+    ignored: Math.max(0, entries.length - P_LIMITS.entries) + (cut ? 1 : 0),
   };
 }
 
