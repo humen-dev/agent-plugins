@@ -128,8 +128,11 @@ describe('App search wiring', () => {
   it('passes the committed query to the header and footer request links', async () => {
     render(<App load={() => Promise.resolve(cat)} />);
     await screen.findByRole('contentinfo');
-    fireEvent.change(box(), { target: { value: 'zzzzqx' } });
-    await waitFor(() => expect(screen.getAllByRole('link', { name: /Request a skill/ }).every((a) => a.getAttribute('href')!.includes('what=zzzzqx'))).toBe(true));
+    vi.useFakeTimers(); // the 120 ms debounce runs on the fake clock, not on CPU load
+    await type('zzzzqx');
+    const links = screen.getAllByRole('link', { name: /Request a skill/ });
+    expect(links.length).toBeGreaterThan(0);
+    expect(links.every((a) => a.getAttribute('href')!.includes('what=zzzzqx'))).toBe(true);
   });
 
   it('"/" on another route goes to the search page and focuses the box', async () => {

@@ -1,7 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Catalog } from './catalog/types.ts';
 import { t } from './i18n/en.ts';
+import { ArtifactPage } from './pages/ArtifactPage.tsx';
 import { Placeholder } from './pages/Placeholders.tsx';
+import { PluginPage } from './pages/PluginPage.tsx';
 import { SearchPage } from './pages/SearchPage.tsx';
 import { parseHash } from './router.ts';
 import { Footer } from './ui/Footer.tsx';
@@ -66,7 +68,14 @@ export function App({ load, reload = () => location.reload() }: { load: () => Pr
   else if (state.status === 'error') body = <CatalogError onRetry={reload} />;
   else if (route.name === 'home') body = <SearchPage catalog={state.catalog} onQuery={setQuery} focusOnMount={wantSearchFocus.current} />;
   else if (route.name === 'notfound') body = <NotFound url={hash || '#/'} />;
-  else body = <Placeholder route={route} catalog={state.catalog} url={hash} />;
+  else if (route.name === 'plugin') {
+    const plugin = state.catalog.plugins.find((p) => p.name === route.plugin);
+    body = plugin ? <PluginPage catalog={state.catalog} plugin={plugin} /> : <NotFound url={hash} />;
+  } else if (route.name === 'artifact') {
+    const plugin = state.catalog.plugins.find((p) => p.name === route.plugin);
+    const artifact = state.catalog.artifacts.find((a) => a.plugin === route.plugin && a.kind === route.kind && a.name === route.artifact);
+    body = plugin && artifact ? <ArtifactPage catalog={state.catalog} plugin={plugin} artifact={artifact} /> : <NotFound url={hash} />;
+  } else body = <Placeholder route={route} />;
 
   return (
     <div className="app">

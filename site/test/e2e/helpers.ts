@@ -30,6 +30,23 @@ export const ROUTES: RouteCase[] = [
 
 export const VIEWPORTS = [320, 375, 768, 1280, 1920];
 
+export const pluginByName = (name: string) => {
+  const p = catalog.plugins.find((x) => x.name === name);
+  if (!p) throw new Error(`plugin ${name} missing from catalog.json`);
+  return p;
+};
+
+/** Data rows of a `.tbl` (header row excluded). */
+export const rowsOf = (page: Page, tbl: string) => page.locator(`${tbl} .tr:not(.head)`);
+
+/** Collects requests whose origin differs from the site's. */
+export function trackForeign(page: Page, baseURL: string) {
+  const origin = new URL(baseURL).origin;
+  const foreign: string[] = [];
+  page.on('request', (req) => { if (/^https?:/.test(req.url()) && new URL(req.url()).origin !== origin) foreign.push(req.url()); });
+  return foreign;
+}
+
 /** Card keys in DOM order; a card's `aria-labelledby` is `card-<key>`. */
 export const cardKeys = (page: Page) =>
   page.getByRole('article').evaluateAll((els) => els.map((e) => (e.getAttribute('aria-labelledby') ?? '').replace(/^card-/, '')));

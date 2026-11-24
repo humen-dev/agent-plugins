@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { en } from '../src/i18n/en.ts';
 
 const SRC = join(import.meta.dirname, '..', 'src');
-const ATTRS = new Set(['aria-label', 'title', 'placeholder', 'alt']);
+const ATTRS = new Set(['aria-label', 'title', 'placeholder', 'alt', 'data-label']);
 const hasLetter = (s: string) => /\p{L}/u.test(s);
 const isStr = (n: ts.Node): n is ts.StringLiteral | ts.NoSubstitutionTemplateLiteral =>
   ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n);
@@ -69,6 +69,7 @@ describe('AC-63 translations', () => {
     expect(scan(`const a = <i title={'Close'} />;`)).toHaveLength(1);
     expect(scan(`const a = <i placeholder={x ? 'a' : t('header.menu')} />;`)).toHaveLength(1);
     expect(scan(`const a = <img alt="logo" />;`)).toHaveLength(1);
+    expect(scan(`const a = <div data-label="Kind" />;`)).toHaveLength(1);
   });
 
   it('fails on unknown or non-literal keys', () => {
