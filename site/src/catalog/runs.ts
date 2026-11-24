@@ -3,12 +3,13 @@ import { KIND_ORDER } from '../search/config.ts';
 import type { Plugin } from './types.ts';
 
 /** One label per run reason, in `reasons` order; `shell` becomes one label per distinct kind (Decision 7). */
-export function runsLabels(p: Plugin): string[] {
+export function runsLabels(p: Plugin, group: 'card' | 'runs' = 'card'): string[] {
+  const card = group === 'card';
   return p.runs.reasons.flatMap((r) => {
-    if (r === 'hooks') return [t('card.runs.hooks')];
-    if (r === 'mcp') return [t('card.runs.mcp')];
-    if (r === 'scripts') return [t('card.runs.scripts')];
+    if (r === 'hooks') return [card ? t('card.runs.hooks') : t('runs.hooks')];
+    if (r === 'mcp') return [card ? t('card.runs.mcp') : t('runs.mcp')];
+    if (r === 'scripts') return [card ? t('card.runs.scripts') : t('runs.scripts')];
     const kinds = new Set(p.runs.shellArtifacts.map((id) => id.split(':')[0]));
-    return KIND_ORDER.filter((k) => kinds.has(k)).map((kind) => t('card.runs.shell', { kind }));
+    return KIND_ORDER.filter((k) => kinds.has(k)).map((kind) => (card ? t('card.runs.shell', { kind }) : t('runs.shell', { kind })));
   });
 }

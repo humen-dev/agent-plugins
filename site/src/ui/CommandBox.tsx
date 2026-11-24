@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { t } from '../i18n/en.ts';
 import { Icon } from './Icon.tsx';
 
-export function CommandBox({ text }: { text: string }) {
+export function CommandBox({ text, label }: { text: string; label?: string }) {
   const id = useId();
   const code = useRef<HTMLElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -32,7 +32,7 @@ export function CommandBox({ text }: { text: string }) {
   return (
     <div>
       <div className="cmd" data-state={state}>
-        <code className="cmd-text" id={id} ref={code} tabIndex={0} aria-label={t('card.install')}>{text}</code>
+        <code className="cmd-text" id={id} ref={code} tabIndex={0} aria-label={label ?? t('card.install')}>{text}</code>
         <button type="button" className="cmd-copy" onClick={copy}>
           <Icon name={state === 'ok' ? 'check' : 'copy'} size="sm" /><span>{state === 'ok' ? t('card.copied') : t('card.copy')}</span>
         </button>

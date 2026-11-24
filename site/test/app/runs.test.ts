@@ -21,6 +21,14 @@ describe('runsLabels', () => {
     ]);
   });
 
+  it('AC-33: the runs group gives the card labels in the same order and count', () => {
+    for (const p of [
+      withRuns(['hooks', 'mcp', 'scripts']),
+      withRuns(['hooks', 'shell'], ['agent:p/a', 'skill:p/s', 'command:p/c']),
+      withRuns([]),
+    ]) expect(runsLabels(p, 'runs')).toEqual(runsLabels(p, 'card'));
+  });
+
   it('gives no label when nothing runs', () => {
     expect(runsLabels(withRuns([]))).toEqual([]);
   });
