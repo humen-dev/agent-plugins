@@ -7,3 +7,4 @@
 - A Markdown table separator needs `---` in test fixtures; a bare `-` row is parsed as a body row (`site/test/markdown/markdown-block.test.tsx:97`). — U1 (M3)
 - The AC-63 scan flags any string literal inside a `title`/`aria-label`/`data-label` attribute expression and any `t()` call whose argument is not a plain literal; a ternary inside `t(...)` or `title={...}` fails, so write `cond ? t('a') : t('b')` (`site/test/i18n.test.ts:28-37`). — U2 (M3)
 - `site/scripts/*.mjs` are type-checked by `tsc` (checkJs), so arrow-function parameters need JSDoc types (`site/scripts/check-size.mjs:15`). — U1 (M5)
+- The search input sets `outline: none` and its `.search` wrapper draws the focus ring, so a focus check reads the wrapper border, not the input outline (`site/src/styles/search.css:14`, `site/test/e2e/a11y.spec.ts`). — U2 (M5)

@@ -30,7 +30,13 @@ export const ROUTES: RouteCase[] = [
 
 export const VIEWPORTS = [320, 375, 768, 1280, 1920];
 
-export const pluginByName = (name: string) => {
+export const THEMES = ['dark', 'light'] as const;
+
+/** Persists the theme before any page script runs (read by theme-init.js). */
+export const setTheme = (page: Page, theme: (typeof THEMES)[number]) =>
+  page.addInitScript((t) => localStorage.setItem('catalog.theme', t), theme);
+
+export const pluginByName =(name: string) => {
   const p = catalog.plugins.find((x) => x.name === name);
   if (!p) throw new Error(`plugin ${name} missing from catalog.json`);
   return p;
