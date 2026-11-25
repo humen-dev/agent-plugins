@@ -30,7 +30,13 @@ export const ROUTES: RouteCase[] = [
 
 export const VIEWPORTS = [320, 375, 768, 1280, 1920];
 
-export const pluginByName = (name: string) => {
+export const THEMES = ['dark', 'light'] as const;
+
+/** Persists the theme before any page script runs (read by theme-init.js). */
+export const setTheme = (page: Page, theme: (typeof THEMES)[number]) =>
+  page.addInitScript((t) => localStorage.setItem('catalog.theme', t), theme);
+
+export const pluginByName =(name: string) => {
   const p = catalog.plugins.find((x) => x.name === name);
   if (!p) throw new Error(`plugin ${name} missing from catalog.json`);
   return p;
@@ -68,5 +74,14 @@ export function trackForeign(page: Page, baseURL: string) {
 export const cardKeys = (page: Page) =>
   page.getByRole('article').evaluateAll((els) => els.map((e) => (e.getAttribute('aria-labelledby') ?? '').replace(/^card-/, '')));
 
-export const cardNames = (page: Page) =>
+/** Presses Tab until the locator holds focus; fails after `max` presses. */
+export async function tabTo(page: Page, loc: Locator, max: number) {
+  for (let i = 0; i < max; i++) {
+    if (await loc.evaluate((e) => e === document.activeElement)) return;
+    await page.keyboard.press('Tab');
+  }
+  if (!(await loc.evaluate((e) => e === document.activeElement))) throw new Error(`no focus on target after ${max} Tab presses`);
+}
+
+export const cardNames =(page: Page) =>
   page.getByRole('article').getByRole('heading', { level: 3 }).evaluateAll((els) => els.map((e) => e.textContent ?? ''));

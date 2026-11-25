@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useId, useLayoutEffect, useMemo, useState } from 'react';
 import type { Catalog } from '../catalog/types.ts';
 import { t } from '../i18n/en.ts';
 import { installHash, parseP } from '../install/link.ts';
@@ -19,7 +19,8 @@ export function InstallPage({ catalog }: { catalog: Catalog }) {
   const [scope, setScope] = useState<Scope>('user');
 
   // AC-41c: a `p` param previews that selection; storage stays untouched until the first edit.
-  useEffect(() => {
+  // Layout effect: the preview must be in the store before paint, or the stored set shows for one commit.
+  useLayoutEffect(() => {
     const read = () => {
       const p = parseP(location.hash);
       if (p === null) return;

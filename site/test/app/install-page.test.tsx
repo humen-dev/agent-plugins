@@ -108,6 +108,22 @@ describe('InstallPage', () => {
     expect(JSON.parse(stored()!)).toEqual(['a', 'd']);
   });
 
+  it('the header never shows the stored set before a ?p= preview (AC-41c, no flash)', async () => {
+    localStorage.setItem(STORAGE_KEY, '["a"]');
+    installStore.reset();
+    history.replaceState(null, '', '#/install?p=c');
+    const seen: string[] = [];
+    const mo = new MutationObserver(() => {
+      if (document.querySelectorAll('input[type=checkbox]').length === 4) seen.push(document.querySelector('.hdr .count-pill')?.textContent ?? '');
+    });
+    mo.observe(document.body, { subtree: true, childList: true, characterData: true });
+    const { container } = render(<App load={() => Promise.resolve(fixture())} />);
+    await waitFor(() => expect(boxes(container)).toHaveLength(4));
+    mo.disconnect();
+    expect(seen.length).toBeGreaterThan(0);
+    expect(seen.every((v) => v === '1')).toBe(true);
+  });
+
   it('names dropped names in one status line, bounded (EC-6)', () => {
     history.replaceState(null, '', '#/install?p=a,ghost');
     const c = view();
