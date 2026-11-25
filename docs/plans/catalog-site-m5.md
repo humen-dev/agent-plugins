@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | draft |
+| Status | approved |
 | Goal | Every push to `main` that touches the site paths, with "Site: tests" and "Site: build" passing, deploys the site built in that run to GitHub Pages at `https://humen-dev.github.io/agent-plugins/`. The build fails on the size budgets and reports Lighthouse. The site passes the axe matrix, focus, keyboard, reduced-motion and smoke checks. The docs describe a public marketplace with a live catalog. |
 | Requirements source | `docs/specs/catalog-site.md` (SPEC-01, Status: approved `:4`), milestone M5 only (`:923`); design `site/prototype/` (token contrast table `Foundations.dc.html:111-151`); merged M1–M4 plans `docs/plans/catalog-site-m1.md` … `m4.md` and SF-1..SF-18; the owner's M5 brief; the planner's Requirements review (findings 1–12) with the owner's answers Q1 a, Q2 a, Q3 a, Q4 b. Input only: this plan never edits them. |
 | Execution mode | single-agent (sequential pass), chosen by the owner (Q4 b) |
