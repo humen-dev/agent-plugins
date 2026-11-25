@@ -1,21 +1,15 @@
 # humen-dev agent plugins
 
-A private [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)
-for full-stack development: backend, frontend (React + TypeScript) and
-spec-driven development (SDD). It currently ships Django backend plugins;
-frontend and SDD plugins are planned.
+A [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)
+for full-stack development. It currently ships Django backend plugins, codebase
+onboarding, the spec-driven development workflow and research tools; frontend
+plugins are planned.
+
+Browse the catalog at <https://humen-dev.github.io/agent-plugins/>.
 
 ## Install
 
-This repository is private, so Claude Code uses your machine's git credentials.
-For HTTPS, set up the GitHub CLI credential helper once:
-
-```bash
-gh auth login
-gh auth setup-git
-```
-
-Then, inside Claude Code:
+Inside Claude Code:
 
 ```text
 /plugin marketplace add humen-dev/agent-plugins
@@ -74,6 +68,7 @@ plugins/<name>/                   one folder per plugin
   THIRD_PARTY_NOTICES.md          attribution and license, for copied plugins
 docs/                             plugin guidelines, security policy, releases
 scripts/                          structural linter and version-bump check (CI)
+site/                             catalog website: generator and app, deployed to GitHub Pages
 CONTRIBUTING.md                   how to add or change a plugin
 ```
 

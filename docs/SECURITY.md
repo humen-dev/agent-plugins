@@ -66,6 +66,6 @@ or scripts.
 
 ## Reporting a problem
 
-Open an issue in this (private) repository or contact the owner
-([@humen-dev](https://github.com/humen-dev)) directly. Do not post exploit
-details in public channels.
+Open an issue for non-sensitive problems. Send exploit details to the owner
+([@humen-dev](https://github.com/humen-dev)) directly; do not post them in
+issues or other public channels.

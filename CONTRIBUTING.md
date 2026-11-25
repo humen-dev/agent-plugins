@@ -75,6 +75,27 @@ component you touched in a real session.
 - Adaptations (read-only agents, cross-plugin `skills:` preloads, fixes) are
   normal changes and get a version bump.
 
+## Catalog site
+
+The site at <https://humen-dev.github.io/agent-plugins/> rebuilds and deploys
+(workflow "Site") on every merge to `main` that touches `plugins/**`,
+`.claude-plugin/**`, `site/**`, `scripts/validate-marketplace.mjs` or
+`.github/workflows/site.yml`.
+
+Local commands, from the repository root:
+
+```bash
+cd site
+npm ci
+node scripts/generate.mjs --out src/generated/catalog.json --repo humen-dev/agent-plugins  # same as: npm run generate
+npm run dev        # dev server
+npm run build      # production build into site/dist
+npm run preview    # serve the build at http://localhost:4173/agent-plugins/
+npm run check      # lint, typecheck, unit tests
+npx playwright install chromium
+npm run e2e        # browser tests
+```
+
 ## Commits and PRs
 
 - Short imperative subject, scoped by plugin when relevant:
