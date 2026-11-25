@@ -6,3 +6,4 @@
 - An anchored regex of the form `\s+(.*)$` needs the `s` flag (or no trailing `$`); otherwise a long whitespace run followed by U+2028 backtracks quadratically (`site/src/markdown/parse.ts:98`, `:102`). — U1 (M3)
 - A Markdown table separator needs `---` in test fixtures; a bare `-` row is parsed as a body row (`site/test/markdown/markdown-block.test.tsx:97`). — U1 (M3)
 - The AC-63 scan flags any string literal inside a `title`/`aria-label`/`data-label` attribute expression and any `t()` call whose argument is not a plain literal; a ternary inside `t(...)` or `title={...}` fails, so write `cond ? t('a') : t('b')` (`site/test/i18n.test.ts:28-37`). — U2 (M3)
+- `site/scripts/*.mjs` are type-checked by `tsc` (checkJs), so arrow-function parameters need JSDoc types (`site/scripts/check-size.mjs:15`). — U1 (M5)
