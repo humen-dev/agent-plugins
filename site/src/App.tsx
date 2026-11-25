@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { Catalog } from './catalog/types.ts';
 import { t } from './i18n/en.ts';
 import { resolveSet } from './install/resolve.ts';
@@ -50,7 +50,8 @@ export function App({ load, reload = () => location.reload() }: { load: () => Pr
   }, [routeId]);
 
   // "/" on other routes goes to the search page and focuses the box (AC-25a); the page handles it on `#/`.
-  useEffect(() => {
+  // Layout effect: the shortcut must be live once the page is painted, not one task later.
+  useLayoutEffect(() => {
     if (!ready || route.name === 'home') return;
     const on = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
