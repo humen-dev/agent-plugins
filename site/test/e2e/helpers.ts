@@ -74,5 +74,14 @@ export function trackForeign(page: Page, baseURL: string) {
 export const cardKeys = (page: Page) =>
   page.getByRole('article').evaluateAll((els) => els.map((e) => (e.getAttribute('aria-labelledby') ?? '').replace(/^card-/, '')));
 
-export const cardNames = (page: Page) =>
+/** Presses Tab until the locator holds focus; fails after `max` presses. */
+export async function tabTo(page: Page, loc: Locator, max: number) {
+  for (let i = 0; i < max; i++) {
+    if (await loc.evaluate((e) => e === document.activeElement)) return;
+    await page.keyboard.press('Tab');
+  }
+  if (!(await loc.evaluate((e) => e === document.activeElement))) throw new Error(`no focus on target after ${max} Tab presses`);
+}
+
+export const cardNames =(page: Page) =>
   page.getByRole('article').getByRole('heading', { level: 3 }).evaluateAll((els) => els.map((e) => e.textContent ?? ''));
